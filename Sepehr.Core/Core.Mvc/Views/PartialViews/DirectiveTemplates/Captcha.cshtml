@@ -1,0 +1,12 @@
+﻿
+<div>
+        <span class="bullet" />
+        <span class="lblcaptcha">عبارت امنیتی:</span>
+        <input type="text" class="k-textbox txtinputsecurity" data-val-required="عبارت امنیتی را وارد کنید" value="Security Code" placeholder="Security Code" name="securityCode" id="securityCode"
+               ng-click="selectText()" ng-model="captchaEntered" size="30" maxlength="2048" >
+
+        <img ng-src="{{base64Data}}" class="imgcaptchalogin" style="border: 1px solid #cfcfcf;" />
+        <a href="#"><img class="k-icon k-i-refresh imgrefresh" ng-click="refreshImage()" /></a>
+
+</div>
+

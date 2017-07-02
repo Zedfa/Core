@@ -1,0 +1,15 @@
+﻿@model Core.Mvc.ViewModel.CompanyRoleViewModel
+@{
+    ViewBag.Title = "نقشهای سازمانی";
+    Layout = null;
+}
+
+<script src="~/Areas/Core/Views/CompanyRole/Index.js"></script>
+<div class="k-rtl">
+    @{
+        var clientRel = new ClientDependentFeature();
+        clientRel.Events.OnEdit = "OnEditCompanyRole";
+    }
+
+    @(Html.GridCr<CompanyRoleViewModel>("companyRoleGrd", CompanyRoleViewModel.ViewInfo as GridInfo, clientRel))
+</div>

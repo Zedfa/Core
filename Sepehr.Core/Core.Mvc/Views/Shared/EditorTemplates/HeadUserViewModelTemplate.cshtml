@@ -1,0 +1,101 @@
+﻿
+@model  Core.Mvc.ViewModel.UserViewModel
+
+
+
+
+
+@using (Html.BeginForm(new { id = "myform" }))
+{
+    @Html.AntiForgeryToken()
+    
+
+    <div class="k-rtl">
+
+
+        <div class="editor-label">
+            @Html.LabelCrFor(a => a.FName)
+        </div>
+        <div class="editor-field">
+            @Html.TextBoxCrFor(model => model.FName)
+            <br />
+
+            @Html.ValidationMessageFor(model => model.FName)
+        </div>
+
+        <div class="editor-label">
+            @Html.LabelCrFor(a => a.LName)
+        </div>
+        <div class="editor-field">
+            @Html.TextBoxCrFor(model => model.LName)
+            <br />
+
+            @Html.ValidationMessageFor(model => model.LName)
+        </div>
+
+        <div class="editor-label">
+            @Html.LabelCrFor(a => a.UserName)
+        </div>
+        <div class="editor-field">
+            @Html.TextBoxCrFor(model => model.UserName)
+            <br />
+
+            @Html.ValidationMessageFor(model => model.UserName)
+        </div>
+
+
+        <div class="editor-label">
+            @Html.LabelFor(a => a.Password)
+        </div>
+        <div class="editor-field">
+            @Html.PasswordCrFor(model => model.Password)
+            <br />
+
+            @Html.ValidationMessageFor(model => model.Password)
+        </div>
+
+        <div class="editor-label">
+            @Html.LabelCrFor(a => a.ConfirmPassword)
+        </div>
+        <div class="editor-field">
+            @Html.PasswordCrFor(model => model.ConfirmPassword)
+            <br />
+
+            @Html.ValidationMessageFor(model => model.ConfirmPassword)
+        </div>
+
+
+
+        <div class="editor-label">
+            @Html.LabelFor(a => a.Active)
+        </div>
+        <div class="editor-field">
+            @Html.CheckBoxCrFor(model => model.Active)
+        </div>
+      
+        <div class="editor-label">
+            @Html.LabelCr("نقش")
+        </div>
+
+        <div class="editor-field" style="text-align: right">
+            @(Html.LookUpCr<RoleViewModel>("RoleChoosInHeadUser", "انتخاب نقش", RoleViewModel.LookupInfoWithCompanyRole,"Id", "Name", "RoleIdForHead"))
+        </div>
+
+
+    </div>
+    
+    
+    @Html.HiddenFor(model => model.Id)
+
+
+}
+
+
+
+
+
+
+
+
+
+

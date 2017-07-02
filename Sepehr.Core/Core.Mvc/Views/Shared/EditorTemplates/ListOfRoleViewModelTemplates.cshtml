@@ -1,0 +1,49 @@
+﻿@model  Core.Mvc.ViewModel.UserRoleViewModel
+
+
+@using (Html.BeginForm(new { id = "myform" }))
+{
+    @Html.AntiForgeryToken()
+    @Html.ValidationSummary(true)
+
+
+    <div class="k-rtl">
+        <div class="editor-label">
+            @Html.LabelCr("کاربر")
+
+        </div>
+        <div class="editor-label">
+
+            @Html.DisplayFor(model => model.UserName, new { @id = "UserName" })
+            <span id="name"></span>
+
+        </div>
+
+        <div class="editor-label">
+            @Html.LabelCr("نقش")
+        </div>
+
+
+        <div class="editor-field" style="text-align: right">
+
+            @(Html.LookUpCr<RoleViewModel>("RoleName", "انتخاب نقش", RoleViewModel.LookupInfo as GridInfo, "Id", "Name", "RoleId"))
+            @Html.ValidationMessageFor(model => model.RoleId)
+
+        </div>
+
+    </div>
+
+
+
+}
+
+
+
+
+
+
+
+
+
+
+

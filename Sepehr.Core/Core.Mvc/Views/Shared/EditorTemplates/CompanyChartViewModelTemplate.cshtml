@@ -1,0 +1,36 @@
+﻿@model Core.Mvc.ViewModel.CompanyChartViewModel
+
+
+@{
+    ViewBag.Title = "ساختار سازمانی";
+    Layout = null;
+    
+}
+@Html.AntiForgeryToken()
+ @Html.ValidationSummary(true)
+<div class="k-rtl" id="CompanyChartModelBinding">
+    <table>
+        
+        <tr>
+            <td>
+                 <div class="editor-label">
+        @Html.LabelCrFor(a => a.Title)
+    </div>
+            </td>
+            <td>
+                <div id="Title" class="editor-field">
+
+        @Html.TextBoxCrFor(a => a.Title, new Dictionary<string, object> {{ "data-bind", "value: Title" } ,{ "style", "width:200px;" }})
+
+
+    </div>
+            </td>
+        </tr>
+   
+    
+  </table>
+        
+        
+</div>
+     @Html.HiddenCrFor(a => a.ParentId, new Dictionary<string, object> { { "data-bind", "value: ParentId" } })
+    @Html.HiddenCrFor(a => a.HasChildren, new Dictionary<string, object> { { "data-bind", "value: HasChildren" } })

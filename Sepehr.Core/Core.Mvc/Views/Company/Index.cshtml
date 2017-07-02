@@ -1,0 +1,24 @@
+﻿@using Core.Mvc.ViewModel
+
+
+@{
+    ViewBag.Title = "سازمان ها";
+    Layout = null;
+}
+
+<script src="~/Areas/Core/Views/Company/Index.js"></script>
+<div class="k-rtl">
+    @{
+        var clientRel = new ClientDependentFeature();
+       //clientRel.Events.OnSave = "OnSaveGrdCompany";
+        clientRel.Events.OnEdit = "onEditGrdCompany";
+
+    }
+    @(Html.GridCr<CompanyViewModel>("companyGrd", CompanyViewModel.ViewInfo as GridInfo, clientRel))
+</div>
+
+
+<div id="modalWindowCompanyHelp">
+ 
+</div>
+ 

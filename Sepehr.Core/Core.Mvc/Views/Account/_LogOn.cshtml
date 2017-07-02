@@ -1,0 +1,62 @@
+﻿@model Core.Mvc.ViewModel.Account.LogOnViewModel
+@{
+
+    Layout = null;
+}
+
+
+<div id='dw_loginDiv' class="k-block k-info-colored" kendo-window="loginPopup"
+     k-title="'ورود به سیستم'"
+     k-width="390"
+     k-height="400"
+     k-resizable="false"
+     k-scrollable="false"
+     k-actions="[]"
+     @*k-close="{{isAuthorize}}"*@
+     >
+    @*k-activate="orderWindows"*@
+
+    <form action="/core/Account/LogOn" method="post">
+
+        @Html.ValidationSummary()
+
+        <div id="loginForm">
+            <img src='@(string.Format("Areas/{0}/Content/images/login-user.jpeg", new CoreAreaRegistration().AreaName))' style="height: 60px; border-radius: 3px; float: right;" />
+            <div class="part">
+
+                <p>
+                    @Html.LabelCrFor(m => m.UserName)
+                    @Html.TextBoxCrFor(m => m.UserName, htmlAttributes: new Dictionary<string, object> { { "ng-model", "userName" }, { "placeholder", "User Name" } })
+                </p>
+
+                <p style="margin-right: 25px;">
+                    @Html.LabelCrFor(m => m.Password)
+                    @*@Html.PasswordCrFor(m => m.Password, htmlAttributes: new Dictionary<string, object> { { "ng-model", "password" } })*@
+
+                    <input class="k-textbox" data-val="true" placeholder="Password" ng-model="password" data-val-required="کلمه عبور را وارد کنید" id="Password" name="Password" type="password">
+
+                </p>
+                <p>
+                    @Html.CheckBoxCrFor(m => m.RememberMe)
+                    @Html.LabelCrFor(m => m.RememberMe)
+                </p>
+
+                <div style="margin: 15px;">
+
+                    <core-captcha captcha-encrypted="captchaEncrypted" captcha-entered="captchaEntered" refresh-image="refreshImage"></core-captcha>
+
+                </div>
+
+            </div>
+            <div class="part" style="padding-right: 14px;">
+
+                <input class="k-button" default="" id="btnLogin" ng-click="logOnClick()" type="button" value="ورود به سیستم">
+            </div>
+
+        </div>
+    </form>
+</div>
+
+
+
+

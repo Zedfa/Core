@@ -1,0 +1,39 @@
+﻿
+
+@model UserLoggedViewModel
+
+@{
+    ViewBag.Title = "لاگ کاربران";
+    Layout = null;   
+}
+
+
+
+<div class="k-rtl">
+    @*<div class="editor-label">
+        @Html.LabelRP("کاربر")
+    </div>
+    <div class="editor-field" style="text-align: right">
+        @(Html.LookUpRP<UserViewModel>("UserForTrackInUserLog", "کاربر", UserViewModel.LookupAllUser, "Id", "UserFullName", "UserIdInUserLog"))
+        
+        @Html.ButtonRP("btnSearchByUserId", Titles.Search,uniqueNameElement:"btnSearchByUserId#UserLogApi/PostEntities",htmlAttributes: new{@onclick="SearchUserLog()"})   
+    </div>*@
+    @{
+        var clientRel = new ClientDependentFeature();
+        clientRel.CustomActions
+            .Add(new Core.Mvc.Helpers.CoreKendoGrid.Settings.Features.CustomActionInfo
+            {
+                ID = "SearchUserLog",
+                CommandText = "جستجو",
+
+                IconRelativePath = "Areas/Core/Content/images/find-replace.png",
+                //ClickEventHandler = "userLog.SearchUserLog()",
+                CustomActionUniqueName = "SearchUserLog#SearchUserLog"
+
+            });
+    }
+
+    @(Html.GridCr<UserLoggedViewModel>("gridUserLog", UserLoggedViewModel.ViewInfo as GridInfo, clientRel))
+</div>
+
+<script src="~/Areas/Core/Views/UserLog/Index.js"></script>

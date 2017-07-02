@@ -1,0 +1,20 @@
+﻿<div>
+    <div id="view-container" ng-if="1==1">
+        <div id="kendoMenuParent" class="col-lg-7">
+            <div id="kendoMenu" kendo-menu k-data-source="MenuItems" k-rebind="MenuItems" k-on-select="onMenuItemSelect(kendoEvent)"></div>
+        </div>
+        <div id="customTemplateMenu" class="col-lg-5" ng-if="customTemplate">{{customTemplate}}</div>
+    </div>
+    <div class="sidebar-left" ng-if="1==1">
+        <div id="tabStripNavigatorContainer1">
+        </div>
+
+        <div>
+            <div id="tabStripNavigator" kendo-tab-strip="tabStripNavigator" k-options="tabStripSettings">
+            </div>
+        </div>
+    </div>
+
+</div>
+
+

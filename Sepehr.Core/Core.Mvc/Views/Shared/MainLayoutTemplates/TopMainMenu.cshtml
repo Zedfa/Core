@@ -1,0 +1,81 @@
+﻿
+
+<div id="main-menu">
+    <div class="sidebar-right">
+        <div id="memberInfo">
+            <div id="memberLogo">
+                <img src='@(string.Format("Areas/{0}/Content/images/login-user.jpeg", new CoreAreaRegistration().AreaName))' class="rounded-corner2" width="25" height="28" />
+            </div>
+
+            @{  string fullName = "ناشناس";
+              int id = Core.Mvc.Infrastructure.CustomMembershipProvider.GetUserIdCookie() ?? 0;
+              if (id > 0)
+              {
+                  //var _user = (Core.Service.ServiceBase.appBase.OnlineUsers.FirstOrDefault(user => user.UserName.ToLower().Trim() == User.Identity.Name.ToLower().Trim()) as Core.Entity.UserProfile);
+
+                  var currentUser = Core.Service.ServiceBase.DependencyInjectionFactory.CreateInjectionInstance<Core.Service.IUserService>().Find(id);
+
+
+                  if (currentUser != null)
+                  {
+
+                      fullName = currentUser.FName + " " + currentUser.LName;
+                  }
+
+              }
+            }
+            <div style="margin-top: 5px;">
+                <span id="currentUserFullName">@fullName</span>
+            </div>
+
+        </div>
+        <div id="toolTipContainer" style="visibility:hidden;">
+            <a id="changePass" href="#" onclick="showChangePassWindow()">تغییر کلمه عبور</a>
+            <br />
+            <a id="exit" href="#" onclick="signOut()">خروج</a>
+        </div>
+        @*<p>
+                <img class="fit" src="~/Content/Images/seperator.png" alt="جداکننده" />
+            </p>*@
+    </div>
+
+    <div id="logo" class="rounded-corner">
+        <div style="float: left; height: 10px;">
+            @*<img src="~/Content/Images/logo.png" alt="سپهر سیستم" />*@
+        </div>
+        <div class="date-details">
+            @{var date = new Core.Cmn.FarsiUtils.PersianDate(DateTime.Now).ToString("D"); }
+            <div>@date</div>
+            <div>
+                @(DateTime.Now.Year + ", " + System.Globalization.CultureInfo.CurrentCulture.DateTimeFormat.GetMonthName(DateTime.Now.Month) + ", "
+                + DateTime.Now.DayOfWeek.ToString() + " " + DateTime.Now.Day)
+            </div>
+        </div>
+        <menu current-tab="currentTab"></menu>
+        <div id="tabstripNgView">
+            <sepehr-view current-tab="currentTab">
+
+            </sepehr-view>
+      </div>    
+
+
+
+
+    </div>
+
+
+    <div id="aboutUsModal"
+         kendo-window
+         k-animation="false"
+         k-draggable="true"
+         k-modal="true"
+         k-resizable="false"
+         k-actions="['close']"
+         k-visible="false"
+         k-title="'درباره ما'">
+        <img src='@(string.Format("Areas/{0}/Content/images/Logo.png",new CoreAreaRegistration().AreaName))' />
+    </div>
+
+
+</div>
+

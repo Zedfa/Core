@@ -1,0 +1,85 @@
+﻿@model Core.Mvc.ViewModel.ViewElementRoleViewModel
+
+
+
+@{
+    ViewBag.Title = "سطح دسترسی ها";
+    Layout = null;
+}
+
+<div class="">    
+    <section class="filters-container center-section access-level">
+
+        <div class="row filters">
+            <div class="col-lg-4 col-md-4 col-sm-3 col-xs-3 pull-right"></div>
+            <span class="col-lg-1 col-md-1 col-sm-1 col-xs-1 pull-right">
+                @Html.Label("نقش")
+            </span>
+            <span id="roleSelectedPart" class=" col-lg-3 col-md-3 col-sm-5 col-xs-5 pull-right">
+                @(Html.LookUpCr<RoleViewModel>("SelectedRoleNameViewElement", "انتخاب نقش", RoleViewModel.LookupInfo as GridInfo, "Id", "Name", "SelectedRoleIdViewElement"))
+                @*<script>
+                     var h = Lookup.createControl("Grid", "تست", "Ads.MVC.ViewModels.RoleViewModel, Ads.MVC, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null"
+                         , 'LookupInfo', 'SelectedRoleNameViewElement', 'Name', 'Id', 'SelectedRoleIdViewElement', 'False', 900, 500);
+                     $("#roleSelectedPart").html(h._outerHtml);
+
+                    </script>*@
+
+                <br />
+                @Html.ValidationMessageFor(model => model.SelectedRoleNameViewElement)
+            </span>
+            <div class="col-lg-4 col-md-4 col-sm-3 col-xs-3 pull-left"></div>
+        </div><!-- row filters -->
+
+        <script src="~/Areas/Core/Views/ViewElementRole/Index.js"></script>
+
+        <div id="treeViewElement">
+            @(Html.Kendo().TreeView()
+          .Name("treeviewElement")
+
+          .Checkboxes(chkbxs =>
+          {
+              chkbxs.CheckChildren(true);
+          })
+
+          .AutoBind(false)
+
+         .HtmlAttributes(new { style = "display: none" })
+
+          .DataTextField("Title")
+
+          .DataSource(dataSource => dataSource
+              .Read(read => read.Action("Read", "ViewElementRole")
+              .Type(HttpVerbs.Post)
+              .Data("addData")
+            )
+
+          )
+            )
+        </div>
+
+        <div class="row filters submit access">
+            <div class="col-lg-3 col-md-3 col-sm-3 col-xs-3 pull-right">
+            </div>
+            <span class="editor-field col-lg-6 col-md-6 col-sm-6 col-xs-6 pull-right ">
+                @Html.SubmitCr("SaveViewElement", "ثبت", uniqueNameElement: "Core/ViewElementRole/PostEntity#Core/ViewElementRole/PostEntity", isConfirmButton: true, name: "", toolTip: "", htmlAttributes: new { @class = "k-button k-button-icontext k-primary mainbtn" })
+                @Html.HiddenFor(a => a.SelectedRoleIdViewElement)
+            </span>
+            <div class="col-lg-3 col-md-3 col-sm-3 col-xs-3 pull-left">
+            </div>
+        </div><!-- row filters -->
+
+    </section>    
+</div>
+
+
+
+
+
+
+
+
+
+
+
+
+

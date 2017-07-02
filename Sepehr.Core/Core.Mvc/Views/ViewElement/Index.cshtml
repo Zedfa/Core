@@ -1,0 +1,548 @@
+﻿@model Core.Mvc.ViewModel.ViewElementViewModel
+
+@using Core.Entity.Enum
+@using Core.Cmn.Extensions
+@using ElementType = Core.Entity.Enum.ElementType
+
+@{
+    ViewBag.Title = "ایجاد منوها";
+    Layout = null;
+
+}
+
+<script>
+    function GetSelectedItemId() {
+        var id = null;
+        if ($("#ViewElementParentId").val() != "") {
+
+            return $("#ViewElementParentId").val();
+
+
+        }
+
+        return id;
+
+    }
+    var addedViewElementToRoot = false;
+    var selectedViewElementMenuId = "";
+
+    function onExpandViewElementMenu(e) {
+
+        var data = $('#treeViewViewElement').data('kendoTreeView').dataItem(e.node);
+        selectedViewElementMenuId = data.id;
+        $("#ViewElementParentId").val(selectedViewElementMenuId);
+    }
+
+    function onSelectViewElementMenu(e) {
+
+        var data = $('#treeViewViewElement').data('kendoTreeView').dataItem(e.node);
+        selectedViewElementMenuId = data.id;
+        $("#ViewElementParentId").val(selectedViewElementMenuId);
+
+
+    }
+    $("#chkAddViewElementToNode").change(function () {
+
+
+        if (this.checked) {
+
+            $("#appendViewElementMenuSelectedNode").val('ذخیره'); //اضافه به ریشه
+            addedViewElementToRoot = true;
+
+        } else {
+            $("#appendViewElementMenuSelectedNode").val('ذخیره');
+            addedViewElementToRoot = false;
+
+        }
+    });
+
+</script>
+
+<div class="k-rtl" id="viewelements-filter">
+
+    <section class="filters-container">
+
+        <div class="row filters">
+
+            <div class="sm-seprate col-lg-6 col-md-6 col-sm-6 col-xs-6 pull-right">
+                <div class=" edit-lbl col-lg-2 col-md-2 col-sm-2 col-xs-3 pull-right" style="padding:0">
+                    @Html.LabelFor(a => a.Id)
+                </div>
+                <div class="id-contain edit-field col-lg-10 col-md-10 col-sm-10 col-xs-9 pull-right">
+                    @Html.TextBoxCrFor(a => a.Id, new Dictionary<string, object> { })
+                </div>
+            </div>
+
+            <div class="sm-seprate col-lg-6 col-md-6 col-sm-6 col-xs-6 pull-right">
+                <div class="edit-lbl col-lg-2 col-md-2 col-sm-2 col-xs-3 pull-right" style="padding:0">
+                    @Html.LabelFor(a => a.Title)
+                </div>
+                <div class="title-contain edit-field col-lg-10 col-md-10 col-sm-10 col-xs-9 pull-right">
+                    @Html.TextBoxCrFor(a => a.Title, new Dictionary<string, object> { })
+                </div>
+            </div>           
+
+        </div><!-- row filters -->
+
+        <div class="row filters">
+
+            <div class="sm-seprate col-lg-6 col-md-6 col-sm-6 col-xs-6 pull-right">
+                <div class="edit-lbl col-lg-2 col-md-2 col-sm-2 col-xs-3 pull-right" style="padding:0">
+                    @Html.LabelFor(model => model.UniqueName)
+                </div>
+                <div class="uniquename-contain edit-field col-lg-10 col-md-10 col-sm-10 col-xs-9 pull-right">
+                    @Html.TextBoxCrFor(a => a.UniqueName, new Dictionary<string, object> { })
+                </div>
+            </div>
+
+            <div class="sm-seprate col-lg-6 col-md-6 col-sm-6 col-xs-6 pull-right">
+                <div class="edit-lbl col-lg-2 col-md-2 col-sm-2 col-xs-3 pull-right" style="padding:0">
+                    @Html.LabelFor(a => a.SortOrder)
+                </div>
+                <div class="sortorder-contain edit-field col-lg-10 col-md-10 col-sm-10 col-xs-9 pull-right">
+                    @Html.TextBoxCrFor(a => a.SortOrder, new Dictionary<string, object> { })
+                </div>
+            </div>
+
+        </div><!-- row filters -->
+
+        <div class="row filters">
+
+            <div class="sm-seprate ccol-lg-6 col-md-6 col-sm-6 col-xs-6 pull-right">
+                <div class="editor-label col-lg-2 col-md-2 col-sm-2 col-xs-3 pull-right" style="padding:0">
+                    @Html.LabelFor(model => model.XMLViewData)
+                </div>
+                <div class="xmlviewdata-contain edit-lbl col-lg-10 col-md-10 col-sm-10 col-xs-9 pull-right">
+                    @Html.TextBoxCrFor(a => a.XMLViewData, new Dictionary<string, object> { })
+                </div>
+            </div>
+
+            <div class="sm-seprate col-lg-6 col-md-6 col-sm-6 col-xs-6  pull-right">
+                <div class="edit-lbl col-lg-2 col-md-2 col-sm-2 col-xs-3 pull-right" style="padding:0">
+                    @Html.LabelFor(model => model.ElementType)
+                </div>
+                <div class="elementtype-contain edit-field col-lg-10 col-md-10 col-sm-10 col-xs-9 pull-right">
+                    @(Html.Kendo().DropDownList()
+                          .Name("ElementType")
+                          .BindTo(from ElementType e in Enum.GetValues(typeof(ElementType))
+                                  select new SelectListItem { Value = ((int)e).ToString(), Text = e.GetDescriptionEnum() }))
+                </div>
+            </div>
+
+        </div><!-- row filters -->
+
+        <div class="row filters">
+
+            <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12 pull-right">
+                <div class="pull-right" @*style="padding-right:15px;"*@>
+                    <div class="label-checkbox pull-right">
+                        @Html.LabelCr("درج به عنوان ریشه", new Dictionary<string, object>() { { "Class", "editor-label" }, })
+                    </div>
+                    @Html.CheckBox("isRoot", new { @class = "k-checkbox" })
+                </div>
+                <div class="pull-right" @*style="padding-right:15px;"*@>
+                    <div class="label-checkbox pull-right">
+                        @Html.LabelCrFor(a => a.IsHidden)
+                    </div>
+                    @Html.CheckBoxCrFor(a => a.IsHidden)
+                </div>
+                <div class=" pull-right" @*style="padding-right:15px;"*@>
+                    <div class="label-checkbox  pull-right">
+                        @Html.LabelCrFor(a => a.Invisible)
+                    </div>
+                    @Html.CheckBoxCrFor(a => a.Invisible)
+                </div>
+            </div>
+
+        </div><!-- row filters -->
+
+        <div class="row filters actions">
+            <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12 pull-right">
+                @Html.SubmitCr("SelectViewElement", "انتخاب")
+                &nbsp;
+                @Html.ButtonCr("CreateNewViewElement", "جدید")
+                &nbsp;
+                @Html.ButtonCr("AddViewElement", "اضافه")
+                @Html.ButtonCr("EditViewElement", "ویرایش")
+                @Html.ButtonCr("RemoveremoveSelectedViewElementMenuNode", "حذف")
+            </div>
+        </div><!-- row filters -->
+
+    </section>
+</div>
+
+
+<div id="treeView" style="margin:0;overflow-y:auto; height:270px;">
+
+    @(Html.Kendo().TreeView()
+          .Name("treeViewViewElement")
+          .DataTextField("Title")
+          .DataSource(dataSource => dataSource
+          .Read(read => read.Action("GetEntities", "ViewElement")
+          .Type(HttpVerbs.Post)
+          .Data("GetSelectedItemId")))
+          .Events(e => e.Expand("onExpandViewElementMenu"))
+          .Events(e => e.Select("onSelectViewElementMenu"))
+    )
+
+</div>
+
+
+<div id="modalWindowViewElement" style="text-align: center;">
+
+    <div style="display: block; height: 35px; text-align: center; line-height: 30px;">
+        <span>آیا از حذف اطمینان دارید؟</span>
+
+    </div>
+    <div style="display: block; text-align: center;">
+
+        <button id="btnViewElementYes" class="k-button">بله</button>
+        &nbsp;  &nbsp;  &nbsp;
+        <button id="btnViewElementNo" class="k-button">خیر</button>
+
+    </div>
+
+</div>
+
+
+@*@Html.HiddenFor(a => a.Id)*@
+@Html.HiddenFor(a => a.ViewElementParentId)
+<script>
+
+
+    $(document).ready(function () {
+
+        var title = "";
+        
+        getNewViewElementId();
+        var treeview = $("#treeViewViewElement").data("kendoTreeView");
+
+
+        var wndmodalWindowViewElementMenu = $("#modalWindowViewElement").kendoWindow({
+            title: "حذف",
+            modal: true,
+
+            visible: false,
+
+            resizable: false,
+
+            width: 400
+
+        }).data("kendoWindow");
+
+        var isSetviewElementClickEvent = false;
+
+        $("#RemoveremoveSelectedViewElementMenuNode").click(function () {
+
+
+            if (selectedViewElementMenuId == "" || selectedViewElementMenuId == null) {
+                DialogBox.ShowError("منو را انتخاب نمائید", 250, 20, true);
+                return;
+            }
+
+
+            wndmodalWindowViewElementMenu.center();
+            wndmodalWindowViewElementMenu.open();
+            if (!isSetviewElementClickEvent) {
+                $("#btnViewElementYes").click(function () {
+
+
+                    var selectedNode = treeview.select();
+                    if ($("#ViewElementParentId").val() == "") {
+                        DialogBox.ShowError("منو مربوطه را انتخاب نمائید", 250, 20, true);
+                        return;
+                    }
+
+
+                    $.ajax({
+                        url: getAreaUrl("ViewElement", "DeleteEntity"),
+
+                        type: 'Delete',
+
+                        data: {
+                            selectedViewElementMenuId: selectedViewElementMenuId,
+                        },
+
+                        success: function (result) {
+
+                            treeview.remove(selectedNode);
+                            selectedViewElementMenuId = null;
+                            wndmodalWindowViewElementMenu.close();
+
+
+                        },
+
+                        error: function (xhr) {
+                            DialogBox.ShowError("خطا در حذف", 250, 20);
+                            wndmodalWindowViewElementMenu.close();
+                        }
+                    });
+                });
+                isSetviewElementClickEvent = true;
+            }
+        });
+
+
+
+
+        $("#btnViewElementNo").click(function () {
+            wndmodalWindowViewElementMenu.close();
+
+
+        });
+        function editViewElement(e) {
+
+
+            var parentId;
+            var validatorViewElementName = $("#Title").kendoValidator().data("kendoValidator"),
+              status = $(".status");
+            var validatorUniqueName = $("#UniqueName").kendoValidator().data("kendoValidator"),
+             status = $(".status");
+            if (!validatorViewElementName.validate() || !validatorUniqueName.validate())
+                return;
+            if ($("#isRoot").prop("checked") == true) {
+                parentId = null;
+            }
+            else {
+                var treeViewElement = $("#treeViewViewElement").data("kendoTreeView");
+                var treeViewElementSelectedItem = treeViewElement.dataItem(treeViewElement.select());
+                parentId = treeViewElement.dataItem(treeViewElement.select()).parentNode().id;
+            }
+            //var treeViewElement = $('#treeViewViewElement').data('kendoTreeView');
+            //if (($("#isRoot").prop("checked") == false || $("#isRoot").prop("checked") == undefined) && treeViewElement.dataItem(treeViewElement.select()) == undefined) {
+
+            //    DialogBox.ShowError("آیتم پدر را از درخت انتخاب کنید", 250, 20);
+            //    selectParentWin.open();
+            //    return;
+            //}
+
+
+            $.ajax({
+                url: getAreaUrl("ViewElement", "PutEntity"),
+
+                type: 'PUT',
+
+                data: {
+                    ViewElementParentId: parentId,
+                    SortOrder: $("#SortOrder").val(),
+                    Id: $("#Id").val(),
+                    Title: $("#Title").val(),
+                    UniqueName: $("#UniqueName").val(),
+                    ElementType: $("#ElementType").val(),
+                    XMLViewData: $("#XMLViewData").val(),
+                    IsHidden: $("#IsHidden").prop('checked'),
+                    Invisible: $("#Invisible").prop('checked')
+                },
+
+                success: function (result) {
+
+
+                    if (!result.success) {
+
+                        DialogBox.ShowError(result.errors.toString(), 250, 20);
+                        return false;
+                    }
+
+
+
+                    var viewElementTree = $("#treeViewViewElement").data("kendoTreeView");
+                    var selectedNode = viewElementTree.select();
+                    viewElementTree.dataItem(selectedNode).set("SortOrder", $("#SortOrder").val());
+                    viewElementTree.dataItem(selectedNode).set("Title", $("#Title").val());
+                    viewElementTree.dataItem(selectedNode).set("ElementType", $("#ElementType").val());
+                    viewElementTree.dataItem(selectedNode).set("UniqueName", $("#UniqueName").val());
+                    viewElementTree.dataItem(selectedNode).set("XMLViewData", $("#XMLViewData").val());
+                    viewElementTree.dataItem(selectedNode).set("Invisible", $("#Invisible").prop('checked'));
+                    viewElementTree.dataItem(selectedNode).set("IsHidden", $("#IsHidden").prop('checked'));
+                    if ($("#IsRoot").prop('checked') == undefined || $("#IsRoot").prop('checked') == false)
+                        viewElementTree.dataItem(selectedNode).set("IsRoot", false);
+                    else
+                        viewElementTree.dataItem(selectedNode).set("IsRoot", true);
+
+                    selectedNode.val(result.viewElementViewModel);
+                    //selectedNode.find(">div>.k-in").contents(":last").replaceWith($("#Title").val());
+
+                    //var Id = $("#Id").val();
+                    createNewViewElement();
+                    //$("#Id").val(Id);
+
+
+                },
+
+                error: function (xhr) {
+
+                    DialogBox.ShowError("خطا رخ داده لطفا دوباره سعی نمائید", 250, 20);
+                }
+            });
+
+
+        };
+
+        function addViewElement(e) {
+
+
+
+            var validatorViewElementName = $("#Title").kendoValidator().data("kendoValidator"),
+              status = $(".status");
+            var validatorUniqueName = $("#UniqueName").kendoValidator().data("kendoValidator"),
+             status = $(".status");
+            if (!validatorViewElementName.validate() || !validatorUniqueName.validate())
+                return;
+            if ($("#isRoot").prop("checked") == true) {
+                $("#ViewElementParentId").val("");
+                //$("#Id").val("");
+            }
+            var treeViewElement = $('#treeViewViewElement').data('kendoTreeView');
+            if (($("#isRoot").prop("checked") == false || $("#isRoot").prop("checked") == undefined) && treeViewElement.dataItem(treeViewElement.select()) == undefined) {
+
+                DialogBox.ShowError("آیتم پدر را از درخت انتخاب کنید", 250, 20);
+
+                return;
+            }
+
+
+            $.ajax({
+                url: getAreaUrl("ViewElement", "PostEntity"),
+
+                type: 'POST',
+
+                data: {
+
+                    ViewElementParentId: $("#ViewElementParentId").val(),
+                    Id: $("#Id").val(),
+                    SortOrder: $("#SortOrder").val(),
+                    Title: $("#Title").val(),
+                    UniqueName: $("#UniqueName").val(),
+                    ElementType: $("#ElementType").val(),
+                    XMLViewData: $("#XMLViewData").val(),
+                    IsHidden: $("#IsHidden").prop('checked'),
+                    Invisible: $("#Invisible").prop('checked')
+                },
+
+                success: function (result) {
+
+
+                    if (!result.success) {
+
+                        DialogBox.ShowError(result.errors.toString(), 250, 20);
+                        return false;
+                    }
+                    var viewElementTree = $("#treeViewViewElement").data("kendoTreeView");
+                    var selectedNode = viewElementTree.select();
+                    if (selectedNode.length == 0) {
+                        selectedNode = null;
+                    }
+                    if (selectedNode != null) {
+                        var addedParnt = treeview.dataItem(treeview.append(result.viewElementViewModel, selectedNode));
+                        var node = treeview.findByUid(addedParnt.uid);
+                        treeview.dataItem(node).set('id', result.viewElementViewModel.Id);
+                        node.find(">div>.k-in").contents(":last").replaceWith(result.viewElementViewModel.Title);
+
+
+                        addedParnt.loaded(false);
+                        addedParnt.load();
+                        createNewViewElement();
+
+                    }
+
+                    if (selectedNode == null) {
+
+
+                        var addedParnt = treeview.dataItem(treeview.append(result.viewElementViewModel, selectedNode));
+                        var node = treeview.findByUid(addedParnt.uid);
+                        treeview.dataItem(node).set('id', result.viewElementViewModel.Id);
+
+                        node.find(">div>.k-in").contents().replaceWith(result.viewElementViewModel.Title);
+
+                        var selectedDataItem = treeview.dataItem(selectedNode);
+                        viewElementTree.root.load(false);
+                        viewElementTree.root.load();
+                        //selectedDataItem.loaded(false);
+                        //selectedDataItem.load();
+                        createNewViewElement();
+
+                    }
+
+                },
+
+                error: function (xhr) {
+
+                    DialogBox.ShowError("خطا رخ داده لطفا دوباره سعی نمائید", 250, 20);
+                }
+            });
+
+
+        };
+
+
+
+        function selectViewElement(e) {
+
+
+
+
+            if ($("#ViewElementParentId").val() == "") {
+                DialogBox.ShowError("منو مربوطه را انتخاب نمائید", 250, 20);
+                return;
+            }
+            var treeViewElement = $('#treeViewViewElement').data('kendoTreeView');
+
+            var treeViewElementSelectedItem = treeViewElement.dataItem(treeViewElement.select())
+            if (treeViewElement.dataItem(treeViewElement.select()).parentNode() == undefined) {
+                $("#isRoot").prop("checked", true)
+            }
+            else {
+                $("#isRoot").prop("checked", false)
+            }
+            $("#Id").val(treeViewElementSelectedItem.id);
+            $("#SortOrder").val(treeViewElementSelectedItem.SortOrder);
+            $("#Title").val(treeViewElementSelectedItem.Title);
+            $("#UniqueName").val(treeViewElementSelectedItem.UniqueName);
+            $("#ElementType").data("kendoDropDownList").value(treeViewElementSelectedItem.ElementType)
+            $("#XMLViewData").val(treeViewElementSelectedItem.XMLViewData);
+            $("#IsHidden").prop("checked", treeViewElementSelectedItem.IsHidden)
+            $("#Invisible").prop('checked', treeViewElementSelectedItem.Invisible);
+
+
+
+        };
+
+        function getNewViewElementId() {
+            
+            $.ajax({
+                url: getAreaUrl("ViewElement", "GetNewViewElementId"),
+
+                data: {
+                },
+                success: function (id) {
+
+                    $("#Id").val(id);
+                }
+            });
+        }
+        function createNewViewElement() {
+            
+            getNewViewElementId();
+            $("#SortOrder").val("");
+            $("#Title").val("");
+            $("#XMLViewData").val("");
+            $("#UniqueName").val("");
+            $("#ElementType").data("kendoDropDownList").value(0)//اگر ویرایش شده باشد مقدار را خالی می کنیم
+            $("#IsHidden").prop('checked', false);
+            $("#chkAddViewElementToNode").prop('checked', false);
+            $("#Invisible").prop('checked', false);
+            $("#isRoot").prop('checked', false);
+        }
+
+
+
+        $("#AddViewElement").click(addViewElement);
+        $("#SelectViewElement").click(selectViewElement);
+        $("#EditViewElement").click(editViewElement);
+        $("#CreateNewViewElement").click(createNewViewElement);
+
+        // $("#appendNodeText").keypress(append);
+
+    });
+
+</script>

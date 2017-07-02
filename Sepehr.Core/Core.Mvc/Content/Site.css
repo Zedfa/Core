@@ -1,0 +1,1933 @@
+﻿/*----------------------------------------------------------
+The base color for this template is rgb(11,72,107). If you'd like
+to use a different color start by replacing all instances of
+rgb(11,72,107) with your new color.
+----------------------------------------------------------*/
+
+/*#region Base Elements*/
+
+body {
+    width: 100%;
+    height: 100%;
+}
+
+html {
+    overflow: hidden !important;
+    font: 73% verdana,Tahoma,'Lucida Grande',helvetica,arial,sans-serif;
+    /*background-color: rgb(11,72,107);*/ /* azure*/
+    width: 100% !important;
+    height: 100% !important;
+}
+
+header,
+footer,
+nav,
+section {
+    display: block;
+}
+
+a {
+    color: rgb(86, 81, 81);
+    text-decoration: none;
+}
+
+/*label {
+    font-weight:normal !important;
+}*/
+
+/*#endregion*/
+
+/*#region HEADINGS*/
+
+h1, h2, h3, h4, h5, h6 {
+    font-size: 1.5em;
+    color: #000;
+}
+
+h1 {
+    font-size: 2em;
+    padding-bottom: 0;
+    margin-bottom: 0;
+}
+
+h2 {
+    padding: 0 0 10px 0;
+}
+
+h3 {
+    font-size: 1.2em;
+}
+
+h4 {
+    font-size: 1.1em;
+}
+
+h5, h6 {
+    font-size: 1em;
+}
+
+li {
+    line-height: 1.6;
+}
+
+ul.simple {
+    list-style-type: none;
+}
+
+/* this rule styles <h2> tags that are the 
+first child of the left and right table columns */
+.rightColumn > h1, .rightColumn > h2, .leftColumn > h1, .leftColumn > h2 {
+    margin-top: 0;
+}
+
+
+/*#endregion*/
+
+/*#region PRIMARY LAYOUT ELEMENTS */
+
+/* you can specify a greater or lesser percentage for the 
+page width. Or, you can specify an exact pixel width. */
+
+.page {
+    width: 90%;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+#page > h2 {
+    float: none;
+    text-align: center;
+    width: auto;
+    padding: 5em 0 1em;
+    font-size: 3em;
+}
+
+header, #header {
+    position: relative;
+    margin-bottom: 0px;
+    color: #000;
+    padding: 0;
+}
+
+    header h1, #header h1 {
+        font-weight: bold;
+        padding: 5px 0;
+        margin: 0;
+        color: #fff;
+        border: none;
+        line-height: 2em;
+        font-size: 32px !important;
+    }
+
+#main {
+    background: #fff;
+    padding: 30px 30px 15px 30px;
+    margin-bottom: 30px;
+    _height: 1px; /* only IE6 applies CSS properties starting with an underscore */
+}
+
+.sidebar-right {
+    width: 10%;
+    margin-left: 5px;
+    float: right;
+    vertical-align: middle;
+    /*background-color: rgb(227,227,227);*/
+}
+
+.sidebar-left {
+    width: 100%;
+    height: 85%;
+    display: inline-block;
+    vertical-align: middle;
+}
+
+.date-details {
+    float: left;
+    margin-left: 300px;
+}
+
+    .date-details > div:first-child {
+        font-size: small;
+    }
+
+        .date-details > div:first-child + div {
+            font-size: xx-small;
+        }
+
+.sidebar-right, .shadow {
+    color: #696969;
+    text-align: center;
+}
+
+footer {
+    color: #999;
+    padding: 10px 0;
+    text-align: center;
+    line-height: normal;
+    margin: 0;
+    font-size: .9em;
+}
+
+.left-align {
+    text-align: left;
+}
+
+.right-align {
+    text-align: right;
+}
+
+#memberLogo {
+    float: right;
+    margin: 0px 6px 0px;
+}
+
+#memberInfo {
+    height: 30px;
+    padding-top: 10px;
+}
+
+    #memberInfo > div > div {
+        margin-bottom: 5px;
+    }
+
+.fit {
+    width: 100%;
+}
+
+.nav-container {
+    overflow-x: hidden;
+    overflow-y: auto;
+    height: 100%;
+}
+
+.nav-color {
+    background-color: #f5f7f8;
+    border-top: 1px solid #e2e4e7;
+    border-right: 1px solid #e2e4e7;
+}
+
+#nav-wrapper {
+    width: 200px;
+}
+
+#nav-details {
+    margin-right: 215px;
+    margin-top: -100px;
+}
+
+.root-nav-categories li > span {
+    cursor: pointer;
+}
+
+/*#endregion*/
+
+/*#region Menu*/
+
+.k-rtl {
+}
+
+    /*Menu Container*/
+    .k-rtl .k-widget.k-menu.k-menu-horizontal {
+        /*font-size:14px;*/
+        /*font-weight:normal*/
+    }
+
+    /* Menu Items Container*/
+    .k-rtl .k-widget.k-menu-horizontal > .k-item {
+        /*font-size:14px;*/
+        /*font-weight:normal*/
+    }
+
+        /* Main Menu Items*/
+        .k-rtl .k-widget.k-menu-horizontal > .k-item > span.k-link {
+            /*font-size:14px;*/
+        }
+
+            /*Main Menu Each Item*/
+
+            .k-rtl .k-widget.k-menu-horizontal > .k-item > span.k-link > span {
+                /*font-size:14px;*/
+            }
+
+    /*Sub Menu Container */
+    /*Use the !important Because of Inline Styling*/
+    .k-rtl .k-widget.k-menu-horizontal ul.k-group.k-menu-group.k-popup.k-reset {
+        /*font-size:14px !important;*/
+    }
+
+        /* Sub Menu Items Container */
+        .k-rtl .k-widget.k-menu-horizontal ul.k-group.k-menu-group.k-popup.k-reset li.k-item.k-state-default {
+            /*font-size:14px !important;*/
+        }
+
+            /*Sub Menu Items*/
+            .k-rtl .k-widget.k-menu-horizontal ul.k-group.k-menu-group.k-popup.k-reset li.k-item.k-state-default > span.k-link > span {
+                /*font-size:16px;*/
+            }
+
+#menu {
+    position: relative;
+    margin: 0;
+    text-align: right;
+}
+
+    #menu .t-item {
+        border-width: 0 0 0 1px;
+    }
+
+    #menu .t-link {
+        padding: 5px 20px;
+        font-weight: bold;
+        text-decoration: none;
+        line-height: 1.8em;
+    }
+
+#topMenu {
+    float: right;
+    border-radius: 5px;
+    background-image: linear-gradient(0deg, rgba(133,134,89,0), rgba(89,90,61,0) 40%, rgba(133,134,89,0));
+    margin: -43px 5px 0px 0px;
+}
+
+.k-menu > .k-item[role='menuitem'] > .k-link > span[id] {
+    display: inline-block;
+}
+
+/*#endregion*/
+
+/*#region TabStrip*/
+
+div#tabStripNavigator {
+    background: none;
+    border: none;
+}
+
+#tabStripNavigatorContainer {
+    width: 98%;
+    height: 85%;
+    -moz-border-radius: 5px;
+    -webkit-border-radius: 5px;
+    border-radius: 5px;
+    background: transparent;
+    /*background-image: url(Images/Ads.jpeg);
+    background-repeat: repeat;*/
+    background-position: right top;
+    background-size: 430px,400px;
+    margin-top: 30px;
+    opacity: 0.07;
+    filter: alpha(opacity=05);
+    position: absolute;
+    z-index: -1;
+}
+
+#tabStripNavigatorContainer1 {
+    width: 98%;
+    height: 85%;
+    -moz-border-radius: 5px;
+    -webkit-border-radius: 5px;
+    border-radius: 5px;
+    background: #e3e3e3;
+    position: absolute;
+    z-index: -2;
+}
+
+#tabStripNavigator .k-tabstrip-items .k-link {
+    height: 20px;
+    padding: .2em .92em;
+}
+
+#tabStripNavigator li[role="tab"] {
+    height: 28px;
+}
+
+#tabStripNavigator .k-state-active {
+    border-color: #BE8369;
+}
+
+/*#endregion*/
+
+/*#region FORM LAYOUT ELEMENTS    */
+
+fieldset {
+    border: 1px solid #ddd;
+    /*padding: 0 1.4em 1.4em 1.4em;*/
+    margin: 0 0 1.5em 0;
+    padding: 0;
+}
+
+.k-widget.k-window.k-rtl {
+    width: 850px;
+}
+
+legend {
+    font-size: 1.2em;
+    font-weight: normal;
+}
+
+
+/*#endregion */
+
+/*#region TABLE*/
+
+table {
+    border: solid 1px #e8eef4;
+    border-collapse: collapse;
+}
+
+    table[role='grid'] {
+        position: relative;
+    }
+
+    table td {
+        padding: 1px;
+        border: solid 1px #e8eef4;
+        text-align: right;
+    }
+
+    table th {
+        padding: 6px 5px;
+        background-color: #e8eef4;
+        border: solid 1px #e8eef4;
+    }
+
+/* this rule styles <h2> tags that are the first child of the left and right table columns */
+.rightColumn > h1, .rightColumn > h2, .leftColumn > h1, .leftColumn > h2 {
+    margin-top: 0;
+}
+
+/*#endregion */
+
+/*#region Tree*/
+
+.tree-toolbar {
+    border-width: 0 0 1px;
+    border-style: solid;
+    margin: 0;
+    padding: .22em .4em .28em;
+}
+
+    .tree-toolbar .k-button {
+        margin: 0 .16em;
+    }
+
+/*#endregion*/
+
+/*#region MISC */
+
+.clear {
+    clear: both;
+}
+
+html .k-error-colored {
+    border-color: #929090;
+}
+
+div#title {
+    display: block;
+    text-align: left;
+}
+
+#logo {
+    margin: 0px 0px 8px;
+    width: 100%;
+    /*height: 80px;*/
+    z-index: -1000;
+    background-image: url('images/header.png');
+    background-repeat: repeat-x;
+}
+
+#loginForm {
+}
+
+    #loginForm .part {
+        margin: 25px 65px 65px 65px;
+    }
+
+    #loginForm p {
+        margin: 15px;
+    }
+
+#logindisplay {
+    font-size: 1.1em;
+    display: block;
+    text-align: right;
+    margin: 10px;
+    color: White;
+}
+
+    #logindisplay a:link {
+        color: white;
+        text-decoration: underline;
+    }
+
+    #logindisplay a:visited {
+        color: white;
+        text-decoration: underline;
+    }
+
+    #logindisplay a:hover {
+        color: white;
+        text-decoration: none;
+    }
+
+.rounded-corner {
+    -moz-border-radius: 5px;
+    -webkit-border-radius: 5px;
+    border-radius: 5px;
+}
+
+.rounded-corner2 {
+    -moz-border-radius: 2px;
+    -webkit-border-radius: 2px;
+    border-radius: 2px;
+}
+
+.shadow {
+    -moz-box-shadow: -3px 0px 10px 0px black;
+    -webkit-box-shadow: -3px 0px 10px 0px black;
+    box-shadow: -3px 0px 10px 0px black;
+}
+
+.popup-footer-button {
+    margin: 5px;
+    width: 97%;
+    bottom: 0;
+    position: absolute;
+}
+
+/*#endregion*/
+
+/*#region Styles for validation helpers*/
+
+.field-validation-error {
+    color: #ff0000;
+}
+
+.field-validation-confirm {
+    color: rgb(24, 165, 57);
+}
+
+.field-validation-valid {
+    display: none;
+}
+
+.input-validation-error {
+    border: 1px solid #ff0000;
+    background-color: #ffeeee;
+}
+
+.input-validation-confirm {
+    border: 1px solid rgb(24, 165, 57);
+    background-color: #ffeeee;
+}
+
+.validation-summary-errors {
+    font-weight: bold;
+    color: #ff0000;
+}
+
+.validation-summary-valid {
+    display: none;
+}
+
+.required-field > .k-widget.k-numerictextbox > .k-numeric-wrap.k-state-default.k-expand-padding, .required-field > .k-widget.k-multiselect.k-header {
+    border-left-color: rgb(236,99,22);
+    border-left-width: 5px;
+}
+
+.optional-field > .k-widget.k-numerictextbox > .k-numeric-wrap.k-state-default.k-expand-padding, .optional-field > .k-widget.k-multiselect.k-header {
+    border-left-color: rgb(24, 165, 57);
+    border-left-width: 5px;
+}
+
+.validation-checker {
+    margin-right: 6px;
+}
+
+/*#endregion*/
+
+/*#region Styles for editor and display helpers*/
+
+.display-label,
+.editor-label {
+    /*margin: 1em 0 0 0;*/
+    margin: 0 !important;
+}
+
+    .editor-label > label {
+        padding-top: 12px !important;
+    }
+
+input#chkAddViewElementToNode {
+    height: auto;
+    margin-top: 10px;
+}
+
+input#isRoot {
+    width: auto;
+    height: auto;
+    margin-top: 10px;
+    margin-left: 35px;
+}
+
+input#IsHidden {
+    width: auto;
+    height: auto;
+    margin-top: 10px;
+    margin-left: 35px;
+}
+
+input#Invisible {
+    width: auto;
+    height: auto;
+    margin-top: 10px;
+}
+
+input#ViewElementInVisible {
+    height: auto;
+    margin-top: 10px;
+}
+
+/*#endregion*/
+
+/*#region style for kendo controls*/
+
+.k-textbox {
+    width: 145px;
+    border-left-color: rgb(24, 165, 57) !important;
+    border-left-width: 5px !important;
+}
+
+    .k-textbox[data-val-required], .k-textbox.manual-validation, .required-validation {
+        width: 145px;
+        border-left-color: rgb(236,99,22) !important;
+        border-left-width: 5px !important;
+    }
+
+html .k-window .k-window-title {
+    height: 100%;
+}
+
+.k-block.k-info-colored.k-window-content.k-content[data-role=dialogBox] > div:first-child {
+    overflow: auto;
+    height: 90%;
+}
+
+.k-grid-content > table.k-selectable {
+    position: relative;
+}
+
+a.k-button.k-button-icontext.k-grid-cancel, a.k-button.k-button-icontext.k-grid-update {
+    text-decoration: none;
+}
+
+a.k-button.k-button-icontext.k-grid-cancel {
+    float: left;
+}
+
+.k-pager-wrap.k-grid-pager.k-widget span.k-pager-info.k-label {
+    direction: rtl;
+}
+
+.k-rtl .k-button-icontext .k-icon {
+    margin: 2px 3px 0 0;
+    float: left;
+}
+
+.k-rtl .k-numeric-wrap {
+    padding: 0;
+}
+
+.k-chart {
+    margin: 0 auto 15px auto;
+    width: 700px;
+    height: 430px;
+}
+
+.k-loading-mask {
+    z-index: 100002;
+}
+
+/*#endregion*/
+
+/*#region Unknown*/
+
+textarea {
+    min-height: 55px;
+    min-width: 245px;
+}
+
+input[type="password"] {
+    width: 200px;
+    border: 1px solid #CCC;
+}
+
+input#SaveCompanyViewElement {
+    float: left;
+}
+
+.label-checkbox {
+    float: right;
+}
+
+    .label-checkbox label {
+        margin-left: 15px !important;
+    }
+
+.display-field,
+.editor-field {
+    margin: 0.5em 0 0 0;
+}
+
+.text-box.multi-line {
+    height: 7.5em;
+}
+
+.tri-state {
+    width: 6em;
+}
+
+.seperator {
+    width: 50%;
+    margin-top: 10px;
+    margin-bottom: 15px;
+}
+
+.divCaseSeetlePrint {
+    float: left;
+    border: 1px solid grey;
+    background-color: lightgrey;
+    margin: 2px;
+}
+
+.divCreateContinueSettlePrint {
+    border: 1px solid grey;
+    background-color: lightgrey;
+    margin: 2px;
+}
+
+.hide {
+    visibility: hidden;
+}
+
+.gridRowError td {
+    border: 1px inset #ff0000;
+}
+
+.helpfieldset {
+    text-align: justify;
+}
+
+.button-container {
+    width: 92%;
+}
+
+.bottom-margin {
+    margin-bottom: 10px;
+}
+
+.top-margin {
+    margin-top: 10px;
+}
+
+/*#endregion*/
+
+/*#region Height Fitting - Main Container */
+
+/*.main-content {
+    width: 100%;
+    height: 100%;
+    -ms-flex:1;
+    -webkit-flex:1;
+    flex:1;
+    display: flex;
+    -ms-flex-direction:column;
+    -webkit-flex-direction:column;
+    flex-direction: column;
+    
+    justify-content: flex-start; 
+    align-items: stretch; 
+    -ms-align-content: stretch;
+    -webkit-align-content: stretch;
+    align-content: stretch; 
+}*/
+
+/*.main-content > .main-content.ng-scope {
+    width: 100%;
+    height: 100%;
+    -ms-flex:1;
+    -webkit-flex:1;
+    flex:1;
+    display: flex;
+    -ms-flex-direction:column;
+    -webkit-flex-direction:column;
+    flex-direction: column;
+    
+    justify-content: flex-start; 
+    align-items: stretch; 
+    -ms-align-content: stretch;
+    -webkit-align-content: stretch;
+    align-content: stretch; 
+}*/
+
+/*.main-content > .main-content.ng-scope > div {
+    width: 100%;
+    height: 100%;
+    -ms-flex:1;
+    -webkit-flex:1;
+    flex:1;
+    display: flex;
+    -ms-flex-direction:column;
+    -webkit-flex-direction:column;
+    flex-direction: column;
+    
+    justify-content: flex-start; 
+    align-items: stretch; 
+    -ms-align-content: stretch;
+    -webkit-align-content: stretch;
+    align-content: stretch; 
+}*/
+
+/*.main-content > .main-content.ng-scope > div >.rounded-corner {
+    width: 100%;
+    height: 100%;
+    -ms-flex:1;
+    -webkit-flex:1;
+    flex:1;
+    display: flex;
+    -ms-flex-direction:column;
+    -webkit-flex-direction:column;
+    flex-direction: column;
+    
+    justify-content: flex-start; 
+    align-items: stretch; 
+    -ms-align-content: stretch;
+    -webkit-align-content: stretch;
+    align-content: stretch; 
+}*/
+
+/*#endregion */
+
+/*#region Filters */
+
+.filters-container {
+    background-color: #f5f5f5;
+    padding: 10px 15px;
+    font-family: Tahoma !important;
+}
+
+    .filters-container label {
+        font-weight: normal !important;
+    }
+
+.row.filters {
+    margin: 12px 15px;
+}
+
+.edit-lbl {
+    font-family: Tahoma !important;
+}
+
+.edit-field {
+    font-family: Tahoma !important;
+}
+
+.row.filters label {
+    padding-left: 0;
+    padding-right: 0;
+    padding-top: 6px;
+    font-size: 16px !important;
+}
+
+.row.filters input {
+    height: 34px;
+    line-height: 1.42857143;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+}
+
+.row.filters.actions {
+    margin-top: 20px;
+}
+
+/*#endregion */
+
+/*#region ViewElement Page */
+
+#viewelements-filter .filters-container .row.filters .title-contain > input {
+}
+
+
+/*#endregion */
+
+
+/*#region Main Page & ScrollBar */
+
+#tabstripNgView {
+    width: 100%;
+    -moz-border-radius: 5px;
+    -webkit-border-radius: 5px;
+    border-radius: 5px;
+    overflow-y: scroll;
+    overflow-x: hidden;
+    background: transparent;
+    background: #f9f9f9;
+    font-family: Tahoma !important;
+    /*font-size:14px;*/
+    -ms-flex: 1;
+    -webkit-flex: 1;
+    flex: 1;
+    display: flex;
+    -ms-flex-direction: column;
+    -webkit-flex-direction: column;
+    flex-direction: column;
+    justify-content: flex-start; /* align items in Main Axis */
+    align-items: stretch; /* align items in Cross Axis */
+    -ms-align-content: stretch;
+    -webkit-align-content: stretch;
+    align-content: stretch; /* Extra space in Cross Axis */
+}
+
+/*#endregion*/
+
+/*#region Grid Styles*/
+
+div#codeBody span.k-tool-text {
+    display: none !important;
+}
+
+.grd-popup-action {
+    bottom: 5px;
+    position: absolute;
+    padding: 5px;
+    left: 5px;
+    height: 20px;
+}
+
+.grd-popup-action-top-border {
+    bottom: 35px;
+    position: absolute;
+    left: 1px;
+    height: 1px;
+    width: 99%;
+    border-top: outset 2px #e6e3e9;
+}
+
+/*#region Grid - Selection */
+
+/*div.k-grid-content {
+    font-family:Tahoma !important;
+}*/
+
+div.k-grid-content .ng-scope.k-state-selected {
+    /*background-color: #fe761b !important;
+   opacity:0.7;    
+   z-index: 50 !important;
+   color:white !important;
+   transition:background-color 0.2s ease-in-out;*/
+    background-image: none !important;
+    background-color: rgba(254, 118, 27, 0.70) !important;
+    opacity: 1.0 !important;
+    z-index: 50 !important;
+    color: white !important;
+    -webkit-transition: none !important;
+    -moz-transition: none !important;
+    transition: none !important;
+}
+
+/*div.k-grid-content .ng-scope.k-state-selected .k-state-focused  {
+   background-color: rgba(254, 118, 27, 0.70) !important;     
+   color:white !important;
+ }*/
+
+div.k-grid-content .ng-scope .k-state-focused {
+    background-color: rgba(254, 118, 27, 0.70) !important;
+    color: white !important;
+}
+
+div.k-grid-content .ng-scope.k-state-selected .k-state-focused {
+    /*z-index: 100 !important;
+    background-color:rgba(254, 118, 27, 0.0) !important;
+    color:white !important;*/
+    /*background-image: none !important;*/
+    /*background-color: rgba(254, 118, 27, 0.70) !important;*/
+    /*background-color: #fe761b !important;
+    opacity:0.7;*/
+    /*background-image: url('textures/highlight.png');
+    background-image: none,-webkit-linear-gradient(top,#fe761b 0,#e15613 100%);
+    background-image: none,-moz-linear-gradient(top,#fe761b 0,#e15613 100%);
+    background-image: none,-o-linear-gradient(top,#fe761b 0,#e15613 100%);
+    background-image: none,linear-gradient(to bottom,#fe761b 0,#e15613 100%);*/
+    /*background-position: 50% 50%;*/
+    background: none !important;
+    color: white !important;
+}
+
+.k-state-focused, td.k-state-focused {
+    box-shadow: none !important;
+}
+
+    .k-state-focused.k-state-selected {
+        box-shadow: none !important;
+        text-shadow: none !important;
+    }
+
+.k-grid td {
+    text-shadow: none !important;
+}
+
+/*#endregion*/
+
+
+/*Main Container*/
+.k-grid.k-widget.k-reorderable {
+    width: 100%;
+}
+
+    /*Grid-Buttons Container*/
+    .k-grid.k-widget.k-reorderable > .k-header.k-grid-toolbar.ng-scope {
+        /*font-size:16px !important;*/
+    }
+
+        /*Grid-Buttons Like Insert & ... */
+        .k-grid.k-widget.k-reorderable > .k-header.k-grid-toolbar.ng-scope > button.k-button {
+            /*font-size:16px !important;*/
+        }
+
+/*Grid-Buttons Like Insert & ...  Hover*/
+.k-header.k-grid-toolbar.ng-scope button.k-button:hover {
+    /*color:#efefef;*/
+    background-color: #f8f8f8;
+}
+
+.k-header.k-grid-toolbar.ng-scope button.k-button:active {
+    /*color:#eeeeee*/
+    background-color: #f35800;
+    border-color: #f35800;
+}
+
+/*Grid-Buttons Icons Like Insert & ... */
+.k-grid.k-widget.k-reorderable > .k-header.k-grid-toolbar.ng-scope > button.k-button > span.k-icon {
+    /*font-size:16px !important;*/
+}
+
+/*Grid-Hint*/
+k-grid.k-widget.k-reorderable > .k-grouping-header {
+    /*font-size:16px !important;*/
+}
+
+/*Grid-Table Headers Main Container*/
+.k-grid.k-widget.k-reorderable > .k-grid-header {
+    /*background:blue;*/
+}
+
+    /*Grid-Table Headers Container*/
+    .k-grid.k-widget.k-reorderable > .k-grid-header thead > tr {
+        /*font-size:16px !important;*/
+    }
+
+        .k-grid.k-widget.k-reorderable > .k-grid-header thead > tr:hover {
+            cursor: alias;
+        }
+
+        /*Grid-Table Headers Contents*/
+        .k-grid.k-widget.k-reorderable > .k-grid-header thead > tr > th > a {
+            /*font-size:16px !important;*/
+        }
+
+/*Grid-Table Contents Main Container (Contents and Scrollbar)*/
+.k-grid.k-widget.k-reorderable > .k-grid-content {
+    /*font-size:16px !important;*/
+    height: 300px;
+    overflow-x: auto;
+    overflow-y: scroll;
+}
+
+    /*Grid-Table Contents Container (Only Contents)*/
+    .k-grid.k-widget.k-reorderable > .k-grid-content tbody {
+        /*font-size:16px !important;*/
+    }
+
+        /*Grid-Table Contents - Every Content Row*/
+        .k-grid.k-widget.k-reorderable > .k-grid-content tbody > tr {
+            /*font-size:20px !important;*/
+            white-space: nowrap;
+        }
+
+.k-grid.k-widget.k-reorderable .k-grid-content tbody tr td:hover {
+    cursor: copy;
+}
+
+
+/*.k-edit-form-container {
+    width:100%;
+}*/
+
+/*.tabs-margin  {
+    margin-right:20px;
+    padding:0;
+}*/
+
+.k-pager-wrap.k-grid-pager.k-widget span.k-pager-info.k-label {
+    direction: ltr;
+}
+
+.k-pager-wrap.k-grid-pager.k-widget {
+    height: auto;
+}
+
+
+/*#region Grid - Fits The Height */
+
+/*#region Main Section */
+
+
+#tabstripNgView > div {
+    -ms-flex: 1;
+    -webkit-flex: 1;
+    flex: 1;
+    display: flex;
+    -ms-flex-direction: column;
+    -webkit-flex-direction: column;
+    flex-direction: column;
+    justify-content: flex-start;
+    align-items: stretch;
+    -ms-align-content: stretch;
+    -webkit-align-content: stretch;
+    align-content: stretch;
+}
+
+    #tabstripNgView > div div.ng-scope:not(.k-grid-toolbar) {
+        -ms-flex: 1;
+        -webkit-flex: 1;
+        flex: 1;
+        display: flex;
+        -ms-flex-direction: column;
+        -webkit-flex-direction: column;
+        flex-direction: column;
+        justify-content: flex-start;
+        align-items: stretch;
+        -ms-align-content: stretch;
+        -webkit-align-content: stretch;
+        align-content: stretch;
+    }
+
+
+    /* Just Core */
+    #tabstripNgView > div .k-grid.k-widget.k-reorderable {
+    }
+
+
+    #tabstripNgView > div div.ng-isolate-scope.ng-scope {
+        -ms-flex: 1;
+        -webkit-flex: 1;
+        flex: 1;
+        display: flex;
+        -ms-flex-direction: column;
+        -webkit-flex-direction: column;
+        flex-direction: column;
+        justify-content: flex-start;
+        align-items: stretch;
+        -ms-align-content: stretch;
+        -webkit-align-content: stretch;
+        align-content: stretch;
+        min-height: 242px;
+    }
+
+        #tabstripNgView > div div.ng-isolate-scope.ng-scope .k-grid.k-widget.k-reorderable {
+            -ms-flex: 1;
+            -webkit-flex: 1;
+            flex: 1;
+            display: flex;
+            -ms-flex-direction: column;
+            -webkit-flex-direction: column;
+            flex-direction: column;
+            justify-content: flex-start;
+            align-items: stretch;
+            -ms-align-content: stretch;
+            -webkit-align-content: stretch;
+            align-content: stretch;
+        }
+
+    #tabstripNgView > div .k-grid-content {
+        -ms-flex: 1;
+        -webkit-flex: 1;
+        flex: 1;
+        display: flex;
+        -ms-flex-direction: row;
+        -webkit-flex-direction: row;
+        flex-direction: row;
+        justify-content: flex-start;
+        align-items: stretch;
+        -ms-align-content: stretch;
+        -webkit-align-content: stretch;
+        align-content: stretch;
+    }
+
+        #tabstripNgView > div .k-grid-content > .k-virtual-scrollable-wrap {
+            -ms-flex: 1;
+            -webkit-flex: 1;
+            flex: 1;
+            display: flex;
+            -ms-flex-direction: row;
+            -webkit-flex-direction: row;
+            flex-direction: row;
+            justify-content: flex-start;
+            align-items: stretch;
+            -ms-align-content: stretch;
+            -webkit-align-content: stretch;
+            align-content: stretch;
+        }
+
+        #tabstripNgView > div .k-grid-content table.k-selectable > tbody > tr {
+            line-height: 45px;
+            height: 45px;
+            max-height: 45px;
+        }
+
+            #tabstripNgView > div .k-grid-content table.k-selectable > tbody > tr > td {
+                line-height: 45px;
+                height: 45px;
+                max-height: 45px;
+                padding: 0;
+                margin: 0;
+                white-space: nowrap;
+                text-overflow: ellipsis;
+            }
+
+
+
+        #tabstripNgView > div .k-grid-content table.k-selectable {
+            position: absolute;
+        }
+
+
+            #tabstripNgView > div .k-grid-content table.k-selectable > tbody {
+                /*margin-bottom:1px;
+    -ms-flex:1;
+    -webkit-flex:1;
+    flex:1;
+    display: flex;
+    -ms-flex-direction:column;
+    -webkit-flex-direction:column;
+    flex-direction: column;
+    
+    justify-content: flex-start;  
+    align-items: stretch;  
+    -ms-align-content: stretch;
+    -webkit-align-content: stretch;
+    align-content: stretch;*/
+            }
+
+
+
+
+
+/*#tabstripNgView > div .k-grid-content > .k-scrollbar.k-scrollbar-vertical {
+    -ms-flex:1;
+    -webkit-flex:1;
+    flex:1;
+    display: flex;
+    -ms-flex-direction:row;
+    -webkit-flex-direction:row;
+    flex-direction: row;
+    
+    justify-content: flex-start;  align items in Main Axis 
+    align-items: stretch;  align items in Cross Axis 
+    -ms-align-content: stretch;
+    -webkit-align-content: stretch;
+    align-content: stretch;
+}*/
+
+
+/*#tabstripNgView > div .k-grid-content > .k-virtual-scrollable-wrap > table {
+    -ms-flex:1;
+    -webkit-flex:1;
+    flex:1;
+    display: flex;
+    -ms-flex-direction:column;
+    -webkit-flex-direction:column;
+    flex-direction: column;
+    
+    justify-content: flex-start;  align items in Main Axis 
+    align-items: stretch;  align items in Cross Axis 
+    -ms-align-content: stretch;
+    -webkit-align-content: stretch;
+    align-content: stretch;
+}*/
+
+
+/*#tabstripNgView > div .k-grid-content > .k-virtual-scrollable-wrap > table tbody {
+    -ms-flex:1;
+    -webkit-flex:1;
+    flex:1;
+    display: flex;
+    -ms-flex-direction:column;
+    -webkit-flex-direction:column;
+    flex-direction: column;
+    
+    justify-content: flex-start;  align items in Main Axis 
+    align-items: stretch;  align items in Cross Axis 
+    -ms-align-content: stretch;
+    -webkit-align-content: stretch;
+    align-content: stretch;
+}*/
+
+
+/*#tabstripNgView > div .k-grid-content > .k-virtual-scrollable-wrap > table tbody tr {
+    -ms-flex:1;
+    -webkit-flex:1;
+    flex:1;
+    display: flex;
+    -ms-flex-direction:row;
+    -webkit-flex-direction:row;
+    flex-direction: row;
+    
+    justify-content: flex-start;  align items in Main Axis 
+    align-items: stretch;  align items in Cross Axis 
+    -ms-align-content: stretch;
+    -webkit-align-content: stretch;
+    align-content: stretch;
+}*/
+
+
+/*#endregion */
+
+/*#region Alarms*/
+
+#alarms .k-grid-content {
+    height: auto !important;
+}
+
+#alarms .k-content.ng-scope.k-state-active {
+    display: flex !important;
+}
+
+
+#tabstripNgView > div .k-tabstrip-wrapper {
+    -ms-flex: 1;
+    -webkit-flex: 1;
+    flex: 1;
+    display: flex;
+    -ms-flex-direction: column;
+    -webkit-flex-direction: column;
+    flex-direction: column;
+    justify-content: flex-start; /* align items in Main Axis */
+    align-items: stretch; /* align items in Cross Axis */
+    -ms-align-content: stretch;
+    -webkit-align-content: stretch;
+    align-content: stretch; /* Extra space in Cross Axis */
+}
+
+    #tabstripNgView > div .k-tabstrip-wrapper > div#Gadgettabs {
+        -ms-flex: 1;
+        -webkit-flex: 1;
+        flex: 1;
+        display: flex;
+        -ms-flex-direction: column;
+        -webkit-flex-direction: column;
+        flex-direction: column;
+        justify-content: flex-start; /* align items in Main Axis */
+        align-items: stretch; /* align items in Cross Axis */
+        -ms-align-content: stretch;
+        -webkit-align-content: stretch;
+        align-content: stretch; /* Extra space in Cross Axis */
+    }
+
+
+        #tabstripNgView > div .k-tabstrip-wrapper > div#Gadgettabs div#Gadgettabs-1 > div,
+        #tabstripNgView > div .k-tabstrip-wrapper > div#Gadgettabs div#Gadgettabs-2 > div,
+        #tabstripNgView > div .k-tabstrip-wrapper > div#Gadgettabs div#Gadgettabs-3 > div {
+            -ms-flex: 1;
+            -webkit-flex: 1;
+            flex: 1;
+            display: flex;
+            -ms-flex-direction: column;
+            -webkit-flex-direction: column;
+            flex-direction: column;
+            justify-content: flex-start; /* align items in Main Axis */
+            align-items: stretch; /* align items in Cross Axis */
+            -ms-align-content: stretch;
+            -webkit-align-content: stretch;
+            align-content: stretch; /* Extra space in Cross Axis */
+        }
+
+/*#endregion */
+
+/*#region definitionaccountingcodemaster */
+
+#definitionaccountingcodemaster {
+    -ms-flex-direction: row !important;
+    -webkit-flex-direction: row !important;
+    flex-direction: row !important;
+}
+
+
+/*#endregion */
+
+/*#endregion*/
+
+/*#region Popup Window*/
+
+/*Whole Container of Popup Page - Outer One*/
+
+.k-widget.k-window.k-rtl {
+    width: 850px;
+    font-family: Tahoma !important;
+}
+
+.k-window-content.k-content {
+    overflow-y: auto;
+    overflow-x: hidden;
+    font-family: Tahoma !important;
+}
+
+/*Whole Container - Inner One*/
+
+.k-widget.k-window.k-rtl .k-window-content.k-content > .k-edit-form-container {
+    width: auto;
+}
+
+/*ViewElementRole*/
+
+.k-widget.k-window div#lkp_SelectedRoleNameViewElement_Div {
+    overflow: hidden !important;
+}
+
+.grid-inside {
+    padding: 0;
+    margin-top: 20px;
+    width: 95% !important;
+    float: none !important;
+    margin-right: 15px;
+}
+
+    .grid-inside div {
+        list-style-type: none;
+        margin-left: 0;
+    }
+
+    .grid-inside li label {
+        padding-top: 4px;
+    }
+
+    .grid-inside div label {
+        padding-top: 4px;
+    }
+
+/*#region grid inside responsive */
+
+@media only screen and (max-height:764px) {
+
+    .grid-inside-responsive {
+        overflow-y: scroll !important;
+        width: 96% !important;
+        margin-right: 0 !important;
+        padding: 0 15px !important;
+        margin-top: 0 !important;
+    }
+}
+
+
+/*#region PC Resolution : 864 & 900 */
+
+/* 864 & 900 */
+@media only screen and (min-height:734px) and (max-height:764px) {
+    .grid-inside-responsive {
+        max-height: 585px;
+    }
+}
+
+/* 864 */
+@media only screen and (min-height:702px) and (max-height:718px) {
+    .grid-inside-responsive {
+        max-height: 585px;
+    }
+}
+
+/*#endregion */
+
+
+/*#region PC Resolution : 800 */
+
+@media only screen and (min-height:669px) and (max-height:700px) {
+    .grid-inside-responsive {
+        max-height: 562px;
+    }
+}
+
+/*#endregion */
+
+
+/*#region PC Resolution : 768 & 800 */
+
+/* 768 & 800 */
+@media only screen and (min-height:638px) and (max-height:668px) {
+    .grid-inside-responsive {
+        max-height: 530px;
+    }
+}
+
+/* 768 */
+@media only screen and (min-height:607px) and (max-height:637px) {
+    .grid-inside-responsive {
+        max-height: 500px;
+    }
+}
+
+/*#endregion */
+
+
+/*#region PC Resolution : 720 */
+
+@media only screen and (min-height:559px) and (max-height:606px) {
+    .grid-inside-responsive {
+        max-height: 450px;
+    }
+}
+
+/*#endregion */
+
+
+/*#region Device Resolution : 720 */
+
+@media only screen and (min-height:719px) and (max-height:730px) {
+    .grid-inside-responsive {
+        max-height: 587px;
+    }
+}
+
+/*#endregion */
+
+
+/*#region PC Resolution : 600 */
+
+@media only screen and (min-height:470px) and (max-height:500px) {
+    .grid-inside-responsive {
+        max-height: 363px;
+    }
+}
+
+@media only screen and (min-height:439px) and (max-height:469px) {
+    .grid-inside-responsive {
+        max-height: 331px;
+    }
+}
+
+/*#endregion */
+
+
+/*#endregion */
+
+
+/*#region Lookup Element */
+
+.grid-inside .lookup_number {
+    height: 25px;
+    border: 1px solid #c5c5c5;
+    border-radius: 4px;
+    width: 76px;
+}
+
+.grid-inside .lookup_width_lg input:nth-of-type(3) {
+    width: 230px;
+}
+
+.grid-inside .lookup_width_lg span input {
+    width: 230px;
+}
+
+.grid-inside .lookup_width_md input:nth-of-type(3) {
+    width: 221px;
+}
+
+.grid-inside .lookup_width_md span input {
+    width: 221px;
+}
+
+
+/*#endregion */
+
+/*#region input border */
+
+.grid-inside .input_border {
+    /*border:1px solid #c5c5c5;
+    border-radius:4px;*/
+    width: 221px;
+}
+
+.grid-inside .border-green {
+    /*border-left-color:rgb(24, 165, 57) !important;
+    border-left-width:5px !important;*/
+}
+
+.grid-inside .border-red {
+    /*border-left-color:rgb(236,99,22) !important;
+    border-left-width:5px !important;*/
+}
+
+/*#endregion */
+
+/*#region Input & Drop Down whole */
+
+#documentexport .input_whole {
+    width: 96%;
+}
+
+#documentexport .dropdown_whole span.k-widget.k-dropdown.k-header {
+    width: 100%;
+}
+
+/*#endregion */
+
+/*#region Drop Down */
+
+.grid-inside .dropdown_item {
+    width: 221px;
+}
+
+    .grid-inside .dropdown_item span.k-widget.k-dropdown.k-header {
+        width: 221px;
+    }
+
+.grid-inside .dropdown_item_little {
+    width: 60px;
+}
+
+/*#endregion */
+
+/*#region Input Regular  */
+
+.grid-inside .input_regular {
+}
+
+/*#endregion */
+
+/*#region Item_Descount */
+
+.grid-inside .item_description_lg {
+    width: 316px;
+    resize: none;
+}
+
+.desc_small {
+    min-height: 40px;
+}
+
+.grid-inside .item_description_md {
+    width: 310px;
+    resize: none;
+}
+
+.item_description {
+    resize: none;
+}
+
+/*#endregion */
+
+/*#region Item Date */
+
+.grid-inside .item_date {
+    width: 223px;
+}
+
+    .grid-inside .item_date input {
+        width: 221px;
+    }
+
+/*#endregion */
+
+
+
+.row-customize {
+    margin-left: -15px;
+    margin-right: -15px;
+    height: auto;
+    position: relative;
+}
+
+    .row-customize:after, .row-customize:before {
+        display: table;
+        /*content: "";*/
+    }
+
+.grid-inside .row-customize span.k-widget.k-dropdown.k-header.ng-pristine.ng-untouched.ng-valid.ng-valid-parse {
+    width: 124px;
+}
+
+.grid-inside .col-lg-6.col-md-6.col-sm-5.col-xs-5.pull-right > span.k-widget.k-dropdown.k-header {
+    width: 100%;
+}
+
+    .grid-inside .col-lg-6.col-md-6.col-sm-5.col-xs-5.pull-right > span.k-widget.k-dropdown.k-header.ng-valid.ng-valid-parse.ng-dirty.ng-touched.k-valid {
+        width: 100%;
+    }
+
+
+/*#endregion*/
+
+/*#region ViewElementRole Page*/
+
+.k-widget.k-window .k-window-titlebar.k-header {
+    text-align: right;
+    /*margin-top: 0 !important;*/
+}
+
+.k-widget.k-window .k-block.k-info-colored.k-window-content.k-content .k-header.k-grid-toolbar {
+    text-align: right;
+}
+
+.k-widget.k-window .k-block.k-info-colored.k-window-content.k-content .k-grouping-header {
+    text-align: right;
+}
+
+.k-widget.k-window .k-block.k-info-colored.k-window-content.k-content .k-grid-header tr th {
+    text-align: right;
+}
+
+/*#endregion*/
+
+/*#endregion*/
+
+/*#region Buttons _ Display - Confirmation - Cancel*/
+
+.k-button.k-button-icontext.k-primary.mainbtn {
+    background: rgba(76, 175, 80, 0.86);
+    border-color: rgba(76, 175, 80, 0.9);
+    padding: 2px 20px !important;
+    width: auto;
+    padding: 0 10px;
+    font-family: Tahoma;
+    font-weight: normal;
+    transition: all .25s ease-in-out 0.1s;
+    height: 34px;
+    font-family: Tahoma !important;
+}
+
+    .k-button.k-button-icontext.k-primary.mainbtn.btn-top {
+        height: 30px;
+        padding: 0 !important;
+        width: 71px;
+    }
+
+    /*Insert Button Hover*/
+    .k-button.k-button-icontext.k-primary.mainbtn:hover {
+        background: rgb(76, 175, 80) !important;
+        border-color: rgb(76, 175, 80) !important;
+    }
+
+    .k-button.k-button-icontext.k-primary.mainbtn:focus {
+        box-shadow: none;
+    }
+
+/*Cancel Button in Popup Page */
+button.k-button.k-button-icontext.k-grid-cancel {
+    opacity: 0.7;
+    padding: 2px 10px;
+    width: auto;
+    font-weight: normal;
+    height: 34px;
+    font-family: Tahoma !important;
+}
+
+/*#endregion*/
+
+/*#region Buttons _ New & Edit -- Redesign  */
+
+/*span.ng-isolate-scope button.ui-datepicker-trigger {
+    height: 22px !important;
+}*/
+
+.k-window-content.k-content > .k-edit-form-container.ng-scope > .k-edit-buttons.k-state-default.ng-scope {
+    width: 98%;
+    padding: 10px 0;
+}
+
+.container-popup {
+    padding: 0 10px;
+}
+
+/*#endregion*/
+
+
+
+
+/*#endregion*/
+
+/*#region ViewElementRole Page*/
+
+.k-widget.k-window .k-window-titlebar.k-header {
+    text-align: right;
+}
+
+.k-widget.k-window .k-block.k-info-colored.k-window-content.k-content .k-header.k-grid-toolbar {
+    text-align: right;
+}
+
+.k-widget.k-window .k-block.k-info-colored.k-window-content.k-content .k-grouping-header {
+    text-align: right;
+}
+
+.k-widget.k-window .k-block.k-info-colored.k-window-content.k-content .k-grid-header tr th {
+    text-align: right;
+}
+
+
+section.filters-container.center-section.access-level {
+    font-family: Tahoma !important;
+}
+
+    section.filters-container.center-section.access-level > .row.filters {
+        margin-left: 0;
+        margin-right: 0;
+    }
+
+        section.filters-container.center-section.access-level > .row.filters > .col-lg-12.col-md-12.col-sm-12.col-xs-12 {
+            margin-left: auto;
+            margin-right: auto;
+            float: none;
+            text-align: center;
+        }
+
+    section.filters-container.center-section.access-level .low-buttom-margin {
+        margin-bottom: 6px;
+    }
+
+    section.filters-container.center-section.access-level > .row.filters > .col-lg-12.col-md-12.col-sm-12.col-xs-12 > label {
+        padding-left: 0;
+        padding-right: 0;
+        float: none;
+        text-align: left;
+        margin-left: 12px;
+    }
+
+        section.filters-container.center-section.access-level > .row.filters > .col-lg-12.col-md-12.col-sm-12.col-xs-12 > label + span {
+            padding: 0;
+            float: none;
+        }
+
+    section.filters-container.center-section.access-level > .row.filters input.checkbox-center {
+        height: auto;
+        margin-right: 5px;
+    }
+
+
+section.filters-container.center-section.access-levell span.col-lg-1.col-md-1.col-sm-1.col-xs-1.pull-right {
+    text-align: center;
+}
+
+section.filters-container.center-section.access-level span#roleSelectedPart {
+    text-align: center;
+}
+
+section.filters-container.center-section.access-level span.editor-field.col-lg-6.col-md-6.col-sm-6.col-xs-6.pull-right {
+    text-align: center;
+}
+
+    section.filters-container.center-section.access-level span.editor-field.col-lg-6.col-md-6.col-sm-6.col-xs-6.pull-right input#SaveViewElement {
+        margin: 0;
+        float: none;
+    }
+
+
+section.filters-container.center-section.access-level div#treeViewElement {
+    width: 50%;
+    margin-left: auto !important;
+    margin-right: auto !important;
+    /*background-color:ActiveBorder;*/
+    border-radius: 5px;
+    padding-top: 15px;
+    height: 400px;
+    overflow-y: auto;
+}
+
+    section.filters-container.center-section.access-level div#treeViewElement .k-widget.k-treeview.k-reset {
+        /*overflow-x:hidden;*/
+    }
+
+
+    section.filters-container.center-section.access-level div#treeViewElement ul.k-group.k-treeview-lines > li {
+        /*padding-right:46%;*/
+        padding-right: 25%;
+    }
+
+section.ffilters-container.center-section.access-level div#treeViewElement ul.k-group.k-treeview-lines li div span.k-icon.k-plus {
+    float: none;
+}
+
+.k-icon.export-excel {
+    background: url('images/excel.png') no-repeat;
+    background-position: center;
+    padding: 0 4px;
+}
+/*#endregion*/
+
+
+/*#region LookUp*/
+
+.rp-lookup {
+    width: 120px;
+}
+
+    .rp-lookup div.k-widget.k-multiselect.k-header {
+        float: right;
+        width: 150px;
+    }
+
+    .rp-lookup span.k-space-right.k-button {
+        /*width:24px;
+    height:23px;*/
+    }
+
+/*.L-textBox {
+    text-align: center;
+    background: url(Default/lookup.png) no-repeat;
+    background-position: right center;
+    padding-left: 20px;
+    width: 100px;
+    border-color: #c5c5c5;
+    color: #2e2e2e;
+    border-radius: 4px;
+}*/
+
+/*.L-textBox:hover {
+        background: url(Default/hover-lookup.png) no-repeat;
+        background-position: right center;
+        width: 100px;
+        padding-left: 20px;
+}*/
+
+.l-i-button {
+    background: url(Images/lookup.png) no-repeat;
+    background-position: center;
+}
+
+/*.l-i-button :hover {
+       background:url(../Images/hover-lookup.png) no-repeat;
+    background-position: center;
+}*/
+
+/*#endregion*/
+
+/*#region Responsive Styles */
+
+
+/*#endregion */
+
+/*#region  Fixing Popup Grids*/
+.k-widget.k-window.k-rtl {
+    left: 0 !important;
+    right: 0 !important;
+    margin: auto;
+    width: 80%;
+    top: 10px !important;
+}
+
+@media(max-width: 768px){
+
+    .k-widget.k-window.k-rtl.modal-fixing {
+        width: 100%;
+    }
+}
+/*#endregion*/
+

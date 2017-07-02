@@ -1,0 +1,21 @@
+﻿@using Core.Mvc.Helpers;
+@using System.Web.Mvc;
+@using System.Web.Mvc.Ajax;
+@using System.Web.Mvc.Html;
+@using System.Web.Optimization;
+@using System.Web.Routing;
+
+@{
+    string modalId = Model.ToString();
+}
+
+<div id="@modalId">
+    <div style="display: block; height: 35px; text-align: center; line-height: 30px;">
+        <span>آیا از حذف اطمینان دارید؟</span>
+    </div>
+    <div style="display: block; text-align: center;">
+        @Html.ButtonCr(string.Format("{0}_btn_yes", modalId), "", "", "بله", "", "")
+        &nbsp;  &nbsp;  &nbsp;
+        @Html.ButtonCr(string.Format("{0}_btn_no", modalId), "", "", "خیر", "", "")
+    </div>
+</div>

@@ -1,0 +1,23 @@
+﻿@model Core.Mvc.Helpers.Lookup.Grid
+<div id="@(string.Format("lkp_{0}_Div", Model.LookupName))" style="overflow:auto;height:94%;">
+    <div>
+        @{
+            var lookupEvent = "Lookup.confirm";
+            var clientRel = Model.ClientDependentFeatures ?? new ClientDependentFeature();
+            if (string.IsNullOrEmpty(clientRel.Events.OnDoubleClick))
+            {
+                clientRel.Events.OnDoubleClick = lookupEvent;
+            }
+            else
+            {
+                clientRel.Events.OnDoubleClick = string.Format("var grid=$('#{0}').data('kendoGrid'); {1}(grid);{2};"
+                                                                    , Model.GridID, clientRel.Events.OnDoubleClick, lookupEvent);
+            }
+            var vmType = Type.GetType(Model.ViewModel);
+
+        }
+        @Html.GridCr(Model.GridID, Model.GridInfo, vmType, clientRel)
+    </div>
+
+</div>
+

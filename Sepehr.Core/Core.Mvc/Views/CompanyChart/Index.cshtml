@@ -1,0 +1,101 @@
+﻿@model Core.Mvc.ViewModel.CompanyChartViewModel
+
+@{
+    ViewBag.Title = "ساختارسازمانی";
+    Layout = null;  
+}
+<script src="~/Areas/Core/Views/CompanyChart/Index.js"></script>
+
+
+
+<div id="treeViewCompany" style="margin: 10px;">
+    @{
+      
+        TreeViewEventBuilder treeEvent = new TreeViewEventBuilder();
+        treeEvent.Select = "onSelect";
+    }
+
+ 
+    @(Html.TreeViewBoxCr<CompanyChartViewModel>(CompanyChartViewModel.TreeInfo,"treeviewCompanyChart", treeEvent, false))
+</div>
+<div>
+    @(Html.Kendo().Grid<CompanyChartRoleViewModel>()
+                      .Events(e => e.DataBound("gor_onOADataBound"))
+                      .Events(e => e.SaveChanges("gor_AssignAccount_onSaveChanges"))
+                      .Name("gridCompanyChartRole")
+                      .HtmlAttributes(new { style = "display: none" })
+                      .AutoBind(false)
+                      .Columns(columns =>
+                                   {
+                                       columns.Bound(p => p.Name).Title("نقش").Width(130);
+                                       columns.Bound(p => p.UserId).Visible(false);
+                                       columns.Bound(p => p.UserName).Visible(false);
+                                       columns.Bound(p => p.Id).Visible(false);
+                                       columns.Template(@<text></text>)
+                                       //.ClientTemplate("<input type='checkbox' #= HasAccess ? checked='checked':'' # class='check_row' />")
+                                       .ClientTemplate("<input type='checkbox'  class='check_row' />")
+                                       .HeaderTemplate("<input type='checkbox' id='masterCheckBox' onclick='gor_checkAllInRoleCompanyAccount(this)'/>").Width(200);
+                                   })
+                              .Editable(ed => ed.Mode(GridEditMode.InCell))
+
+                              .ToolBar(tb => tb.Save().SaveText("ذخیره").CancelText("انصراف"))
+                                    .Pageable(p => p.Messages(s => s.First("اولین صفحه")))
+                                    .Pageable(p => p.Messages(s => s.Last("آخرین صفحه")))
+                                    .Pageable(p => p.Messages(s => s.ItemsPerPage("تعدارد رکورد هر صفحه")))
+                                    .Pageable(p => p.Messages(s => s.Next("صفحه بعد")))
+                                    .Pageable(p => p.Messages(s => s.Previous("صفحه قبل")))
+                                    .Pageable(p => p.Messages(s => s.Of("از")))
+                                    .Pageable(p => p.Messages(s => s.Page("صفحه")))
+                                    .Pageable(p => p.Messages(s => s.Refresh("به روزرسانی")))
+                                        .Pageable(p => p.Messages(m =>
+                                        {
+                                            // m.Display("{0} - {1} of {2} My customized items");
+                                            m.Empty("رکوردی یرای نمایش وجود ندارد");
+                                        }))
+
+
+
+                              .Selectable(selectable => selectable
+                                                            .Mode(GridSelectionMode.Single)
+                                                            .Type(GridSelectionType.Cell)).Navigatable()
+                                                            // .Scrollable(scrollable => scrollable.Virtual(true))
+
+                                                            .DataSource(dataSource => dataSource
+                                                            .Ajax()
+                                                            .Events(dse => dse.Sync("gor_syncComplete"))
+                                                            .Model(model =>
+                                                            {
+                                                                model.Id(r => r.Id);
+                                                                model.Field(p => p.Name).Editable(false);
+                                                            })
+                                                            .Batch(true)
+
+                                                            .PageSize(10)
+                                                            .Read(read => read.Action("GetRoles", "CompanyRole"))
+                                                                    .Update(up => up.Action("PostEntity", "CompanyRole"))
+                                                            .Events(events => events.RequestEnd("onRequestEndgridCompanyChartRole"))
+
+                              ))
+
+</div>
+
+
+<div id="modalWindow" style="text-align: center;">
+
+    <div style="display: block; height: 35px; text-align: center; line-height: 30px;">
+        <span>آیا از حذف اطمینان دارید؟</span>
+
+    </div>
+    <div style="display: block; text-align: center;">
+
+        <button id="btnCompanyChartYes" class="k-button">بله</button>
+        &nbsp;  &nbsp;  &nbsp;
+         <button id="btnCompanyChartNo" class="k-button">خیر</button>
+
+    </div>
+
+</div>
+
+
+<script src="~/Areas/Core/Views/CompanyChart/IndexBottom.js"></script>
+

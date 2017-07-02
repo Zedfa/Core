@@ -1,0 +1,38 @@
+﻿@model Core.Mvc.ViewModel.CompanyRoleViewModel
+@{
+    Layout = null;
+
+}
+@using (Html.BeginForm(new { id = "CompanyRoleform" }))
+{
+    <div class="k-rtl">
+
+        <div class="editor-label">
+            @Html.LabelCrFor(model => model.CompanyId)
+        </div>
+
+        @Html.Label("سازمان")
+
+        @(Html.LookUpCr<CompanyViewModel>("CompanyName", "انتخاب سازمان", CompanyViewModel.LookupInfo, "CompanyId", "CompanyName", "CompanyId"))
+        @Html.ValidationMessageFor(model => model.CompanyId)
+
+
+        <table>
+            <tr>
+                <td>
+                    @Html.Label("نقش")
+                </td>
+                <td id="roleSelectedPart">
+                    @(Html.LookUpCr<RoleViewModel>("RoleName", "انتخاب نقش", RoleViewModel.LookupInfo as GridInfo, "Id", "Name", "RoleId"))
+                    <br />
+                    @Html.ValidationMessageFor(model => model.RoleId)
+
+                </td>
+            </tr>
+
+        </table>
+
+
+
+    </div>
+}

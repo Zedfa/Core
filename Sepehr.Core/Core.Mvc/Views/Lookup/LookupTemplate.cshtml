@@ -1,0 +1,57 @@
+﻿@{
+    Layout = null;
+}
+<span>
+    <style>
+        span.k-widget.k-tooltip-validation {
+            position: fixed !important;
+            margin-top: -6px !important;
+            display: table-cell;
+            font-size: 13px;
+        }
+
+        input[ng-show] {
+            width: 82px;
+        }
+
+        input[type=number]::-webkit-inner-spin-button,
+        input[type=number]::-webkit-outer-spin-button {
+            -webkit-appearance: none;
+            margin: 0;
+        }
+
+        input[type=number] {
+            -moz-appearance: textfield;
+        }
+    </style>
+    <input type="number" ng-model="shortcutCode" ng-show="shortcutCodeName?true:false" ng-keypress="onShortcutCodekeypress(this, $event)" ng-blur="onShortcutCodeBlur(this)" class="k-textbox" />
+    <input type="text" ng-model="valueName" ng-hide="true" />
+    <input id="{{lookupId}}" kendo-masked-text-box ng-model="displayName" readonly validations="validators" />
+
+    <button kendo-button ng-click="openLookupWindow(this)">
+        ...
+    </button>
+    <div kendo-window="{{lookupId}}TemplateWindow"
+         k-width="winWidth"
+         k-height="winHeight"
+         k-title="{{title}}"
+         k-on-open="lkpOnWinOpen({args:this})"
+         k-on-close="lkpOnWinClose({args:this})"
+         k-modal="true"
+         k-resizable="false"
+         k-visible="false">
+        <div class="k-content" id="lkpGrid">
+            <grid-view grid-name="{{lookupId}}"
+                       view-model-type="{{viewModelName}}"
+                       @*dto-type="{{dtoType}}"*@
+                       on-double-click="dblClick(args)"
+                       is-lookup="true"
+                       wi-prop-name="{{lkpPropName}}"
+                       on-init="lclInit(args)"
+                       on-data-bound="lclDataBound(args)"
+                       scroll-position="{{scrollPosition}}">
+            </grid-view>
+
+        </div>
+    </div>
+</span>

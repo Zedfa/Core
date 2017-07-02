@@ -1,0 +1,118 @@
+﻿@using Core.Mvc.Infrastructure;
+
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" lang="fa" xml:lang="fa" />
+    <title>پنل مدیریتی سپهر سیستم</title>
+    <link rel="Shortcut Icon" href="~/Content/images/fav.png" />
+    <meta name="viewport" content="width=device-width" />
+       
+    @Styles.Render("~/Content/core/css/kendo")
+    @*@Styles.Render("~/areas/core/content/kendo")*@
+
+    @Styles.Render("~/bundles/core/jquery-ui/css")
+    @*@Styles.Render("~/areas/core/content/jquery-ui/css")*@
+
+    @Styles.Render("~/bundles/core/css")
+    @*@Styles.Render("~/bundles/core/bootstrap/bootstrapcss")*@
+    @Styles.Render("~/bundles/core/responsiveBoilerplate/fa")
+    @Scripts.Render("~/bundles/core/basicExtensions")
+    @Scripts.Render("~/bundles/core/jquery")
+    @Scripts.Render("~/bundles/core/angular")
+    @Scripts.Render("~/bundles/core/kendo")
+    @Scripts.Render("~/bundles/core/bootstrapjs")
+   
+</head>
+<body class="k-rtl" ng-app="coreApp" ng-controller="renderMenuController">
+    <header>
+        <div class="content-wrapper">
+        </div>
+    </header>
+
+    <div class="main-content">
+        <notification></notification>
+            <div class="main-content" id="topMainMenu">
+
+            @*@{
+                    int? userId = CustomMembershipProvider.GetUserIdCookie();
+                    bool isPassCodeValidate = CustomMembershipProvider.ValidatePassCode(CustomMembershipProvider.GetPassCodeCookie());
+                    if (isPassCodeValidate && userId.Value != null)
+                    {
+                        @Html.Partial("MainLayoutTemplates/TopMainMenu", new TopMenuViewModel());
+                    }
+                }*@
+
+        </div>
+
+        @RenderSection("featured", required: false)
+        <section class="content-wrapper clear-fix">
+            @RenderBody()
+            <div id="divMessage">
+                <input id="hdnError" type="hidden" class="@ViewBag.isRTL" value="@ViewBag.errorMsg" />
+
+            </div>
+        </section>
+        <section id="spinnerPart"></section>
+    </div>
+    <footer>
+        <div class="content-wrapper">
+            <div class="float-left">
+            </div>
+
+        </div>
+
+    </footer>
+
+
+    @Scripts.Render("~/areas/core/Scripts/tools/app/modulemanagement.js")
+
+    @Scripts.Render("~/bundles/core/customTypes")
+    @*@Scripts.Render("~/bundles/core/kendo.angular")*@
+    @Scripts.Render("~/bundles/core/tools")
+    @Scripts.Render("~/ExternalScriptBundle")
+    @*@Scripts.Render(String.Format("~/app/scripts/{0}Modules.js", Core.Cmn.ConfigHelper.GetConfigValue<string>("StartupProjectForWebClient").ToLower().Replace(".mvc", "")))*@
+
+    @Scripts.Render("~/bundles/core/app")
+
+    @Scripts.Render("~/bundles/core/startup")
+    @Scripts.Render("~/bundles/core/controllers")
+    @Scripts.Render("~/bundles/core/directives")
+    @Scripts.Render("~/bundles/core/services")
+
+
+
+    @Scripts.Render("~/bundles/core/datepicker/jquery")
+    @*<core-login ng-if="isAuthorize==false"></core-login>*@
+    <core-login ng-if="!isAuthorize"></core-login>
+
+    <script>
+        window.areaName = '@ViewContext.RouteData.DataTokens["area"].ToString()';
+    </script>
+    @*@{
+            int? userId = CustomMembershipProvider.GetUserIdCookie();
+            bool isPassCodeValidate = CustomMembershipProvider.ValidatePassCode(CustomMembershipProvider.GetPassCodeCookie());
+            if (!isPassCodeValidate && userId == null && !Core.Service.ServiceBase.appBase.OnlineUsers.Exists(user => user.UserName.ToLower().Trim() == User.Identity.Name.ToLower().Trim()))
+            {
+
+                <script >
+                    $(document).ready(showLoginWindow());
+                </script>
+
+            }
+            else
+            {
+                <script>
+                    $(document).ready(function () { $("#topMainMenu").css("visibility", "visible"); });
+                </script>
+            }
+        }*@
+
+    @Scripts.Render("~/bundles/core/app/controllers")
+    @Scripts.Render("~/bundles/core/app/services")
+    @Scripts.Render("~/bundles/core/app/directives")
+
+
+</body>
+
+</html>

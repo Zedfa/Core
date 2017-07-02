@@ -1,0 +1,87 @@
+﻿
+@{
+    ViewBag.Title = "Index";
+    Layout = null;
+}
+
+<style>
+    div#logGrid {
+        width: 800px;
+    }
+</style>
+
+<script>
+    
+    var selectedLogId;
+    function onLogChange(e) {
+        
+        var grid = e.sender;
+        var currentSelection = grid.select();
+        colIndex = currentSelection.index();
+        var currentRow = currentSelection.closest("tr");
+        var dataItem = grid.dataItem(currentRow);
+        if (colIndex == -1)
+            return;
+        if (selectedLogId == dataItem.Id)
+            return;
+        else {
+            selectedLogId = dataItem.Id;
+            $("#exceptionLogDTOTree").data("kendoTreeView").dataSource.filter({ field: "ID", operator: "eq", value: selectedLogId });
+            
+        }
+
+
+
+    }
+
+function onExceptionLogChange(e) {
+   
+}
+function onGridNodeSelection(e) {
+   
+}
+
+function onGridNodeCollapse(e) {
+   
+    var dataUID = e.node.getAttribute("data-uid");
+    var tree = e.sender;
+    var currentSelection = tree.select();
+    var colIndex = currentSelection.index();
+    var currentRow = currentSelection.closest("tr");
+    var dataItem = tree.dataItem(e.node);
+
+    var selectedExceptionLogId = dataItem.ID;
+    tree.dataSource.transport.options.read.url = function (data) {
+       
+        return "api/Core/ExceptionDetailLogApi/GetSubtreeOfCurrentNode" + "?ParentId=" + dataUID;
+    };
+    $("#exceptionLogDTOTree").data("kendoTreeView").dataSource.filter({ field: "ParentId", operator: "eq", value: selectedExceptionLogId });
+
+}
+
+
+
+</script>
+
+<div class="k-rtl">
+
+    @{
+        var clientRel = new Core.Mvc.Helpers.CoreKendoGrid.ClientDependentFeature();
+            clientRel.Events.OnChange = "onLogChange";
+            clientRel.CssStyles.Add("font-size", "9pt;");
+    }
+
+    @(Html.GridCr<EventLogViewModel>("logGrid", EventLogViewModel.ViewInfo, clientRel , "1100"))
+
+</div>
+
+
+<div class="k-rtl">
+    @{
+        TreeViewEventBuilder treeEvent = new TreeViewEventBuilder();
+        treeEvent.Select = "onGridNodeSelection";
+    }
+
+
+   @(Html.TreeViewBoxCr<ExceptionLogViewModel>(ExceptionLogViewModel.TreeInfo , "exceptionLogDTOTree", treeEvent, false))
+</div>

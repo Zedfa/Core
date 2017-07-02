@@ -1,0 +1,69 @@
+﻿@model Core.Mvc.ViewModel.CompanyViewElementViewModel
+
+
+
+@{
+    ViewBag.Title = "دسترسی منوهای سازمان";
+    Layout = null;
+}
+
+<div ng-if="true">
+    <script src="~/Areas/Core/Views/CompanyViewElement/Index.js"></script>
+   
+    <section class="gozaresh-contain accounting-container">
+
+        <div class="row gozaresh">
+            <div class="col-lg-1 col-md-1 col-sm-2 col-xs-3 pull-right">
+                @Html.Label("سازمان")
+            </div>
+            <div class="col-lg-5 col-md-5 col-sm-8 col-xs-8 pull-right">
+
+
+                @(Html.LookUpCr<CompanyViewModel>("SelectedCompanyNameViewElement", "انتخاب سازمان", CompanyViewModel.LookupInfo as GridInfo, "CompanyId", "CompanyName", "SelectedCompanyIdViewElement"))
+                @Html.ValidationMessageFor(model => model.SelectedCompanyNameViewElement)
+
+            </div>
+        </div>
+
+        <div id="treeCompanyviewElement" style="margin: 10px;max-height:300px;overflow-y:auto">
+
+            @(Html.Kendo().TreeView()
+          .Name("treeCompanyviewElement")
+
+          .Checkboxes(chkbxs =>
+          {
+
+              chkbxs.CheckChildren(true);
+          })
+
+        .AutoBind(false)
+        .HtmlAttributes(new { style = "display: none" })
+        .DataTextField("Title")
+        .DataSource(dataSource => dataSource
+        .Read(read => read.Action("Read", "CompanyViewElement")
+        .Type(HttpVerbs.Post)
+        .Data("addDatatreeCompanyviewElement"))))
+
+        </div>
+
+
+        <div class="row gozaresh submit company">
+            <label class="col-lg-1 col-md-1 col-sm-2 col-xs-3 pull-right"><span class="sr-only">ثبت</span></label>
+            <span class="editor-field col-lg-5 col-md-5 col-sm-8 col-xs-8 pull-right">
+                @Html.SubmitCr("SaveCompanyViewElement", "ثبت", uniqueNameElement: "Core/CompanyViewElement/PostEntity#Core/CompanyViewElement/PostEntity", isConfirmButton: true)
+                @Html.HiddenFor(a => a.SelectedCompanyIdViewElement)
+            </span>
+
+        </div>
+
+    </section>
+
+    
+
+
+</div>
+
+
+
+
+

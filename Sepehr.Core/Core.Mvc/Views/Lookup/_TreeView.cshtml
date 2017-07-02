@@ -1,0 +1,11 @@
+﻿
+@model Core.Mvc.Helpers.Lookup.Tree
+
+<div id="@(string.Format("lkp_{0}_Div", Model.LookupName))" style="overflow:auto;height:90%;" >
+
+    <div>
+        @Html.TreeViewCr(Model.TreeInfo, Model.TreeID, Model.UseMultiSelect)
+    </div>
+
+
+</div>

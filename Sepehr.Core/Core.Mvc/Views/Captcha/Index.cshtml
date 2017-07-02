@@ -1,0 +1,22 @@
+﻿
+<div style="margin: 15px;">
+    <div>
+        <div>عبارت زیر را وارد نمایید</div>
+        <input class="k-textbox" data-val="true" data-val-required="کد امنیتی را وارد کنید" id="CaptchaCode" name="CaptchaCode" type="text" ng-model="captchaCode">
+        <span>
+            <div>
+                <div style="float:right;">
+                    <span id="captchaContainer">
+                        <img ng-src="{{captchaUrl}}" id="captchaImag" alt="کد امنیتی" ng-hide="imgCaptchaLoading" /></span>
+                    <img src="Areas/Core/Content/images/captcha-loading.gif" ng-show="imgCaptchaLoading" alt="در حال بارگذاری" />
+                    <input id="hdnCaptchaGuid" name="hdnCaptchaGuid" type="hidden" value="@Guid.NewGuid().ToString("N")"/>
+                </div>
+                <div style="float: left;margin: 7px 0 7px 25px;">
+                    <a class="k-button">
+                        <span id="btnCaptchaRefresh" class="k-icon k-i-refresh" ng-click="loadCaptcha()"></span>
+                    </a>
+                </div>
+            </div>
+        </span>
+    </div>
+</div>

@@ -1,0 +1,99 @@
+﻿@model Core.Mvc.ViewModel.CompanyViewModel
+
+<script type="text/kendo-template" id="message">
+    <div class="k-widget k-tooltip k-tooltip-validation k-invalid-msg field-validation-error" style="margin: 0.5em; display: block; " data-for="#=field#" data-valmsg-for="#=field#" id="#=field#_validationMessage">
+        <span class="k-icon k-warning"> </span>کد ملی معتبر را وارد نمائید<div class="k-callout k-callout-n"></div>
+    </div>
+</script>
+@using (Html.BeginForm(new { id = "Companyform" }))
+{
+    <div class="k-rtl">
+
+        <div class="editor-label">
+            @Html.LabelFor(model => model.CompanyName)
+        </div>
+        <div class="editor-field">
+            @Html.TextBoxCrFor(model => model.CompanyName)
+            <br />
+            @Html.ValidationMessageFor(model => model.CompanyName)
+        </div>
+
+        <div class="editor-label">
+            @Html.LabelFor(model => model.CompanyTitle)
+        </div>
+        <div class="editor-field">
+            @Html.TextBoxCrFor(model => model.CompanyTitle)
+            <br />
+            @Html.ValidationMessageFor(model => model.CompanyTitle)
+        </div>
+
+        <div class="editor-label">
+            @Html.LabelFor(model => model.CompanyPhone)
+        </div>
+        <div class="editor-field">
+            @Html.TextBoxCrFor(model => model.CompanyPhone)
+            <br />
+            @Html.ValidationMessageFor(model => model.CompanyPhone)
+        </div>
+
+        <div class="editor-label">
+            @Html.LabelFor(model => model.CompanyCode)
+        </div>
+        <div class="editor-field">
+            @Html.TextBoxCrFor(model => model.CompanyCode)
+            <br />
+            @Html.ValidationMessageFor(model => model.CompanyCode)
+        </div>
+
+
+        <div class="editor-label">
+            @Html.LabelFor(model => model.CompanyFamily)
+        </div>
+        <div class="editor-field">
+            @Html.TextBoxCrFor(model => model.CompanyFamily)
+            <br />
+            @Html.ValidationMessageFor(model => model.CompanyFamily)
+        </div>
+
+        <div class="editor-label">
+            @Html.LabelFor(model => model.CompanyFatherName)
+        </div>
+        <div class="editor-field">
+            @Html.TextBoxCrFor(model => model.CompanyFatherName)
+            <br />
+            @Html.ValidationMessageFor(model => model.CompanyFatherName)
+        </div>
+
+
+        <div class="editor-label">
+            @Html.LabelFor(model => model.CompanyNationalCode)
+        </div>
+        <div class="editor-field" id="divCompanyNationalCode">
+            @Html.TextBoxCrFor(model => model.CompanyNationalCode)
+            <br />
+            @Html.ValidationMessageFor(model => model.CompanyNationalCode)
+        </div>
+        @Html.HiddenFor(m => m.CompanyIsValidNationalCode)
+
+        <div class="editor-label">
+            @Html.LabelFor(a => a.CompanyActive)
+        </div>
+        <div class="editor-field">
+            @Html.CheckBoxCrFor(model => model.CompanyActive)
+        </div>
+        <div class="editor-label">
+            @Html.LabelFor(model => model.CompanyAddress)
+        </div>
+        <div class="editor-field">
+            @Html.TextAreaCrFor(model => model.CompanyAddress)
+            <br />
+            @Html.ValidationMessageFor(model => model.CompanyAddress)
+        </div>
+
+
+
+    </div>
+    <script src="~/Areas/Core/Views/Shared/EditorTemplates/CompanyViewModelTemplate.js"></script>
+
+}
+
