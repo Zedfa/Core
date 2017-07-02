@@ -7,7 +7,7 @@
     <title>پنل مدیریتی سپهر سیستم</title>
     <link rel="Shortcut Icon" href="~/Content/images/fav.png" />
     <meta name="viewport" content="width=device-width" />
-       
+
     @Styles.Render("~/Content/core/css/kendo")
     @*@Styles.Render("~/areas/core/content/kendo")*@
 
@@ -22,7 +22,7 @@
     @Scripts.Render("~/bundles/core/angular")
     @Scripts.Render("~/bundles/core/kendo")
     @Scripts.Render("~/bundles/core/bootstrapjs")
-   
+
 </head>
 <body class="k-rtl" ng-app="coreApp" ng-controller="renderMenuController">
     <header>
@@ -32,7 +32,7 @@
 
     <div class="main-content">
         <notification></notification>
-            <div class="main-content" id="topMainMenu">
+        <div class="main-content" id="topMainMenu">
 
             @*@{
                     int? userId = CustomMembershipProvider.GetUserIdCookie();
@@ -83,8 +83,7 @@
 
 
     @Scripts.Render("~/bundles/core/datepicker/jquery")
-    @*<core-login ng-if="isAuthorize==false"></core-login>*@
-    <core-login ng-if="!isAuthorize"></core-login>
+    <core-login ng-show="isAuthorizeValue.isAuthorize==false"></core-login>
 
     <script>
         window.areaName = '@ViewContext.RouteData.DataTokens["area"].ToString()';

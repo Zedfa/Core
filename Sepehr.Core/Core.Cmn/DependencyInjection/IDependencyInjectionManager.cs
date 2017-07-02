@@ -9,8 +9,7 @@ using System.Web.Http;
 namespace Core.Cmn.DependencyInjection
 {
     public interface IDependencyInjectionManager
-    {
-        void RegisterType(Type InterfaceType, Type InjectableType);
+    {         
         object GetDependencyResolverForMvc();
         object GetDependencyResolverForWebApi();
         T Resolve<T>();

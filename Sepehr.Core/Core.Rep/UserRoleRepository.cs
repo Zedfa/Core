@@ -3,6 +3,7 @@ using Core.Entity;
 using Core.Rep.DTO.UserRoleDTO;
 using Core.Cmn;
 using Core.Cmn.Extensions;
+using Core.Cmn.Attributes;
 
 namespace Core.Rep
 {
@@ -20,21 +21,27 @@ namespace Core.Rep
             _dc = dbContext;
         }
 
+        public UserRoleRepository(IDbContextBase dc)
+            : base(dc)
+        {
+            _dc = dc;
+        }
         public override IQueryable<UserRole> All(bool canUseCacheIfPossible = true)
         {
-            return _dc.Set<UserRole>().AsNoTracking().Include("Role").Include("User");
+            return Cache<UserRole>(AllUserRoleCache, canUseCacheIfPossible);
         }
 
-        public IQueryable<UserRole> GetRoles(int userId)
+        [Cacheable(EnableUseCacheServer = true, ExpireCacheSecondTime = 60)]
+        public static IQueryable<UserRole> AllUserRoleCache(IQueryable<UserRole> query)
         {
-            return Filter(a => a.UserId == userId);
-            // var userRoles = _dbContextBase.Set<UserRole>();
-            // var findedUser = users.Include("Roles").Single(u => u.Id == userId);
-            // Comment For Change Many To Many Struture
-            //return findedUser.Roles.ToList();
-            // return new List<Role>();
-
+            return query.AsNoTracking().Include(userRole => userRole.Role).Include(userRole => userRole.User);
         }
+
+        public IQueryable<UserRole> GetRolesByUserId(int userId)
+        {
+            return All().Where(userRole => userRole.UserId == userId);
+        }
+
         public IQueryable<UserRoleDTO> GetAllUserRolesDto()
         {
             return All().Select(userRole => new UserRoleDTO

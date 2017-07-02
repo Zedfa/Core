@@ -1,19 +1,21 @@
+using Core.Service;
 using System;
 using System.Web.Security;
+using Core.Rep.DTO;
 
 namespace Core.Mvc.Infrastructure
 {
-    
+
     public class AccountMembership : IMembership
     {
         private readonly MembershipProvider _provider;
 
-        public AccountMembership(MembershipProvider provider)
+
+        public AccountMembership()
         {
-           _provider = provider ?? Membership.Provider;
+            _provider = Membership.Provider;
         }
 
-        
         public int MinPasswordLength
         {
             get
@@ -22,13 +24,13 @@ namespace Core.Mvc.Infrastructure
             }
         }
 
-      
+
+
         public bool ValidateUser(string userName, string password)
         {
             return _provider.ValidateUser(userName, password);
-        }
 
-       
+        }
         public MembershipCreateStatus CreateUser(string userName, string password, string email)
         {
             MembershipCreateStatus status;
@@ -36,22 +38,25 @@ namespace Core.Mvc.Infrastructure
             return status;
         }
 
-        
+
         public bool ChangePassword(string userName, string oldPassword, string newPassword)
         {
-         try
-            {
-                MembershipUser currentUser = _provider.GetUser(userName, true /* userIsOnline */);
-                return currentUser.ChangePassword(oldPassword, newPassword);
-            }
-            catch (ArgumentException)
-            {
-                return false;
-            }
-            catch (MembershipPasswordException)
-            {
-                return false;
-            }
+            throw new NotImplementedException();
+            //try
+            //{
+            //    MembershipUser currentUser = _provider.GetUser(userName, true /* userIsOnline */);
+            //    return currentUser.ChangePassword(oldPassword, newPassword);
+            //}
+            //catch (ArgumentException)
+            //{
+            //    return false;
+            //}
+            //catch (MembershipPasswordException)
+            //{
+            //    return false;
+            //}
         }
+
+
     }
 }

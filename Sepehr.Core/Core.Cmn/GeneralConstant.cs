@@ -10,6 +10,8 @@
         public const string CompanyApp = "CompanyApp";
         public const string Yes = "بله";
         public const string No = "خیر";
-
+        public const string TraceConfig = "TraceConfig";
+        public const string PayLoadKey = "TraceKey";
+        public const string SepehrSystemsDC = "sepehrsystems.com";
     }
 }

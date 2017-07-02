@@ -27,10 +27,10 @@ namespace Core.Service
             return (_repositoryBase as UserRoleRepository).GetAllUserRolesDto();
         }
 
-        public IQueryable<UserRole> GetRoles(int userId)
+        public IQueryable<UserRole> GetRolesByUserId(int userId)
         {
 
-            return _userRoleRepository.GetRoles(userId);
+            return _userRoleRepository.GetRolesByUserId(userId);
         }
 
 

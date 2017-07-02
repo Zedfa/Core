@@ -72,7 +72,7 @@ namespace Core.Mvc.ViewModel
 
 
         //[DataMember]
-        // private int _roleIdInCompanyRole;
+       // private int _roleIdInCompanyRole;
 
         [DataMember]
         public int RoleIdInCompanyRole
@@ -102,7 +102,7 @@ namespace Core.Mvc.ViewModel
             }
         }
 
-        // private static GridInfo _viewInfo;
+       // private static GridInfo _viewInfo;
         public static GridInfo ViewInfo
         {
             get
@@ -111,14 +111,7 @@ namespace Core.Mvc.ViewModel
                 if (_companyListviewInfo == null)
                 {
                     var dsConfig = new DataSourceInfo();
-                    //dsConfig.CrudCr.Read.Url = "api/Core/CompanyRoleApi";
-
-                    dsConfig.CrudCr.Read.Url = "api/CompanyRoleApi/GetEntities";
-                    dsConfig.CrudCr.Insert.Url = "api/CompanyRoleApi/PostEntity";
-                    dsConfig.CrudCr.Update.Url = "api/CompanyRoleApi/PutEntity";
-                    dsConfig.CrudCr.Remove.Url = "api/CompanyRoleApi/DeleteEntity";
-
-
+                    dsConfig.CrudCr.Read.Url = "api/Core/CompanyRoleApi";
                     dsConfig.ModelCr.ModelIdName = "CompanyId";
                     var fConfig = new Features();
                     fConfig.EditableConfig.CustomConfig.Template.Url = "~/Areas/Core/Views/Shared/EditorTemplates/CompanyRoleViewModelTemplate.cshtml";
@@ -132,23 +125,23 @@ namespace Core.Mvc.ViewModel
                             new Column {Title = "شناسه نقش شرکتی" , Field = "RoleId" , Encoded = true , Visible = false , Hidden = true},
                             new Column {Title = "OldRoleId" , Field = "OldRoleId" , Encoded = true , Visible = false , Hidden = true},
                             new Column {Title = "OldCompanyId" , Field = "OldCompanyId" , Encoded = true , Visible = false , Hidden = true}
-
-
+                  
+                        
                         };
                     _companyListviewInfo = new GridInfo(fConfig.CRUDOperation)
-                    {
-                        DataSource = dsConfig,
-                        Features = fConfig,
-                        ColumnsInfo = colsInfo
+                        {
+                            DataSource = dsConfig,
+                            Features = fConfig,
+                            ColumnsInfo = colsInfo
 
-                    };
+                        };
                 }
                 return _companyListviewInfo;
             }
 
 
         }
-        // private static GridInfo _viewInfoComapanyRole;
+       // private static GridInfo _viewInfoComapanyRole;
 
         //public static GridInfo ViewInfoComapanyRole
         //{
@@ -191,12 +184,7 @@ namespace Core.Mvc.ViewModel
                 if (_companyListviewInfo == null)
                 {
                     var dsConfig = new DataSourceInfo();
-
-                    dsConfig.CrudCr.Read.Url = "api/CompanyApi/GetEntities";
-                    dsConfig.CrudCr.Insert.Url = "api/CompanyApi/PostEntity";
-                    dsConfig.CrudCr.Update.Url = "api/CompanyApi/PutEntity";
-                    dsConfig.CrudCr.Remove.Url = "api/CompanyApi/DeleteEntity";
-
+                    dsConfig.CrudCr.Read.Url = "api/Core/CompanyApi";
                     dsConfig.ModelCr.ModelIdName = "CompanyId";
                     var fConfig = new Features();
                     fConfig.EditableConfig.CustomConfig.Template.Url = "~/Areas/Core/Views/Shared/EditorTemplates/CompanyViewModelTemplate.cshtml";
@@ -211,12 +199,12 @@ namespace Core.Mvc.ViewModel
                     new Column{Title="تلفن" , Field="CompanyPhone" ,Encoded=true ,Visible=true},
                     new Column{Title="آدرس" , Field="CompanyAddress" ,Encoded=true ,Visible=true},
                     new Column{Title="کد" , Field="Code" ,Encoded=true ,Visible=true},
-
+                    
                     new Column{Title="نام خانوادگی" , Field="CompanyFamily" ,Encoded=true ,Visible=true},
                     new Column{Title="نام پدر" , Field="CompanyFatherName" ,Encoded=true ,Visible=true},
-
+                   
                     new Column{Title="کد ملی" , Field="CompanyNationalCode" ,Encoded=true ,Visible=true},
-
+                
                     };
                     _companyListviewInfo = new GridInfo(fConfig.CRUDOperation)
                     {

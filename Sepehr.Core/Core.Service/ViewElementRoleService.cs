@@ -17,6 +17,8 @@ namespace Core.Service
 
         //[Dependency]
         private IUserService UserService { get; set; }
+        private IUserRoleService UserRoleService { get; set; }
+
 
 
         //[Dependency]
@@ -25,15 +27,22 @@ namespace Core.Service
         // private ViewElementRoleRepository _viewElementRepository;
         //private IViewElementService _viewElementService { get; set; }
 
-        public ViewElementRoleService(IDbContextBase dbContextBase, IUserLog userLog, IUserService userService, ICompanyChartRoleService companyChartRoleService)//,IViewElementService viewElementService)
+        public ViewElementRoleService(IDbContextBase dbContextBase, IUserRoleService userRoleService, IUserLog userLog, IUserService userService, ICompanyChartRoleService companyChartRoleService)//,IViewElementService viewElementService)
             : base(dbContextBase, userLog)
         {
 
             _userLog = userLog;
             _repositoryBase = new ViewElementRoleRepository(ContextBase, userLog);
             UserService = userService;
+            UserRoleService = userRoleService;
             CompanyChartRoleService = companyChartRoleService;
             //_viewElementService = viewElementService;
+        }
+
+        public ViewElementRoleService(IDbContextBase dbContextBase)
+            : base(dbContextBase)
+        {
+
         }
         public List<int> GetViewElementsIdByRoleId(int? roleId)
         {
@@ -77,10 +86,16 @@ namespace Core.Service
 
         //    }
         //}
+        public IList<ViewElementInfo> GetViewElementGrantedToUserByUserId(int userId)
+        {
+            return Cache(GetViewElementGrantedToUserCache, userId);
+
+        }
+
 
         public void SetViewElementGrantedToUser(UserProfile userProf)
         {
-            var viewElementGrantedToUser = GetViewElementGrantedToUser(userProf.Id);
+            var viewElementGrantedToUser = GetViewElementGrantedToUserByUserId(userProf.Id);
             UserViewElement currentUser = null;
             if (!AppBase.ViewElementsGrantedToUser.TryGetValue(userProf.Id, out currentUser))
             {
@@ -92,53 +107,38 @@ namespace Core.Service
             }
         }
 
-
-        public IList<ViewElementInfo> GetViewElementGrantedToUser(int userId)
+        [Cacheable(ExpireCacheSecondTime = 60)]
+        public static IList<ViewElementInfo> GetViewElementGrantedToUserCache(int userId)
         {
+            var viewElementRoleService = ServiceBase.DependencyInjectionFactory.CreateInjectionInstance<IViewElementRoleService>();
+            return viewElementRoleService.GetUserViewElements(userId);
+        }
 
-            var grntedVElements = new List<ViewElement>();
-            var _allGrantedViewElementToUserList = new List<ViewElementInfo>();
-            var roleList = new List<Role>();
-            var roles = UserService.FindUserRoles(userId);
-            var user = UserService.Find(userId);
-            if (roles.Any())
-                roleList = roles.ToList(); //نقش های کاربر
-            else
+        public IList<ViewElementInfo> GetUserViewElements(int userId)
+        {
+            var grantedViewElements = new List<ViewElement>();
+            var allGrantedViewElementsToUser = new List<ViewElementInfo>();
+            var userRoles = UserRoleService.GetRolesByUserId(userId);
+
+            foreach (var role in userRoles)
             {
-                int companyId = (int)(user.CompanyChartId != null ? user.CompanyChartId : null);
+                var viewElementsByRole =
+                    (_repositoryBase as ViewElementRoleRepository)
+                    .Filter(viewElementRole => viewElementRole.RoleId == role.RoleID)
+                    .ToList();
 
-
-                var userPosition = CompanyChartRoleService.Filter(a => a.CompanyChartId == companyId).Select(a => a.Role).ToList();
-
-                if (userPosition != null)
-                    roleList = userPosition;
-
-            }
-
-
-
-            foreach (var role in roleList)
-            {
-
-
-                var viewElements = (_repositoryBase as ViewElementRoleRepository).Filter(a => a.RoleId == role.ID).ToList();
-
-                foreach (var viewElement in viewElements)
+                foreach (var viewElement in viewElementsByRole)
                 {
-                    if (!grntedVElements.Any(a => a.Id == viewElement.ViewElementId))// if (!_allGrantedViewElementToUserList.Any(a => a.Contains( viewElement.UniqueName)))/
+                    if (!grantedViewElements.Any(a => a.Id == viewElement.ViewElementId))
                     {
-                        //if ((!viewElement.ViewElement.InVisible))
-                        //{
-                            grntedVElements.Add(viewElement.ViewElement);
-                            _allGrantedViewElementToUserList.Add(
-                                new ViewElementInfo
-                                {
-                                    ConceptualName = viewElement.ViewElement.UniqueName.Split('#')[0],
-                                    Url = viewElement.ViewElement.UniqueName.Split('#')[1],
-                                    ElementType = (ElementType)viewElement.ViewElement.ElementType
-                                });
-                        //}
-
+                        grantedViewElements.Add(viewElement.ViewElement);
+                        allGrantedViewElementsToUser.Add(
+                            new ViewElementInfo
+                            {
+                                ConceptualName = viewElement.ViewElement.UniqueName.Split('#')[0],
+                                Url = viewElement.ViewElement.UniqueName.Split('#')[1],
+                                ElementType = (ElementType)viewElement.ViewElement.ElementType
+                            });
                     }
 
                     var rv = GetChildrenEelements(viewElement.ViewElement);
@@ -146,11 +146,10 @@ namespace Core.Service
 
                     foreach (var resultElement in rv.ToList())
                     {
-                        if (!grntedVElements.Any(a => a.Id == resultElement.Id))
-                        // if (!_allGrantedViewElementToUserList.Any(a => a.Contains( viewElement.UniqueName)))
+                        if (!grantedViewElements.Any(a => a.Id == resultElement.Id))
                         {
-                            grntedVElements.Add(resultElement);
-                            _allGrantedViewElementToUserList.Add(
+                            grantedViewElements.Add(resultElement);
+                            allGrantedViewElementsToUser.Add(
                                 new ViewElementInfo
                                 {
                                     ConceptualName = resultElement.UniqueName.Split('#')[0],
@@ -161,9 +160,8 @@ namespace Core.Service
                     }
                 }
             }
-            return _allGrantedViewElementToUserList;
 
-
+            return allGrantedViewElementsToUser;
         }
 
         private static List<ViewElement> GetParentElements(Entity.ViewElement viewElement)

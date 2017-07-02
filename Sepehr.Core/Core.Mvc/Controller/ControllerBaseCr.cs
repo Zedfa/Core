@@ -30,18 +30,18 @@ namespace Core.Mvc.Controller
 
 
             ExceptionInfo excepInfo = new ExceptionInfo(filterContext.Exception, false);
-            
+
             if (!this.HttpContext.User.Identity.Name.ToLower().Equals("admin"))
             {
                 var constantService = AppBase.DependencyInjectionManager.Resolve<Service.IConstantService>();
                 var applicationFaildMsg = string.Empty;
                 constantService.TryGetValue<string>("ApplicationFaild", out applicationFaildMsg);
 
-                excepInfo.Message= applicationFaildMsg/*Core.Resources.ExceptionMessage.ApplicationFaild*/;
+                excepInfo.Message = applicationFaildMsg/*Core.Resources.ExceptionMessage.ApplicationFaild*/;
                 excepInfo.Details = "";
-                excepInfo. IsRTL = true;
+                excepInfo.IsRTL = true;
             }
-            
+
             filterContext.Result = SetException(excepInfo);
             filterContext.ExceptionHandled = true;
 
@@ -59,11 +59,11 @@ namespace Core.Mvc.Controller
         {
 
             this.HttpContext.Response.Clear();
-            
+
             this.HttpContext.Response.StatusCode = 500;
 
             this.HttpContext.Response.TrySkipIisCustomErrors = true;
-            
+
             return new JsonResult
             {
                 Data = new { Message = exception.Message, Details = exception.Details, IsRTL = exception.IsRTL }
@@ -128,18 +128,21 @@ namespace Core.Mvc.Controller
             string culture = requestContext.HttpContext.Request.Url.AbsolutePath.Split('/')[1];
             if (culture == "en")
             {
+                System.Threading.Thread.CurrentThread.CurrentCulture = CultureInfo.CreateSpecificCulture("en-US");
                 return System.Threading.Thread.CurrentThread.CurrentUICulture = CultureInfo.CreateSpecificCulture("en-US");
             }
             else if (culture == "ar")
             {
+                System.Threading.Thread.CurrentThread.CurrentCulture = CultureInfo.CreateSpecificCulture("ar-SA");
                 return System.Threading.Thread.CurrentThread.CurrentUICulture = CultureInfo.CreateSpecificCulture("ar-SA");
             }
             else
             {
+                System.Threading.Thread.CurrentThread.CurrentCulture = CultureInfo.CreateSpecificCulture("fa-IR");
                 return System.Threading.Thread.CurrentThread.CurrentUICulture = CultureInfo.CreateSpecificCulture("fa-IR");
             }
         }
-        
+
         protected override void Initialize(System.Web.Routing.RequestContext requestContext)
         {
             SetCurrentCulture(requestContext);
@@ -149,7 +152,7 @@ namespace Core.Mvc.Controller
         //{
         //   // if (filterContext.RouteData.DataTokens["area"].Equals(CoreAreaRegistration.))
         //    object areaName = string.Empty;
-            
+
         //    if (filterContext.RouteData.DataTokens.TryGetValue("area",out areaName) &&
         //        areaName.Equals("Core") && (filterContext.Result is ViewResult || filterContext.Result is PartialViewResult))
         //    {
@@ -172,7 +175,7 @@ namespace Core.Mvc.Controller
 
         private string GenerateViewPath(RouteData routeData, string viewName)
         {
-            
+
             var controllerName = routeData.GetRequiredString("controller");
             var actionName = routeData.GetRequiredString("action");
             //if (viewName.Equals("Index"))
@@ -183,7 +186,7 @@ namespace Core.Mvc.Controller
             //{
             //    viewName = viewName.Replace("~/", "~/Areas/Core/");
             //}
-            if(controllerName.ToLower().Equals("partialviews")&& actionName.ToLower().Equals("index"))
+            if (controllerName.ToLower().Equals("partialviews") && actionName.ToLower().Equals("index"))
             {
                 return viewName;
             }
@@ -198,9 +201,10 @@ namespace Core.Mvc.Controller
                 {
                     viewName = string.Format("~/Areas/Core/{0}/{1}", controllerName, actionName);
                 }
-                else {
+                else
+                {
                     viewName = string.Format("~/Areas/Core/{0}/{1}", controllerName, viewName);
-                
+
                 }
 
             }
@@ -223,7 +227,7 @@ namespace Core.Mvc.Controller
                     var view = filterContext.Result as ViewResult;
                     view.ViewName = GenerateViewPath(filterContext.RouteData, view.ViewName);
                     filterContext.Result = view;
-                   // view.ExecuteResult(this.ControllerContext);
+                    // view.ExecuteResult(this.ControllerContext);
                 }
 
                 else if (filterContext.Result is PartialViewResult)
@@ -235,9 +239,9 @@ namespace Core.Mvc.Controller
 
                 }
             }
-            
+
             //base.OnResultExecuted(filterContext);
         }
-        
+
     }
 }

@@ -17,6 +17,10 @@ using Core.Cmn.Attributes;
 using Core.Ef.Extensions;
 using System.Linq.Dynamic;
 using System.Globalization;
+using System.Data.Entity.Core.Objects;
+using System.Data.Entity.Infrastructure;
+using System.Data.Entity;
+using EntityFramework.MappingAPI.Extensions;
 
 namespace Core.Rep
 {//, IDTOQueryableBuilder<TObject>
@@ -180,15 +184,9 @@ namespace Core.Rep
             {
                 if (string.IsNullOrEmpty(_keyName))
                 {
-                    //ObjectContext objectContext = ((IObjectContextAdapter)ContextBase).ObjectContext;
-                    //var set = objectContext.CreateObjectSet<TObject>();
-                    //_keyName = set.EntitySet.ElementType
-                    //            .KeyMembers
-                    //             .Select(k => k.Name).FirstOrDefault();
-                    _keyName = ContextBase.GetKeyColumnName<TObject>();
-
-
-
+                    ObjectContext objectContext = ((IObjectContextAdapter)ContextBase).ObjectContext;
+                    var set = objectContext.CreateObjectSet<TObject>();
+                    _keyName = (ContextBase as DbContext).Db(typeof(TObject)).Pks.Select(x => x.ColumnName).First();
                 }
                 return _keyName;
             }

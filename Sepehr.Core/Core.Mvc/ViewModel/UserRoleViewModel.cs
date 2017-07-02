@@ -26,29 +26,29 @@ namespace Core.Mvc.ViewModel
 
         }
 
-        [DataMember]
+         [DataMember]
         public string Id
         {
             get
             {
                 return UserId.ToString() + RoleId.ToString();
-            }
-
+            } 
+            
         }
 
 
 
         [DataMember(IsRequired = true)]
-        [Required(ErrorMessage = "نقش را وارد کنید")]
-        [Display(Name = "نقش")]
+         [Required(ErrorMessage = "نقش را وارد کنید")]
+         [Display(Name = "نقش")]
         public int RoleId
         {
-
+           
             get { return Model.RoleID; }
             set { Model.RoleID = value; }
         }
 
-
+       
         [DataMember]
         public int UserId
         {
@@ -58,7 +58,7 @@ namespace Core.Mvc.ViewModel
 
         [DataMember]
         public string UserName { get; set; }
-
+       
         [DataMember]
         private string _roleName;
         [DataMember]
@@ -85,7 +85,7 @@ namespace Core.Mvc.ViewModel
             get; set;
         }
 
-
+       
 
         private static GridInfo _viewInfo;
 
@@ -96,13 +96,7 @@ namespace Core.Mvc.ViewModel
                 if (_viewInfo == null)
                 {
                     var dsConfig = new DataSourceInfo();
-                    //dsConfig.CrudCr.Read.Url = "api/Core/UserRoleApi";
-
-                    dsConfig.CrudCr.Read.Url = "api/UserRoleApi/GetEntities";
-                    dsConfig.CrudCr.Insert.Url = "api/UserRoleApi/PostEntity";
-                    dsConfig.CrudCr.Update.Url = "api/UserRoleApi/PutEntity";
-                    dsConfig.CrudCr.Remove.Url = "api/UserRoleApi/DeleteEntity";
-
+                    dsConfig.CrudCr.Read.Url = "api/Core/UserRoleApi";
                     dsConfig.ModelCr.ModelIdName = "Id";
 
                     //------------------------
@@ -111,9 +105,9 @@ namespace Core.Mvc.ViewModel
                     fConfig.EditableConfig.CustomConfig.Template.Url = "~/Areas/Core/Views/Shared/EditorTemplates/UserRoleViewModelTemplate.cshtml";
                     fConfig.Selectability = Selectable.Cell;
                     //---------------------
-                    List<Column> colsInfo = new List<Column> {
-                                new Column { Title="نقش" , Field="RoleName"  , Encoded=true , Visible=true  }  ,
-                                new Column { Field="Id" , Visible=false , Hidden=true}
+                    List<Column> colsInfo = new List<Column> { 
+                                new Column { Title="نقش" , Field="RoleName"  , Encoded=true , Visible=true  }  , 
+                                new Column { Field="Id" , Visible=false , Hidden=true} 
             };
                     //GridToolbar = new Toolbar()
                     //{
@@ -143,13 +137,7 @@ namespace Core.Mvc.ViewModel
             get
             {
                 var dConfig = new Core.Mvc.Helpers.CustomWrapper.DataModel.DataSourceInfo();
-                //dConfig.CrudCr.Read.Url = "api/Core/UserRoleApi";
-
-                dConfig.CrudCr.Read.Url = "api/UserRoleApi/GetEntities";
-                dConfig.CrudCr.Insert.Url = "api/UserRoleApi/PostEntity";
-                dConfig.CrudCr.Update.Url = "api/UserRoleApi/PutEntity";
-                dConfig.CrudCr.Remove.Url = "api/UserRoleApi/DeleteEntity";
-
+                dConfig.CrudCr.Read.Url = "api/Core/UserRoleApi";
 
                 var fCnfig = new Features();
                 fCnfig.EditableConfig.CustomConfig.Template.Url = "~/Areas/Core/Views/Shared/EditorTemplates/ListOfRoleViewModelTemplates.cshtml";
@@ -158,9 +146,9 @@ namespace Core.Mvc.ViewModel
                 fCnfig.UserGuideIncluded = false;
 
                 _roleListViewInfo = new GridInfo(fCnfig.CRUDOperation)
-
+               
                 {
-                    ColumnsInfo = new List<Column> {
+                    ColumnsInfo = new List<Column> { 
                                 new Column { Title="نقش" ,  Field="RoleName"  , Encoded=true , Visible=true , Width="50px" , Sortable = false,Filterable = false},
                                 new Column {Title = "شناسه", Field = "Id", Encoded = true, Hidden = true}
             },
@@ -186,7 +174,7 @@ namespace Core.Mvc.ViewModel
             }
         }
 
-
+       
 
     }
 

@@ -3,11 +3,8 @@ using System.Collections.Generic;
 using System.Linq;
 using Core.Entity;
 using Core.Cmn;
-//using Core.Entity.Enum;
 using Core.Rep;
 using Core.Entity.Enum;
-using Core.Cmn;
-using System.Security.Cryptography;
 using Core.Service.Models;
 using Core.Rep.DTO;
 using Core.Cmn.Attributes;
@@ -18,21 +15,14 @@ namespace Core.Service
 {
     [Injectable(InterfaceType = typeof(IViewElementService), DomainName = "core")]
     public class ViewElementService : ServiceBase<ViewElement>, IViewElementService
-    {
-
-
-        //[Dependency]
-        //public IUserLog UserLog { get; set; }
-        //[Dependency]
+    {     
         private IUserService UserService { get; set; }
-        // [Dependency]
+      
         private IUserProfileService UserProfileService { get; set; }
-        // [Dependency]
-        //  public ICompanyChartService CompanyChartService { get; set; }
-        //[Dependency]
+      
         private ICompanyChartRoleService CompanyChartRoleService { get; set; }
 
-        //[Dependency]
+       
         private IViewElementRoleService ViewElementRoleService { get; set; }
 
 
@@ -150,7 +140,7 @@ namespace Core.Service
             UserViewElement currentUser = null;
 
 
-            var viewElements = ViewElementRoleService.GetViewElementGrantedToUser(userId);
+            var viewElements = ViewElementRoleService.GetViewElementGrantedToUserByUserId(userId);
             currentUser = new UserViewElement { UserId = userId, ViewElements = viewElements };
             appBase.ViewElementsGrantedToUser.TryAdd(userId, currentUser);
            
@@ -206,7 +196,7 @@ namespace Core.Service
 
               //  var userProfile = UserProfileService.Filter(entity => entity.Id.Equals(2)).FirstOrDefault();
               // 2 => Anonymous userProfile
-                var viewElements = ViewElementRoleService.GetViewElementGrantedToUser(2);
+                var viewElements = ViewElementRoleService.GetViewElementGrantedToUserByUserId(2);
 
                 appBase.ViewElementsGrantedToAnonymousUser = new UserViewElement { UserId = 2, ViewElements = viewElements };
             //}
@@ -230,9 +220,8 @@ namespace Core.Service
             var roleList = new List<Role>();
             var ViewElementDTOList = new List<ViewElementDTO>();
 
-            // var user = UserService.Find(userId);
-
-            var roles = new UserService().FindUserRoles(userId);
+            
+            var roles = DependencyInjectionFactory.CreateInjectionInstance<IUserService>().FindUserRoles(userId);
             if (roles.Any())
                 roleList = roles.ToList();
             foreach (var role in roleList)

@@ -4,12 +4,11 @@ using System.Net;
 using System.Web;
 using System.Web.Security;
 using Core.Entity;
-using Core.Cmn;
 using Core.Service;
-using System.Security.Cryptography;
-using Core.Cmn;
 using Core.Service.Models;
 using Core.Cmn.Attributes;
+using System.Security.Cryptography;
+using Core.Cmn;
 
 namespace Core.Mvc.Infrastructure
 {
@@ -64,7 +63,7 @@ namespace Core.Mvc.Infrastructure
 
            // var foundUser = _userProService.Filter(a => a.UserName.ToLower() == userName.ToLower()).SingleOrDefault();
             _userProService.AddOnlineUsers(userProfile);
-            _userProService.AppBase.UserId = userProfile.Id;
+            //_userProService.AppBase.UserId = userProfile.Id;
             _companyService.SetCompany((int)userProfile.User.CompanyChartId);
 
             _viewElementRoleService.SetViewElementGrantedToUser(userProfile);
@@ -72,65 +71,15 @@ namespace Core.Mvc.Infrastructure
 
 
             CustomMembershipProvider.SetUserIdCookie(userProfile.Id.ToString());
-            CustomMembershipProvider.SetPassCodeCookie(userProfile.UserName, userProfile.Password);
+            CustomMembershipProvider.SetPassCodeCookie(userProfile.UserName, userProfile.IsDCUser? Security.GetMd5Hash(MD5.Create(), userProfile.DCPassword): userProfile.Password);
 
             Core.Cmn.AppBase.OnAfterUserLogin(EventArgs.Empty);
          
 
         }
+ 
 
-       
-
-
-        //public void SignOut(string userName)
-        //{
-
-        //   // AddRecordToUserLog(userName);
-        //    _userProService.RemoveOnlineUsers(userName);
-        //   if (_viewElementService.AppBase.ViewElementGrantedToUser.Any(a => a.Key.ToLower() == userName.ToLower()))
-        //       _viewElementService.AppBase.ViewElementGrantedToUser.Remove(userName.ToLower());
-
-
-        //    FormsAuthentication.SignOut();
-
-
-        //    FormsAuthentication.RedirectToLoginPage();
-
-        //}
-
-        //public void SignOut(string userName)
-        //{
-        //    if (!string.IsNullOrEmpty(userName))
-        //    //remove from ViewElementGrantedToUser
-        //    {
-        //        //_userProService.RemoveOnlineUsers(userName);
-        //        //UserViewElement userViewElement = _viewElementService.AppBase.ViewElementsGrantedToUser.FirstOrDefault(a => a.UserName.ToLower() == userName.ToLower());
-        //        //if (userViewElement != null)
-        //        //    _viewElementService.AppBase.ViewElementsGrantedToUser.Remove(userViewElement);
-
-
-        //        _userProService.RemoveOnlineUsers(userName);
-        //        //if (_viewElementService.AppBase.ViewElementGrantedToUser.Any(a => a.Key.ToLower() == userName.ToLower()))
-        //        //    _viewElementService.AppBase.ViewElementGrantedToUser.Remove(userName.ToLower());
-        //        UserViewElement userViewElement = _viewElementService.AppBase.ViewElementsGrantedToUser.FirstOrDefault(a => a.UserName.ToLower() == userName.ToLower());
-        //        if (userViewElement != null)
-        //            _viewElementService.AppBase.ViewElementsGrantedToUser.Remove(userViewElement);
-        //    }
-        //    // Delete the authentication ticket and sign out.
-        //    FormsAuthentication.SignOut();
-            
-        //    // Clear authentication cookie
-        //   CustomMembershipProvider.ClearMembershipCookie(FormsAuthentication.FormsCookieName);
-            
-        //   CustomMembershipProvider. ClearMembershipCookie(CustomMembershipProvider.UserIdCookieName);
-        //   CustomMembershipProvider.ClearMembershipCookie(CustomMembershipProvider.PassCodeCookieName);
-
-
-        //    FormsAuthentication.RedirectToLoginPage();
-
-        //}
-
-        public void SignOut(string userName, bool redirectToLoginPage = true)
+        public void SignOut(string userName)
         {
             if (!string.IsNullOrEmpty(userName))
             //remove from ViewElementGrantedToUser
@@ -154,8 +103,9 @@ namespace Core.Mvc.Infrastructure
             CustomMembershipProvider.ClearMembershipCookie(CustomMembershipProvider.UserIdCookieName);
             CustomMembershipProvider.ClearMembershipCookie(CustomMembershipProvider.PassCodeCookieName);
 
-            if (redirectToLoginPage)
-            FormsAuthentication.RedirectToLoginPage();
+            Core.Cmn.AppBase.OnAfterUserSignOut(EventArgs.Empty);
+            //if (redirectToLoginPage)
+            //FormsAuthentication.RedirectToLoginPage();
 
         }
 

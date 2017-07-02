@@ -70,8 +70,9 @@ namespace Core.Cmn
                             WritableProperties.Where(prop => prop.Value.CanWrite).ToList().ForEach(item =>
                             {
                                 var notMappedAttribute = Attribute.GetCustomAttribute(item.Value, typeof(NotMappedAttribute));
-                                if (notMappedAttribute == null)
-                                    _writableMappedProperties.Add(item.Key, item.Value);
+                                var fillNavigationProperyByCache = Attribute.GetCustomAttribute(item.Value, typeof(FillNavigationProperyByCacheAttribute));
+                                if (notMappedAttribute == null && fillNavigationProperyByCache == null)
+                                    _writableProperties.Add(item.Key, item.Value);
                             });
                         }
                     }

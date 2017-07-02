@@ -339,14 +339,23 @@ namespace Core.Cmn.Cache
             try
             {
                 cacheInfo.CountOfWaitingThreads++;
-                lock (cacheInfo)
+                if (cacheInfo.CountOfWaitingThreads < 3)
+                {
+                    lock (cacheInfo)
+                    {
+                        var result = default(T);
+                        var refreshCacheValue = default(T);
+                        CacheService.TryGetCache<T>(cacheExecution.GenerateCacheKey(), out result);
+                        var oldCacheValue = result;
+                        RefreshCache_Force(cacheExecution, cacheInfo, oldCacheValue, out refreshCacheValue);
+                        return refreshCacheValue;
+                    }
+                }
+                else
                 {
                     var result = default(T);
-                    var refreshCacheValue = default(T);
                     CacheService.TryGetCache<T>(cacheExecution.GenerateCacheKey(), out result);
-                    var oldCacheValue = result;
-                    RefreshCache_Force(cacheExecution, cacheInfo, oldCacheValue, out refreshCacheValue);
-                    return refreshCacheValue;
+                    return result;
                 }
             }
             finally

@@ -12,7 +12,7 @@ namespace Core.Service
         public override void OnApplicationStart()
         {
 
-            Core.Cmn.AppBase.LogService = new LogService();
+            Core.Cmn.AppBase.LogService = ServiceBase.DependencyInjectionFactory.CreateInjectionInstance<ILogService>();
 
 
         }
@@ -61,5 +61,26 @@ namespace Core.Service
             }
         }
     }
+
+    public class TraceViewerBase_ApplicationStart : ApplicationStartBase
+    {
+        public override void OnApplicationStart()
+        {
+            Core.Cmn.AppBase.TraceViewer = ServiceBase.DependencyInjectionFactory.CreateInjectionInstance<ITraceViewer>();
+
+            var eventListener = new TraceViewerEventListener();
+
+        }
+        public override Enum ExecutionPriorityOnApplicationStart
+        {
+            get
+            {
+                return Core.Cmn.ExecutionPriorityOnApplicationStart.TraceViewerService;
+            }
+        }
+    }
 }
+
+
+   
 

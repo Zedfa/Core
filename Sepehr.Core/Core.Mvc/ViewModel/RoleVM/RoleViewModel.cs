@@ -23,12 +23,12 @@ namespace Core.Mvc.ViewModel.RoleVM
             {
                 if (_viewInfo == null)
                 {
-                    var dsConfig = new DataSourceInfo();
-                    dsConfig.CrudCr.Read.Url = "api/RoleApi/GetEntities";
-                    dsConfig.CrudCr.Insert.Url = "api/RoleApi/PostEntity";
-                    dsConfig.CrudCr.Update.Url = "api/RoleApi/PutEntity";
-                    dsConfig.CrudCr.Remove.Url = "api/RoleApi/DeleteEntity";
-                    dsConfig.ModelCr.ModelIdName = "Id";
+                    var dataSource = new DataSourceInfo();
+                    dataSource.CrudCr.Read.Url = "api/core/RoleApi/GetEntities";
+                    dataSource.CrudCr.Insert.Url = "api/core/RoleApi/PostEntity";
+                    dataSource.CrudCr.Update.Url = "api/core/RoleApi/PutEntity";
+                    dataSource.CrudCr.Remove.Url = "api/core/RoleApi/DeleteEntity";
+                   // dataSource.ModelCr.ModelIdName = "Id";
 
 
 
@@ -36,12 +36,11 @@ namespace Core.Mvc.ViewModel.RoleVM
 
                     var requiredValidation = new List<ValidationRuleInfo>();
                     requiredValidation.Add(new ValidationRuleInfo("RequiredValidator"));
-                    var fConfig = new Features();
-                    fConfig.EditableConfig.CustomConfig.Template.Url =
+                    var features = new Features();
+                    features.EditableConfig.CustomConfig.Template.Url =
                         "~/Areas/Core/Views/Shared/EditorTemplates/RoleViewModelTemplates.cshtml";
-                    fConfig.Selectability = Selectable.Row;
-                    fConfig.Insertable = true;
-
+                    features.Selectability = Selectable.Row;
+                    features.Insertable = true;
 
                     //---------------------
 
@@ -53,9 +52,9 @@ namespace Core.Mvc.ViewModel.RoleVM
 
 
                     _viewInfo = new GridInfo();
-                    _viewInfo.DataSource = dsConfig;
+                    _viewInfo.DataSource = dataSource;
                     _viewInfo.ColumnsInfo = colsInfo;
-                    _viewInfo.Features = fConfig;
+                    _viewInfo.Features = features;
                     _viewInfo.DtoModelType = typeof(RoleDTO);
 
                 }

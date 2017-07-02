@@ -49,11 +49,16 @@ namespace Core.Mvc.ViewModel.Account
         public string HiddenId { get; set; }
 
         [DataMember]
-
         //[Required(ErrorMessageResourceName = "CaptchaCodeRequired", ErrorMessageResourceType = typeof(Resource.Resource))]
         [Required(ErrorMessage = "کد امنیتی را وارد کنید")]
 
         public string CaptchaCode { get; set; }
 
+
+        [DataMember]
+        //[Required(ErrorMessageResourceName = "CaptchaCodeRequired", ErrorMessageResourceType = typeof(Resource.Resource))]
+        public string Domain { get; set; }
+
     }
+
 }

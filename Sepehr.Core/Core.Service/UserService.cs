@@ -18,7 +18,7 @@ namespace Core.Service
         public UserService(IDbContextBase dbContextBase, IUserLog userLog)
             : base(dbContextBase, userLog)
         {
-            _repositoryBase = new UserRepository(dbContextBase, userLog);
+           _repositoryBase = new UserRepository(dbContextBase, userLog);
 
 
         }
@@ -26,8 +26,6 @@ namespace Core.Service
             : base()
         {
             _repositoryBase = new UserRepository();
-
-
         }
 
 

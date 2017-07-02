@@ -82,10 +82,11 @@ coreAppModule.addController('clearTabContainer', ['$scope', 'viewElementService'
 }]);
 
 
-coreAppModule.addController('renderMenuController', ['$scope', 'getAuthorize', 'isAuthorizeService',
-    ($scope, getAuthorize, isAuthorizeService) => {
-        getAuthorize($scope).then((authorize) => {
-            $scope.isAuthorize = isAuthorizeService.isAuthorize;
-        });
-    }]);
+coreAppModule.addController('renderMenuController', ['$scope', 'getAuthorize', 'isAuthorizeService', ($scope, getAuthorize, isAuthorizeService) => {
+    $scope.isAuthorize = isAuthorizeService.isAuthorize;
+    $scope.isAuthorizeValue = isAuthorizeService;
+    getAuthorize($scope).then((authorize) => {
+        $scope.isAuthorizeValue = isAuthorizeService;
+    });
+}]);
 

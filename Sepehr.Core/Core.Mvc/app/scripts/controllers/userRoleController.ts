@@ -45,7 +45,7 @@ userRoleControllerModule.addController('userRoleController', ['$scope', ($scope)
 
     }
     $scope.onUserGridEdit = (args) => {
-        //debugger;
+        //
         //if (args.item.AgencyUser_ID != undefined) {
         //   
         //    var currentHeight: number = parseInt(args.sc.aeHeight);

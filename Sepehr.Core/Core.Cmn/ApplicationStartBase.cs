@@ -16,11 +16,12 @@ namespace Core.Cmn
     {
         WebClientModuleManagement = 1000,
         CreateInstanceDIFactory = 2000,
-        LogServiceBase = 3000,
-        SetDefaultCulture = 4000,
-        CreateRepositoryCacheConfig = 5000,
-        CreateServiceCacheConfig = 6000,
-        LastOperation = int.MaxValue
+        TraceViewerService = 3000,
+        LogServiceBase = 4000,
+        SetDefaultCulture = 5000,
+        CreateRepositoryCacheConfig = 6000,
+        CreateServiceCacheConfig = 7000,
+        LastOperation = int.MaxValue,
     }
 
     public abstract class ApplicationStartBase

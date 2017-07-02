@@ -12,8 +12,7 @@
      k-resizable="false"
      k-scrollable="false"
      k-actions="[]"
-     @*k-close="{{isAuthorize}}"*@
-     >
+     @*k-close="{{isAuthorize}}"*@>
     @*k-activate="orderWindows"*@
 
     <form action="/core/Account/LogOn" method="post">
@@ -26,7 +25,9 @@
 
                 <p>
                     @Html.LabelCrFor(m => m.UserName)
-                    @Html.TextBoxCrFor(m => m.UserName, htmlAttributes: new Dictionary<string, object> { { "ng-model", "userName" }, { "placeholder", "User Name" } })
+                    @Html.TextBoxCrFor(m => m.UserName, htmlAttributes: new Dictionary<string, object> { { "ng-model", "userName" },
+                   { "placeholder", "User Name" }, { "ng-change","setDomain($event)" } })
+                    <label ng-show="domain">Domain: {{domain}}</label>
                 </p>
 
                 <p style="margin-right: 25px;">

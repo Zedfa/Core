@@ -66,88 +66,82 @@ namespace Core.Mvc.ViewModel
 
         [DataMember]
         public string UserName { get; set; }
-        [DataMember]
+         [DataMember]
         public int SelectedUserId { get; set; }
 
-        [DataMember]
+         [DataMember]
         public bool HasAccess { get; set; }
-        [DataMember]
+         [DataMember]
         public int SelectedCompanyChartId { get; set; }
 
-        private static GridInfo _viewInfo;
+         private static GridInfo _viewInfo;
 
-        public static GridInfo ViewInfo
-        {
-            get
-            {
-                if (_viewInfo == null)
-                {
-                    var dsConfig = new DataSourceInfo();
-                    //dsConfig.CrudCr.Read.Url = "api/Core/RoleApi";
+         public static GridInfo ViewInfo
+         {
+             get
+             {
+                 if (_viewInfo == null)
+                 {
+                     var dsConfig = new DataSourceInfo();
+                     dsConfig.CrudCr.Read.Url = "api/Core/RoleApi";
+                     dsConfig.ModelCr.ModelIdName = "Id";
 
-                    dsConfig.CrudCr.Read.Url = "api/RoleApi/GetEntities";
-                    dsConfig.CrudCr.Insert.Url = "api/RoleApi/PostEntity";
-                    dsConfig.CrudCr.Update.Url = "api/RoleApi/PutEntity";
-                    dsConfig.CrudCr.Remove.Url = "api/RoleApi/DeleteEntity";
-
-                    dsConfig.ModelCr.ModelIdName = "Id";
-
-                    //------------------------
-                    var fConfig = new Features();
-                    // fConfig.ReadOnly = true;
-                    fConfig.EditableConfig.CustomConfig.Template.Url = "~/Areas/Core/Views/Shared/EditorTemplates/RoleViewModelTemplates.cshtml";
-                    fConfig.Selectability = Selectable.Cell;
+                     //------------------------
+                     var fConfig = new Features();
+                     // fConfig.ReadOnly = true;
+                     fConfig.EditableConfig.CustomConfig.Template.Url = "~/Areas/Core/Views/Shared/EditorTemplates/RoleViewModelTemplates.cshtml";
+                     fConfig.Selectability = Selectable.Cell;
 
 
-                    //---------------------
-                    List<Column> colsInfo = new List<Column> {
-                                new Column { Title="نقش" , Field="Name"  , Encoded=true , Visible=true  }  ,
-                                new Column { Field="Id" , Visible=false , Hidden=true}
+                     //---------------------
+                     List<Column> colsInfo = new List<Column> { 
+                                new Column { Title="نقش" , Field="Name"  , Encoded=true , Visible=true  }  , 
+                                new Column { Field="Id" , Visible=false , Hidden=true} 
             };
 
 
-                    _viewInfo = new GridInfo(fConfig.CRUDOperation)
-                    {
-                        DataSource = dsConfig,
-                        Features = fConfig,
-                        ColumnsInfo = colsInfo
-                    };
+                     _viewInfo = new GridInfo(fConfig.CRUDOperation)
+                     {
+                         DataSource = dsConfig,
+                         Features = fConfig,
+                         ColumnsInfo = colsInfo
+                     };
 
-                }
+                 }
 
-                return _viewInfo;
-            }
-        }
+                 return _viewInfo;
+             }
+         }
 
-        private static GridInfo _lookupInfo;
-        public static GridInfo LookupInfo
-        {
-            get
-            {
-                if (_lookupInfo == null)
-                {
-                    _lookupInfo = ViewInfo.DeepCopy<GridInfo>();
-                    _lookupInfo.Features.ReadOnly = true;
-                }
-                return _lookupInfo;
-            }
-        }
+         private static GridInfo _lookupInfo;
+         public static GridInfo LookupInfo
+         {
+             get
+             {
+                 if (_lookupInfo == null)
+                 {
+                     _lookupInfo = ViewInfo.DeepCopy<GridInfo>();
+                     _lookupInfo.Features.ReadOnly = true;
+                 }
+                 return _lookupInfo;
+             }
+         }
 
 
-        private static GridInfo _lookupInfoWithCompanyRole;
-        public static GridInfo LookupInfoWithCompanyRole
-        {
-            get
-            {
-                if (_lookupInfoWithCompanyRole == null)
-                {
-                    _lookupInfoWithCompanyRole = ViewInfo.DeepCopy<GridInfo>();
-                    _lookupInfoWithCompanyRole.Features.ReadOnly = true;
-                    _lookupInfoWithCompanyRole.DataSource.CrudCr.Read.Url = "api/RoleWithCompanyRoleApi";
-                }
-                return _lookupInfoWithCompanyRole;
-            }
-        }
+         private static GridInfo _lookupInfoWithCompanyRole;
+         public static GridInfo LookupInfoWithCompanyRole
+         {
+             get
+             {
+                 if (_lookupInfoWithCompanyRole == null)
+                 {
+                     _lookupInfoWithCompanyRole = ViewInfo.DeepCopy<GridInfo>();
+                     _lookupInfoWithCompanyRole.Features.ReadOnly = true;
+                     _lookupInfoWithCompanyRole.DataSource.CrudCr.Read.Url = "api/Core/RoleWithCompanyRoleApi";
+                 }
+                 return _lookupInfoWithCompanyRole;
+             }
+         }
     }
 
 

@@ -25,14 +25,39 @@ namespace Core.Cmn.DependencyInjection
             {
                 var interfaceType = Reflection.ReflectionHelpers.GetType(item.Value.InterfaceType.FullName);
                 var injectableItem = Reflection.ReflectionHelpers.GetType(item.Key.FullName);
-
-                this.RegisterType(interfaceType, injectableItem);
+                var lifetime = GetLifetimeStateInstance(item.Value.LifeTime);
+                this.RegisterType(interfaceType, injectableItem,lifetime );
             }
         }
-        public void RegisterType(Type InterfaceType, Type InjectableType)
+        private LifetimeManager GetLifetimeStateInstance( LifetimeManagement lifetime) {
+
+            switch (lifetime)
+            {
+                case LifetimeManagement.TransientLifetime:
+                    return new TransientLifetimeManager();
+
+                case LifetimeManagement.ContainerControlledLifetime:
+                    return new ContainerControlledLifetimeManager();
+
+                case LifetimeManagement.PerThreadLifetime:
+                    return new PerThreadLifetimeManager();
+
+                case LifetimeManagement.PerResolveLifetime:
+                    return new PerResolveLifetimeManager();
+
+                case LifetimeManagement.PerRequestLifetime:
+                    return new PerRequestLifetimeManager();
+
+                default:
+                    return new TransientLifetimeManager();
+
+            }
+
+        }
+        private void RegisterType(Type InterfaceType, Type InjectableType, LifetimeManager lifetime)
         {
             (DiContainer as UnityContainer)
-                .RegisterType(InterfaceType, InjectableType);
+                .RegisterType(InterfaceType, InjectableType,lifetime);
 
         }
 

@@ -23,7 +23,7 @@ namespace Core.Mvc.ViewModel
                 if (_viewInfo == null)
                 {
                     var dsConfig = new DataSourceInfo();
-                    dsConfig.CrudCr.Read.Url = "api/CacheInfoApi/GetEntities";
+                    dsConfig.CrudCr.Read.Url = "api/Core/CacheInfoApi/GetEntities";
                     dsConfig.ModelCr.ModelIdName = "Name";
 
                     //------------------------

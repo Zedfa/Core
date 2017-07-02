@@ -174,7 +174,7 @@
     <Compile Include="Helpers\CustomWrapper\DataModel\CrudCr.cs" />
     <Compile Include="Helpers\CustomWrapper\DataModel\DataSourceInfo.cs" />
     <Compile Include="Helpers\CustomWrapper\DataModel\DataSourceResultCr.cs" />
-    <Compile Include="Helpers\CustomWrapper\DataModel\DataSourceRP.cs" />
+    <Compile Include="Helpers\CustomWrapper\DataModel\DataSourceGridCr.cs" />
     <Compile Include="Helpers\CustomWrapper\DataModel\ModelCr.cs" />
     <Compile Include="Helpers\CustomWrapper\DataModel\PreDefinedEvents.cs" />
     <Compile Include="Helpers\CustomWrapper\DataModel\ServerRelInfo.cs" />
@@ -344,6 +344,7 @@
     <TypeScriptCompile Include="Scripts\basicExtensions\hashCode.d.ts" />
     <TypeScriptCompile Include="Scripts\basicExtensions\stringEx.ts" />
     <TypeScriptCompile Include="Scripts\custom-types\changeUserPassword.ts" />
+    <TypeScriptCompile Include="Scripts\custom-types\grid.ts" />
     <TypeScriptCompile Include="Scripts\custom-types\menuItemsDictionary.ts" />
     <TypeScriptCompile Include="Scripts\custom-types\coreViewElementInfo.ts" />
     <TypeScriptCompile Include="Scripts\custom-types\notifications.ts" />

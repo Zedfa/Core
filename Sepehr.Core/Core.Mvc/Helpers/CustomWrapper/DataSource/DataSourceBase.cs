@@ -22,21 +22,21 @@ namespace Core.Mvc.Helpers.CustomWrapper.DataSource
         public DataSourceBase()
         {
             Transport = new TransportBase();
-           
+
             Filters = new List<IFilterDescriptor>();
-            
+
             ServerFiltering = true;
-            
+
             OrderBy = new List<SortDescriptor>();
-            
+
             Groups = new List<GroupDescriptor>();
 
             Aggregates = new List<AggregateDescriptorFunction>();
 
             Schema = new DataSourceSchema();
-            
+
             Events = new Dictionary<DataSourceEvent, object>();
-            
+
             Type = Core.Mvc.Helpers.CustomWrapper.DataSource.DataSourceType.Ajax;
 
         }
@@ -50,7 +50,7 @@ namespace Core.Mvc.Helpers.CustomWrapper.DataSource
 
         private object SerializeDataSource(IEnumerable data)
         {
-           // var dataTableEnumerable = RawData as DataTableWrapperCr;
+            // var dataTableEnumerable = RawData as DataTableWrapperCr;
 
             //if (dataTableEnumerable != null && dataTableEnumerable.Table != null)
             //{
@@ -400,7 +400,7 @@ namespace Core.Mvc.Helpers.CustomWrapper.DataSource
 
             if (Aggregates.Any())
             {
-                var aggObjectList = new List<IDictionary<string,object>>();
+                var aggObjectList = new List<IDictionary<string, object>>();
                 foreach (var item in Aggregates)
                 {
                     var jsonDic = item.ToJson();
@@ -420,14 +420,14 @@ namespace Core.Mvc.Helpers.CustomWrapper.DataSource
                 var filter = (Filter as FilterItem);
                 if (filter != null)
                 {
-                   json["filter"] = filter.ToJson();
+                    json["filter"] = filter.ToJson();
                 }
                 else
                 {
                     var compFilter = (Filter as CompositeFilterItem);
                     json["filter"] = compFilter.ToJson();
                 }
-                
+
             }
 
 
@@ -436,10 +436,9 @@ namespace Core.Mvc.Helpers.CustomWrapper.DataSource
                 json["schema"] = Schema.ToJson();
             }
 
-            if (Batch)
-            {
-                json["batch"] = Batch;
-            }
+
+            json["batch"] = Batch;
+
 
             if (IsClientOperationMode && RawData != null)
             {
@@ -488,192 +487,192 @@ namespace Core.Mvc.Helpers.CustomWrapper.DataSource
         }
 
         #region Events
-            public Dictionary<DataSourceEvent, object> AssignDsEvents(Dictionary<DataSourceEvent, object> dictionary , Helpers.CoreKendoGrid.Settings.Features.ClientEvent clientEvent)
+        public Dictionary<DataSourceEvent, object> AssignDsEvents(Dictionary<DataSourceEvent, object> dictionary, Helpers.CoreKendoGrid.Settings.Features.ClientEvent clientEvent)
+        {
+            if (dictionary.Any(k => k.Value.ToString() != string.Empty))
             {
-                if (dictionary.Any(k => k.Value.ToString() != string.Empty))
+                var tobeAppendToCustomHandlers = dictionary.Where(item => item.Value.ToString() != string.Empty).ToList();
+                var tobeAppendToDefaultHandlers = this.GetListOfPredefinedEvents().Where(item => tobeAppendToCustomHandlers.Any(it => it.Key != item.Key)).ToList();
+                var refinedDic = new Dictionary<DataSourceEvent, object>();
+                if (tobeAppendToCustomHandlers.Count > 0)
                 {
-                    var tobeAppendToCustomHandlers = dictionary.Where(item => item.Value.ToString() != string.Empty).ToList();
-                    var tobeAppendToDefaultHandlers = this.GetListOfPredefinedEvents().Where(item => tobeAppendToCustomHandlers.Any(it => it.Key != item.Key)).ToList();
-                    var refinedDic = new Dictionary<DataSourceEvent, object>();
-                    if (tobeAppendToCustomHandlers.Count > 0)
+                    tobeAppendToCustomHandlers.ForEach(itm => { refinedDic.Add(itm.Key, itm.Value); });
+                    dictionary = MakeDataSourceEvents(refinedDic, clientEvent);
+                }
+                tobeAppendToDefaultHandlers.ForEach(itm =>
+                {
+
+                    switch (itm.Key)
                     {
-                        tobeAppendToCustomHandlers.ForEach(itm => { refinedDic.Add(itm.Key, itm.Value); });
-                        dictionary = MakeDataSourceEvents(refinedDic, clientEvent);
+                        case DataSourceEvent.OnError:
+                            dictionary.Add(DataSourceEvent.OnError, BuildDefaultOnErrorEvent(string.Empty));
+                            break;
+                        case DataSourceEvent.OnRequestStart:
+                            dictionary.Add(DataSourceEvent.OnRequestStart, BuildDefaultOnRequestStartEvent(string.Empty));
+                            break;
+                        case DataSourceEvent.OnRequestEnd:
+                            dictionary.Add(DataSourceEvent.OnRequestEnd, BuildDefaultOnRequestEndEvent(string.Empty));
+                            break;
+                        case DataSourceEvent.Sync:
+                            dictionary.Add(DataSourceEvent.Sync, BuildDefaultOnSyncEvent(string.Empty));
+                            break;
+                        case DataSourceEvent.OnChange:
+                            dictionary.Add(DataSourceEvent.OnChange, BuildDefaultOnChangeEvent(string.Empty));
+                            break;
+                        default:
+                            break;
                     }
-                    tobeAppendToDefaultHandlers.ForEach(itm =>
-                    {
-
-                        switch (itm.Key)
-                        {
-                            case DataSourceEvent.OnError:
-                                dictionary.Add(DataSourceEvent.OnError, BuildDefaultOnErrorEvent(string.Empty));
-                                break;
-                            case DataSourceEvent.OnRequestStart:
-                                dictionary.Add(DataSourceEvent.OnRequestStart, BuildDefaultOnRequestStartEvent(string.Empty));
-                                break;
-                            case DataSourceEvent.OnRequestEnd:
-                                dictionary.Add(DataSourceEvent.OnRequestEnd, BuildDefaultOnRequestEndEvent(string.Empty));
-                                break;
-                            case DataSourceEvent.Sync:
-                                dictionary.Add(DataSourceEvent.Sync, BuildDefaultOnSyncEvent(string.Empty));
-                                break;
-                            case DataSourceEvent.OnChange:
-                                dictionary.Add(DataSourceEvent.OnChange, BuildDefaultOnChangeEvent(string.Empty));
-                                break;
-                            default:
-                                break;
-                        }
-                    });
-                }
-                else
-                {
-                    dictionary = MakeDataSourceEvents(dictionary,clientEvent);
-                }
-                return dictionary;
+                });
             }
-
-            private Dictionary<DataSourceEvent, object> MakeDataSourceEvents(Dictionary<DataSourceEvent, object> recivedEvents , Helpers.CoreKendoGrid.Settings.Features.ClientEvent clEvent)
+            else
             {
-                var finalEventDic = new Dictionary<DataSourceEvent, object>();
-
-                //if (clEvent != null)
-                //{
-                //    if (!string.IsNullOrEmpty(clEvent.OnInit))
-                //    {
-                //        recivedEvents.Add(DataSourceEvent.OnRequestStart, clEvent.OnInit);
-                //    }
-                //}
-                if (recivedEvents.Any(itm => itm.Value.ToString() != string.Empty))
-                {
-                    //list of Events which their implementations have to be defined as Default.
-                    //var tobeDefineAsDefault = defEvents.Keys.Where(k => list.Any(lk => lk != k)).ToList();
-
-                    foreach (var item in recivedEvents)
-                    {
-                        switch (item.Key)
-                        {
-                            case DataSourceEvent.OnError:
-                                BuildCustomOnErrorEvent(finalEventDic, item.Value.ToString());
-                                break;
-                            case DataSourceEvent.OnRequestStart:
-                                BuildCustomOnRequestStartEvent(finalEventDic, item.Value.ToString());
-                                break;
-                            case DataSourceEvent.OnRequestEnd:
-                                BuildCustomOnRequestEndEvent(finalEventDic, item.Value.ToString());
-                                break;
-                            case DataSourceEvent.Sync:
-                                BuildCustomOnSyncEvent(finalEventDic, item.Value.ToString());
-                                break;
-                            case DataSourceEvent.OnChange:
-                                BuildCustomOnChangeEvent(finalEventDic, item.Value.ToString());
-                                break;
-                            default:
-                                break;
-                        }
-                    }
-                }
-                else
-                {
-                   
-                    MakePredefinedEventHandlers(finalEventDic);
-                }
-                return finalEventDic;
+                dictionary = MakeDataSourceEvents(dictionary, clientEvent);
             }
+            return dictionary;
+        }
 
-            private void MakePredefinedEventHandlers(Dictionary<DataSourceEvent, object> finalEventDic)
-            {
-                finalEventDic.Add(DataSourceEvent.OnChange, BuildDefaultOnChangeEvent(string.Empty));
-                finalEventDic.Add(DataSourceEvent.Sync, BuildDefaultOnSyncEvent(string.Empty));
-                finalEventDic.Add(DataSourceEvent.OnRequestEnd, BuildDefaultOnRequestEndEvent(string.Empty));
-                finalEventDic.Add(DataSourceEvent.OnRequestStart, BuildDefaultOnRequestStartEvent(string.Empty));
-                finalEventDic.Add(DataSourceEvent.OnError, BuildDefaultOnErrorEvent(string.Empty));
-            }
+        private Dictionary<DataSourceEvent, object> MakeDataSourceEvents(Dictionary<DataSourceEvent, object> recivedEvents, Helpers.CoreKendoGrid.Settings.Features.ClientEvent clEvent)
+        {
+            var finalEventDic = new Dictionary<DataSourceEvent, object>();
 
-            #region Custom Event Handler Definitions
-
-            private void BuildCustomOnChangeEvent(Dictionary<DataSourceEvent, object> finalEventDic, string customOnChangeFunction)
-            {
-                finalEventDic.Add(DataSourceEvent.OnChange, BuildDefaultOnChangeEvent(customOnChangeFunction));
-            }
-
-            private void BuildCustomOnSyncEvent(Dictionary<DataSourceEvent, object> finalEventDic, string customOnSyncEventFunction)
-            {
-                finalEventDic.Add(DataSourceEvent.Sync, BuildDefaultOnSyncEvent(customOnSyncEventFunction));
-            }
-
-            private void BuildCustomOnRequestEndEvent(Dictionary<DataSourceEvent, object> finalEventDic, string customOnRequestEndFunction)
-            {
-                finalEventDic.Add(DataSourceEvent.OnRequestEnd, BuildDefaultOnRequestEndEvent(customOnRequestEndFunction));
-            }
-
-            private void BuildCustomOnRequestStartEvent(Dictionary<DataSourceEvent, object> finalEventDic, string customOnRequestStartFunction)
-            {
-                finalEventDic.Add(DataSourceEvent.OnRequestStart, BuildDefaultOnRequestStartEvent(customOnRequestStartFunction));
-            }
-
-            private void BuildCustomOnErrorEvent(Dictionary<DataSourceEvent, object> finalEventDic, string customOnErrorFunction)
-            {
-                finalEventDic.Add(DataSourceEvent.OnError, BuildDefaultOnErrorEvent(customOnErrorFunction));
-            }
-
-            #endregion
-
-            #region Default Datasoucre Event Definition
-
-            private object BuildDefaultOnChangeEvent(string customOnChangeFunction)
-            {
-                return string.Empty;
-            }
-
-            private object BuildDefaultOnSyncEvent(string customOnSyncEventFunction)
-            {
-                return string.Empty;
-            }
-
-            //private object BuildDefaultOnRequestEndEvent(string customOnRequestEndFunction)
+            //if (clEvent != null)
             //{
-            //    var OnRequestEndDef = string.Empty;
-
-            //    OnRequestEndDef = string.Format("function {2}_requestEnd(e) {0} " +
-            //        //" var grid = $('#{2}').data('kendoGrid');  $('#{2}_loadingSpinner').hide(30000);" +
-            //                                            " {3} " +
-            //                                            "{1}"
-            //                                            , "{", "}", ID, customOnRequestEndFunction != string.Empty ? "eval('" + customOnRequestEndFunction + "(e);');" : string.Empty);
-
-            //    return OnRequestEndDef;
+            //    if (!string.IsNullOrEmpty(clEvent.OnInit))
+            //    {
+            //        recivedEvents.Add(DataSourceEvent.OnRequestStart, clEvent.OnInit);
+            //    }
             //}
-            public abstract object BuildDefaultOnRequestEndEvent(string customOnRequestEndFunction);
-
-            public abstract object BuildDefaultOnRequestStartEvent(string customOnRequestStartFunction);
-
-            public abstract object BuildDefaultOnErrorEvent(string customOnErrorFunction);
-
-            #endregion
-
-            private  Dictionary<DataSourceEvent, object> GetListOfPredefinedEvents()
+            if (recivedEvents.Any(itm => itm.Value.ToString() != string.Empty))
             {
-                var defEvents = new Dictionary<DataSourceEvent, object>();
-                defEvents.Add(DataSourceEvent.OnChange, "");
-                defEvents.Add(DataSourceEvent.OnError, "");
-                defEvents.Add(DataSourceEvent.OnRequestEnd, "");
-                defEvents.Add(DataSourceEvent.OnRequestStart, "");
-                defEvents.Add(DataSourceEvent.Sync, "");
-                return defEvents;
-            }
+                //list of Events which their implementations have to be defined as Default.
+                //var tobeDefineAsDefault = defEvents.Keys.Where(k => list.Any(lk => lk != k)).ToList();
 
-            public string GetOnDataSourceErrorScriptTemplate(string gridID)
-            {
-                return string.Format("<script type=\"text/kendo-template\" id=\"{0}_val_message\">" +
-                                     "<div class=\"k-widget k-tooltip k-tooltip-validation k-invalid-msg field-validation-error\" style=\"margin: 0.5em; display: block; \" " +
-                                     "data-for=\"#=field#\" data-valmsg-for=\"#=field#\" id=\"#=field#_validationMessage\" >" +
-                                     "<span class=\"k-icon k-warning\"> </span>#=message#<div class=\"k-callout k-callout-n\"></div></div>" +
-                                     "</script>" +
-                                     "<script> var {0}_validationMessageTmpl = kendo.template($('#{0}_val_message').html()); " +
-                                     "function showMessage_{0}(container, name, errors){1} " +
-                                     "container.find(\"[data-valmsg-for='\" + name + \"'],[data-val-msg-for= '\"  + name +  \"']\")" +
-                                     ".replaceWith({0}_validationMessageTmpl({1} field: name, message: errors[0] {2}));{2}" +
-                                     "</script>", gridID, "{", "}");
+                foreach (var item in recivedEvents)
+                {
+                    switch (item.Key)
+                    {
+                        case DataSourceEvent.OnError:
+                            BuildCustomOnErrorEvent(finalEventDic, item.Value.ToString());
+                            break;
+                        case DataSourceEvent.OnRequestStart:
+                            BuildCustomOnRequestStartEvent(finalEventDic, item.Value.ToString());
+                            break;
+                        case DataSourceEvent.OnRequestEnd:
+                            BuildCustomOnRequestEndEvent(finalEventDic, item.Value.ToString());
+                            break;
+                        case DataSourceEvent.Sync:
+                            BuildCustomOnSyncEvent(finalEventDic, item.Value.ToString());
+                            break;
+                        case DataSourceEvent.OnChange:
+                            BuildCustomOnChangeEvent(finalEventDic, item.Value.ToString());
+                            break;
+                        default:
+                            break;
+                    }
+                }
             }
+            else
+            {
+
+                MakePredefinedEventHandlers(finalEventDic);
+            }
+            return finalEventDic;
+        }
+
+        private void MakePredefinedEventHandlers(Dictionary<DataSourceEvent, object> finalEventDic)
+        {
+            finalEventDic.Add(DataSourceEvent.OnChange, BuildDefaultOnChangeEvent(string.Empty));
+            finalEventDic.Add(DataSourceEvent.Sync, BuildDefaultOnSyncEvent(string.Empty));
+            finalEventDic.Add(DataSourceEvent.OnRequestEnd, BuildDefaultOnRequestEndEvent(string.Empty));
+            finalEventDic.Add(DataSourceEvent.OnRequestStart, BuildDefaultOnRequestStartEvent(string.Empty));
+            finalEventDic.Add(DataSourceEvent.OnError, BuildDefaultOnErrorEvent(string.Empty));
+        }
+
+        #region Custom Event Handler Definitions
+
+        private void BuildCustomOnChangeEvent(Dictionary<DataSourceEvent, object> finalEventDic, string customOnChangeFunction)
+        {
+            finalEventDic.Add(DataSourceEvent.OnChange, BuildDefaultOnChangeEvent(customOnChangeFunction));
+        }
+
+        private void BuildCustomOnSyncEvent(Dictionary<DataSourceEvent, object> finalEventDic, string customOnSyncEventFunction)
+        {
+            finalEventDic.Add(DataSourceEvent.Sync, BuildDefaultOnSyncEvent(customOnSyncEventFunction));
+        }
+
+        private void BuildCustomOnRequestEndEvent(Dictionary<DataSourceEvent, object> finalEventDic, string customOnRequestEndFunction)
+        {
+            finalEventDic.Add(DataSourceEvent.OnRequestEnd, BuildDefaultOnRequestEndEvent(customOnRequestEndFunction));
+        }
+
+        private void BuildCustomOnRequestStartEvent(Dictionary<DataSourceEvent, object> finalEventDic, string customOnRequestStartFunction)
+        {
+            finalEventDic.Add(DataSourceEvent.OnRequestStart, BuildDefaultOnRequestStartEvent(customOnRequestStartFunction));
+        }
+
+        private void BuildCustomOnErrorEvent(Dictionary<DataSourceEvent, object> finalEventDic, string customOnErrorFunction)
+        {
+            finalEventDic.Add(DataSourceEvent.OnError, BuildDefaultOnErrorEvent(customOnErrorFunction));
+        }
+
+        #endregion
+
+        #region Default Datasoucre Event Definition
+
+        private object BuildDefaultOnChangeEvent(string customOnChangeFunction)
+        {
+            return string.Empty;
+        }
+
+        private object BuildDefaultOnSyncEvent(string customOnSyncEventFunction)
+        {
+            return string.Empty;
+        }
+
+        //private object BuildDefaultOnRequestEndEvent(string customOnRequestEndFunction)
+        //{
+        //    var OnRequestEndDef = string.Empty;
+
+        //    OnRequestEndDef = string.Format("function {2}_requestEnd(e) {0} " +
+        //        //" var grid = $('#{2}').data('kendoGrid');  $('#{2}_loadingSpinner').hide(30000);" +
+        //                                            " {3} " +
+        //                                            "{1}"
+        //                                            , "{", "}", ID, customOnRequestEndFunction != string.Empty ? "eval('" + customOnRequestEndFunction + "(e);');" : string.Empty);
+
+        //    return OnRequestEndDef;
+        //}
+        public abstract object BuildDefaultOnRequestEndEvent(string customOnRequestEndFunction);
+
+        public abstract object BuildDefaultOnRequestStartEvent(string customOnRequestStartFunction);
+
+        public abstract object BuildDefaultOnErrorEvent(string customOnErrorFunction);
+
+        #endregion
+
+        private Dictionary<DataSourceEvent, object> GetListOfPredefinedEvents()
+        {
+            var defEvents = new Dictionary<DataSourceEvent, object>();
+            defEvents.Add(DataSourceEvent.OnChange, "");
+            defEvents.Add(DataSourceEvent.OnError, "");
+            defEvents.Add(DataSourceEvent.OnRequestEnd, "");
+            defEvents.Add(DataSourceEvent.OnRequestStart, "");
+            defEvents.Add(DataSourceEvent.Sync, "");
+            return defEvents;
+        }
+
+        public string GetOnDataSourceErrorScriptTemplate(string gridID)
+        {
+            return string.Format("<script type=\"text/kendo-template\" id=\"{0}_val_message\">" +
+                                 "<div class=\"k-widget k-tooltip k-tooltip-validation k-invalid-msg field-validation-error\" style=\"margin: 0.5em; display: block; \" " +
+                                 "data-for=\"#=field#\" data-valmsg-for=\"#=field#\" id=\"#=field#_validationMessage\" >" +
+                                 "<span class=\"k-icon k-warning\"> </span>#=message#<div class=\"k-callout k-callout-n\"></div></div>" +
+                                 "</script>" +
+                                 "<script> var {0}_validationMessageTmpl = kendo.template($('#{0}_val_message').html()); " +
+                                 "function showMessage_{0}(container, name, errors){1} " +
+                                 "container.find(\"[data-valmsg-for='\" + name + \"'],[data-val-msg-for= '\"  + name +  \"']\")" +
+                                 ".replaceWith({0}_validationMessageTmpl({1} field: name, message: errors[0] {2}));{2}" +
+                                 "</script>", gridID, "{", "}");
+        }
 
         #endregion
     }

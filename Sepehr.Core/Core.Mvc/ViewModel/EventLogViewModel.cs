@@ -121,7 +121,7 @@ namespace Core.Mvc.ViewModel
                     clientRel.Events.OnChange = "onLogChange";
                     clientRel.CssStyles.Add("font-size", "9pt;");
                     var dsConfig = new Core.Mvc.Helpers.CustomWrapper.DataModel.DataSourceInfo();
-                    dsConfig.CrudCr.Read.Url = "api/ExceptionLogApi/GetAllLogs";
+                    dsConfig.CrudCr.Read.Url = "api/Core/ExceptionLogApi/GetAllLogs";
                     //------------------------
                     var fConfig = new Features();
                     fConfig.ReadOnly = true;

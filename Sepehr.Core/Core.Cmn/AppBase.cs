@@ -14,7 +14,7 @@ namespace Core.Cmn
         private static object _lockObject = new object();
 
         public static event EventHandler UserLoginEvent;
-
+        public static event EventHandler UserSignOutEvent;
 
         public static List<EventLog> Logs { get; set; }
         public static Assembly StartupProject { get; private set; }
@@ -67,11 +67,11 @@ namespace Core.Cmn
 
         public static void OnAfterUserLogin(EventArgs e)
         {
-            EventHandler handler = UserLoginEvent;
-            if (handler != null)
-            {
-                handler(null, e);
-            }
+            UserLoginEvent?.Invoke(null, e);
+        }
+        public static void OnAfterUserSignOut(EventArgs e)
+        {
+            UserSignOutEvent?.Invoke(null, e);
         }
 
         public static bool IsWebApp

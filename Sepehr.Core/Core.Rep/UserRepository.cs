@@ -6,34 +6,41 @@ using Core.Ef;
 using Core.Entity;
 using System.Data.SqlClient;
 using Core.Cmn;
-
 using System.Security.Cryptography;
 using Core.Cmn.Attributes;
 using Core.Rep.DTO;
+using Core.Rep.Interface;
 
 namespace Core.Rep
 {
 
-    public class UserRepository : RepositoryBase<User>
+    public class UserRepository : RepositoryBase<User> 
     {
         private IDbContextBase _dbContext;
+        private IUserProfileRepository _userProfileRepository;
         public UserRepository()
             : base()
         {
 
             _dbContext = ContextBase;
+            _userProfileRepository = AppBase.DependencyInjectionManager.Resolve<IUserProfileRepository>();
         }
+       
         public UserRepository(IDbContextBase dbContextBase)
             : base(dbContextBase)
         {
-
             _dbContext = dbContextBase;
+
+            _userProfileRepository = AppBase.DependencyInjectionManager.Resolve<IUserProfileRepository>();
+
         }
         public UserRepository(IDbContextBase dbContextBase, IUserLog userLog)
             : base(dbContextBase, userLog)
         {
 
             _dbContext = dbContextBase;
+            _userProfileRepository = AppBase.DependencyInjectionManager.Resolve<IUserProfileRepository>();
+
         }
 
 
@@ -144,9 +151,10 @@ namespace Core.Rep
         public bool IsUserActive(string userName)
         {
 
-            var foundedUserProfile = ContextBase.Set<UserProfile>().AsNoTracking().Include("User").Where(a => a.UserName.ToLower() == userName.ToLower()).SingleOrDefault();
+            var foundedUserProfile =_userProfileRepository.All()
+                .Where(a => a.UserName.ToLower() == userName.ToLower()).SingleOrDefault();
 
-            return foundedUserProfile.User.Active;
+            return foundedUserProfile !=null ? foundedUserProfile.User.Active: false;
         }
 
         public IQueryable<User> GetAllHeadUsers()

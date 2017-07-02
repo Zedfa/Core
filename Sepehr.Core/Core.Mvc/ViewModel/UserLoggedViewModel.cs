@@ -151,14 +151,8 @@ namespace Core.Mvc.ViewModel
                 {
 
                     var dsConfig = new DataSourceInfo();
-                    //dsConfig.CrudCr.Read.Url = "api/Core/UserLoggedApi";
-
-                    dsConfig.CrudCr.Read.Url = "api/UserLoggedApi/GetEntities";
-                    dsConfig.CrudCr.Insert.Url = "api/UserLoggedApi/PostEntity";
-                    dsConfig.CrudCr.Update.Url = "api/UserLoggedApi/PutEntity";
-                    dsConfig.CrudCr.Remove.Url = "api/UserLoggedApi/DeleteEntity";
-
-
+                    dsConfig.CrudCr.Read.Url = "api/Core/UserLoggedApi";
+                    
                     /*---------------------------------- */
                     var fConfig = new Features();
 

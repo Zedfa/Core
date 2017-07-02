@@ -1,20 +1,28 @@
 ﻿Begin Transaction;
 Begin try
-declare @categoryId int,@GeneralConfigId int
-  IF Exists (select * from core.ConstantCategories where Name='resources')
-  set @categoryId =(select ID from core.ConstantCategories where Name='resources')
+declare @categoryId int,@GeneralConfigId int , @TraceConfigId int
+  IF Exists (select * from core.ConstantCategories where Name='Shared_Resources')
+  set @categoryId =(select ID from core.ConstantCategories where Name='Shared_Resources')
   ELSE
   Begin
-  INSERT into  core.ConstantCategories(Name)values('Resources')
+  INSERT into  core.ConstantCategories(Name)values('Shared_Resources')
    set @categoryId= (select SCOPE_IDENTITY())
   END
 
-  IF NOT Exists (select * from core.ConstantCategories where Name='GeneralConfig')
+  IF Exists (select * from core.ConstantCategories where Name='GeneralConfig')
   set @GeneralConfigId=(select ID from core.ConstantCategories where Name='GeneralConfig')
   else
   Begin
   INSERT into  core.ConstantCategories(Name)values('GeneralConfig')
   set @GeneralConfigId= (select SCOPE_IDENTITY())
+  END
+
+  IF Exists (select * from core.ConstantCategories where Name='TraceConfig')
+  set @TraceConfigId=(select ID from core.ConstantCategories where Name='TraceConfig')
+  else
+  Begin
+  INSERT into  core.ConstantCategories(Name)values('TraceConfig')
+  set @TraceConfigId= (select SCOPE_IDENTITY())
   END
 
   IF NOT Exists (select * from core.ConstantCategories where Name='DefaultLanguage')
@@ -232,6 +240,11 @@ end
 IF NOT Exists (select * from core.Constants where [Key]= N'AuthCookieExpireDays' and [Culture]= N'en-US')
 begin
 INSERT [core].[Constants] ( [ConstantCategoryID], [Value], [Key], [Culture]) VALUES ( @GeneralConfigId, '0.020833333333333332', N'AuthCookieExpireDays', N'en-US')
+end
+
+IF NOT Exists (select * from core.Constants where [Key]= N'TraceSepehr360' and [Culture]= N'fa-IR' )
+begin
+INSERT [core].[Constants] ( [ConstantCategoryID], [Value], [Key], [Culture]) VALUES ( @TraceConfigId, 'true', N'TraceSepehr360', N'fa-IR')
 end
 
 

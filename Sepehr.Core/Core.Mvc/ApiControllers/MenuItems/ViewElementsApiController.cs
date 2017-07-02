@@ -23,9 +23,10 @@ namespace Core.Mvc.ApiControllers
         public List<MenuItemViewModel> GetMenuItems()
         {
            // if (HttpContext.Current.User.Identity.IsAuthenticated)
-            int? userId = CustomMembershipProvider.GetUserIdCookie();
-            bool isPassCodeValidate = CustomMembershipProvider.ValidatePassCode(CustomMembershipProvider.GetPassCodeCookie());
-            if (isPassCodeValidate && userId.HasValue)
+            //int? userId = CustomMembershipProvider.GetUserIdCookie();
+            //bool isPassCodeValidate = CustomMembershipProvider.ValidatePassCode(CustomMembershipProvider.GetPassCodeCookie());
+            //if (isPassCodeValidate && userId.HasValue)
+            if (CustomMembershipProvider.IsCurrentUserAuthenticate())
             {
                 var topMenuViewmodel = new TopMenuViewModel();
 

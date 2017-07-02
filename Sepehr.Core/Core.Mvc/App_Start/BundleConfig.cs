@@ -191,6 +191,7 @@ namespace Core.Mvc
             bundles.Add(new ScriptBundle("~/bundles/core/customTypes")
                 .Include(relativePath + "Scripts/custom-types/browsers.js",
                 relativePath + "Scripts/custom-types/coreViewElementInfo.js",
+                relativePath + "Scripts/custom-types/grid.js",
                 relativePath + "Scripts/custom-types/notifications.js",
                 relativePath + "Scripts/custom-types/validators.js",
                 relativePath + "Scripts/custom-types/changeUserPassword.js"

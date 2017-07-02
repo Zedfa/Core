@@ -86,7 +86,7 @@ namespace Core.Mvc.ViewModel
             }
             set
             {
-
+               
                 _userName = value;
             }
         }
@@ -198,7 +198,7 @@ namespace Core.Mvc.ViewModel
         public string CompanyOfHeadUser { get; set; }
 
 
-
+       
 
         //[DataMember]
         //private int _CompanyIdOfHeadUser { get; set; }
@@ -318,12 +318,7 @@ namespace Core.Mvc.ViewModel
                 {
 
                     var dsConfig = new DataSourceInfo();
-                    //dsConfig.CrudCr.Read.Url = "api/Core/UserApi";
-
-                    dsConfig.CrudCr.Read.Url = "api/UserApi/GetEntities";
-                    dsConfig.CrudCr.Insert.Url = "api/UserApi/PostEntity";
-                    dsConfig.CrudCr.Update.Url = "api/UserApi/PutEntity";
-                    dsConfig.CrudCr.Remove.Url = "api/UserApi/DeleteEntity";
+                    dsConfig.CrudCr.Read.Url = "api/Core/UserApi";
 
                     /*---------------------------------- */
                     var fConfig = new Features();
@@ -333,9 +328,9 @@ namespace Core.Mvc.ViewModel
 
                     _viewInfo = new GridInfo(fConfig.CRUDOperation)
                     {
-                        ColumnsInfo = new List<Column> {
-                                         new Column { Title="نام" , Field="FName"  ,  Visible=true , Width="50px" },
-                                        new Column { Title="نام خانوادگی" , Field="LName"  , Visible=true , Width="50px" },
+                        ColumnsInfo = new List<Column> { 
+                                         new Column { Title="نام" , Field="FName"  ,  Visible=true , Width="50px" }, 
+                                        new Column { Title="نام خانوادگی" , Field="LName"  , Visible=true , Width="50px" }, 
                                         new Column { Title="نام کاربری" , Field="UserName"  ,  Visible=true , Width="50px" , Sortable = false , Filterable = false}
 
                               },
@@ -357,7 +352,7 @@ namespace Core.Mvc.ViewModel
         }
 
 
-        // private static GridInfo _viewInfoHeadUser;
+       // private static GridInfo _viewInfoHeadUser;
 
         //public static GridInfo ViewInfoHeadUser
         //{

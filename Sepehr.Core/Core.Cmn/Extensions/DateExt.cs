@@ -17,10 +17,18 @@ namespace Core.Cmn.Extensions
 
             return (int.Parse(timeSplit[0]) * 60) + int.Parse(timeSplit[1]);
         }
+        public static string ToStringInEnCulture(this DateTime dateTime)
+        {
+            var currentCultureName = System.Threading.Thread.CurrentThread.CurrentCulture.Name;
+            System.Threading.Thread.CurrentThread.CurrentCulture = CultureInfo.CreateSpecificCulture("en-US");
+            var date = dateTime.ToString();
+            System.Threading.Thread.CurrentThread.CurrentCulture = CultureInfo.CreateSpecificCulture(currentCultureName);
+            return date;
 
+        }
         public static DateTime ShamsiToMiladi(this DateTime dateTime)
         {
-            
+
             return new DateTime(dateTime.Year, dateTime.Month, dateTime.Day, new System.Globalization.PersianCalendar());
         }
 
@@ -87,16 +95,21 @@ namespace Core.Cmn.Extensions
                 foreach (System.Diagnostics.StackFrame frame in frames)
                 {
                     //   x = ""+ frame.GetFileName()+"";
-                        x += "    ** FileName:" + frame.GetFileName() + "** MethodName:" + frame.GetMethod().Name + "** LineNumber:" + frame.GetFileLineNumber() + "** ColumnNumber:" + frame.GetFileColumnNumber();
+                    x += "    ** FileName:" + frame.GetFileName() + "** MethodName:" + frame.GetMethod().Name + "** LineNumber:" + frame.GetFileLineNumber() + "** ColumnNumber:" + frame.GetFileColumnNumber();
                 }
                 var eLog = _logService.GetEventLogObj();
                 eLog.OccuredException = ex;
                 eLog.UserId = "---";
-                eLog.CustomMessage =String.Format("Incomming parameter: {0} in ToArabYearMonth,{1}", dateTime,x);
-                _logService.Handle(eLog); 
+                eLog.CustomMessage = String.Format("Incomming parameter: {0} in ToArabYearMonth,{1}", dateTime, x);
+                _logService.Handle(eLog);
 
                 return String.Empty;
             }
+        }
+
+        public static DateTime ToLocalKind(this DateTime dateTime)
+        {
+            return DateTime.SpecifyKind(dateTime, DateTimeKind.Local);
         }
     }
 }

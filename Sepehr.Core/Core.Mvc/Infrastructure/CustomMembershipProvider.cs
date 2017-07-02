@@ -1,14 +1,13 @@
 using System;
 using System.Text;
-using System.Web.Mvc;
 using System.Web.Security;
-using Core.Entity;
 using Core.Cmn;
 using Core.Service;
 using System.Web;
 using System.Security.Cryptography;
-using Core.Cmn;
-
+using Core.Rep.DTO;
+using Core.Entity;
+using System.Linq;
 
 namespace Core.Mvc.Infrastructure
 {
@@ -16,26 +15,19 @@ namespace Core.Mvc.Infrastructure
     public class CustomMembershipProvider : MembershipProvider
     {
 
-        readonly IUserService _userService;
-        readonly IUserProfileService _profileservice;
+        static readonly IUserProfileService _userProfileService;
 
-        public CustomMembershipProvider()
+
+        static CustomMembershipProvider()
         {
 
-            _profileservice = ServiceBase.DependencyInjectionFactory.CreateInjectionInstance<IUserProfileService>();
+            _userProfileService = ServiceBase.DependencyInjectionFactory.CreateInjectionInstance<IUserProfileService>();
+
         }
-
-
-        public CustomMembershipProvider(IUserService userService, IUserProfileService profileservice)
-        {
-            _userService = userService;
-            _profileservice = profileservice;
-        }
-
 
         public override MembershipUser GetUser(string username, bool userIsOnline)
         {
-            var user = _profileservice.Find(u => u.UserName.Equals(username));
+            var user = _userProfileService.Find(u => u.UserName.Equals(username));
             if (user != null)
             {
                 var memUser = new MembershipUser("CustomMembershipProvider", username, user.Id, string.Empty,
@@ -52,23 +44,26 @@ namespace Core.Mvc.Infrastructure
 
         public override bool ValidateUser(string username, string password)
         {
-            var md5Hash = GetMd5Hash(password);
-            var requiredUser = _profileservice.Find(u => u.UserName.Equals(username) && u.Password.Equals(md5Hash));
-            return requiredUser != null;
+            //var md5Hash = GetMd5Hash(password);
+            //var requiredUser = _userProfileService.Find(u => u.UserName.Equals(username) && u.Password.Equals(md5Hash));
+            //return requiredUser != null;
 
-        }
+            //return _userProfileService.ValidateUser(new UserProfileDTO()
+            //{
+            //    UserName = username,
+            //    Password = password,
+            //    IP = HttpContext.Current.Request.UserHostAddress
+            //}
+            //);
+            return _userProfileService.ValidateUser(
+                new UserProfile()
+                {
+                    UserName = username,
+                    Password = password,
+                }
+            );
 
 
-        public static string GetMd5Hash(string value)
-        {
-            var md5Hasher = MD5.Create();
-            var data = md5Hasher.ComputeHash(Encoding.Default.GetBytes(value));
-            var sBuilder = new StringBuilder();
-            for (var i = 0; i < data.Length; i++)
-            {
-                sBuilder.Append(data[i].ToString("x2"));
-            }
-            return sBuilder.ToString();
         }
 
 
@@ -93,21 +88,22 @@ namespace Core.Mvc.Infrastructure
 
         public override bool ChangePassword(string username, string oldPassword, string newPassword)
         {
-            var args = new ValidatePasswordEventArgs(username, oldPassword, true);
-            OnValidatingPassword(args);
+            throw new NotImplementedException();
+            //var args = new ValidatePasswordEventArgs(username, oldPassword, true);
+            //OnValidatingPassword(args);
 
-            if (args.Cancel)
-            {
-                return false;
-            }
-            if (ValidateUser(username, oldPassword))
-            {
-                var userprofile = _profileservice.Find(u => u.UserName.Equals(username));
-                userprofile.Password = GetMd5Hash(newPassword);
-                _profileservice.Update(userprofile);
-                return true;
-            }
-            return false;
+            //if (args.Cancel)
+            //{
+            //    return false;
+            //}
+            //if (ValidateUser(username, oldPassword))
+            //{
+            //    var userprofile = _userProfileService.Find(u => u.UserName.Equals(username));
+            //    userprofile.Password = _userProfileService.GetMd5Hash(newPassword);
+            //    _userProfileService.Update(userprofile);
+            //    return true;
+            //}
+            //return false;
         }
 
         public override MembershipUser CreateUser(string username, string password, string email, string passwordQuestion, string passwordAnswer, bool isApproved, object providerUserKey, out MembershipCreateStatus status)
@@ -262,7 +258,7 @@ namespace Core.Mvc.Infrastructure
             {
                 var userIdCookie = new HttpCookie(UserIdCookieName, id);
                 //userIdCookie.Expires = DateTime.Now.AddYears(1);
-                userIdCookie.Expires = DateTime.Now.AddMinutes(AuthCookieExpireDays == 0 ? 30 : AuthCookieExpireDays);
+                userIdCookie.Expires = DateTime.Now.AddDays(AuthCookieExpireDays == 0 ? 30 : AuthCookieExpireDays);
                 System.Web.HttpContext.Current.Response.Cookies.Set(userIdCookie);
             }
             else
@@ -302,7 +298,48 @@ namespace Core.Mvc.Infrastructure
 
         }
 
-        public static bool ValidatePassCode(string key)
+        private static bool isUserAuthenticate(UserProfile userProfile)
+        {                
+            var isPassCodeValidate = false;
+
+                    if (userProfile.IsDCUser && userProfile.DCPassword == null)
+                    {
+                        return isPassCodeValidate;
+                    }
+                    var encodedUserName = Security.GetMd5Hash(MD5.Create(), userProfile.UserName);
+                    var password = userProfile.IsDCUser ? Security.GetMd5Hash(MD5.Create(), userProfile.DCPassword ): userProfile.Password;
+                    var passCode = Security.GetMd5Hash(MD5.Create(), string.Format("{0}{1}", encodedUserName, password));
+                    isPassCodeValidate = ValidatePassCode(passCode);
+               
+
+            
+            return isPassCodeValidate;
+        }
+        public static bool IsCurrentUserAuthenticate()
+        {
+
+            int? userId = GetUserIdCookie();
+            var isPassCodeValidate = false;
+            if (userId != null)
+            {
+
+                UserProfile foundUserProfile = _userProfileService.Filter(entity => entity.Id.Equals(userId.Value)).FirstOrDefault();
+
+                if (foundUserProfile != null)
+                {
+                    isPassCodeValidate = isUserAuthenticate(foundUserProfile);
+
+
+                }
+
+            }
+            return isPassCodeValidate;
+        }
+        public static bool IsUserAuthenticate(UserProfile userProfile)
+        {
+            return userProfile != null? isUserAuthenticate(userProfile):false;
+        }
+        private static bool ValidatePassCode(string key)
         {
             var passCode = GetPassCodeCookie();
             if (passCode != null)

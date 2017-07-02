@@ -20,9 +20,9 @@ namespace Core.Mvc.ViewModel.UserRoleVM
                 if (_viewInfo == null)
                 {
                     var dsConfig = new DataSourceInfo();
-                    dsConfig.CrudCr.Read.Url = "api/UserRoleApi/GetEntities";
-                    dsConfig.CrudCr.Insert.Url = "api/UserRoleApi/PostEntity";
-                    dsConfig.CrudCr.Remove.Url = "api/UserRoleApi/DeleteEntity";
+                    dsConfig.CrudCr.Read.Url = "api/Core/UserRoleApi/GetEntities";
+                    dsConfig.CrudCr.Insert.Url = "api/Core/UserRoleApi/PostEntity";
+                    dsConfig.CrudCr.Remove.Url = "api/Core/UserRoleApi/DeleteEntity";
                     dsConfig.ModelCr.ModelIdName = "RoleId";
 
 

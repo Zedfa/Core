@@ -77,13 +77,7 @@ namespace Core.Mvc.ViewModel
                 if (_viewInfo == null)
                 {
                     var dsConfig = new DataSourceInfo();
-                    //dsConfig.CrudCr.Read.Url = "api/Core/CompanyChartApi";
-
-                    dsConfig.CrudCr.Read.Url = "api/CompanyChartApi/GetEntities";
-                    dsConfig.CrudCr.Insert.Url = "api/CompanyChartApi/PostEntity";
-                    dsConfig.CrudCr.Update.Url = "api/CompanyChartApi/PutEntity";
-                    dsConfig.CrudCr.Remove.Url = "api/CompanyChartApi/DeleteEntity";
-
+                    dsConfig.CrudCr.Read.Url = "api/Core/CompanyChartApi";
                     // dsConfig.ModelRP.ModelIdName = "Id";
                     //dsConfig.ModelRP.ModelType = typeof(CompanyChartViewModel);
                     //------------------------
@@ -91,9 +85,9 @@ namespace Core.Mvc.ViewModel
                     fConfig.ReadOnly = true;
                     fConfig.Selectability = Selectable.Cell;
                     //---------------------
-                    List<Column> colsInfo = new List<Column> {
-                                new Column { Title="جایگاه سازمانی" , Field="Title"  , Encoded=true , Visible=true  }  ,
-                                new Column { Field="Id" , Visible=false , Hidden=true}
+                    List<Column> colsInfo = new List<Column> { 
+                                new Column { Title="جایگاه سازمانی" , Field="Title"  , Encoded=true , Visible=true  }  , 
+                                new Column { Field="Id" , Visible=false , Hidden=true} 
                         };
                     _viewInfo = new GridInfo(fConfig.CRUDOperation)
                     {
@@ -121,18 +115,12 @@ namespace Core.Mvc.ViewModel
                     _treeInfo.DataTextField = "Title";
                     _treeInfo.Operation.Insertable = true;
                     _treeInfo.AutoBind = true;
-                    //_treeInfo.DataSource.CrudCr.Read.Url = "api/Core/CompanyChartApi"; //"CompanyChart/Read";
-                    // _treeInfo.DataSource.DataSourceEvents.Add( Core.Mvc.Helpers.CustomWrapper.DataSource.DataSourceEvent.OnRequestEnd, "req");
+                    _treeInfo.DataSource.CrudCr.Read.Url = "api/Core/CompanyChartApi"; //"CompanyChart/Read";
+                   // _treeInfo.DataSource.DataSourceEvents.Add( Core.Mvc.Helpers.CustomWrapper.DataSource.DataSourceEvent.OnRequestEnd, "req");
+                   _treeInfo.TemplateInfo.Width = 300;
+                   _treeInfo.TemplateInfo.Height = 100;
 
-                    _treeInfo.DataSource.CrudCr.Read.Url = "api/CompanyChartApi/GetEntities";
-                    _treeInfo.DataSource.CrudCr.Insert.Url = "api/CompanyChartApi/PostEntity";
-                    _treeInfo.DataSource.CrudCr.Update.Url = "api/CompanyChartApi/PutEntity";
-                    _treeInfo.DataSource.CrudCr.Remove.Url = "api/CompanyChartApi/DeleteEntity";
-
-                    _treeInfo.TemplateInfo.Width = 300;
-                    _treeInfo.TemplateInfo.Height = 100;
-
-
+        
                 }
                 return _treeInfo;
             }
@@ -140,6 +128,6 @@ namespace Core.Mvc.ViewModel
 
 
 
-
+       
     }
 }

@@ -1,11 +1,8 @@
-﻿using System.Data;
-using System.Linq;
+﻿using System.Linq;
 using System.Linq.Expressions;
-using Core.Ef;
 using Core.Entity;
 using Core.Cmn;
 using Core.Rep;
-using Core.Cmn;
 using Core.Cmn.Extensions;
 using System;
 using System.Collections.Generic;
@@ -276,15 +273,9 @@ namespace Core.Service
 
         public ReturnT Cache<ReturnT>(Func<ReturnT> func, bool canUseCacheIfPossible = true)
         {
-            var cacheKey = func.Method.GetHashCode().ToString();
-            CacheInfo cacheInfo = null;
-            if (!CacheConfig.CacheInfoDic.TryGetValue(cacheKey, out cacheInfo))
-            {
-                var att = func.Method.GetAttributeValue<CacheableAttribute, CacheableAttribute>(item => item);
-                CacheConfig.CacheInfoDic[cacheKey] = cacheInfo = CacheConfig.CreateCacheInfo(att, func.Method, func, cacheKey);
-                cacheInfo.Service = this;
-            }
-
+            string cacheKey;
+            CacheInfo cacheInfo;
+            GetOrCreateCacheInfo(func, out cacheKey, out cacheInfo);
 
             if (func != null)
             {
@@ -306,10 +297,23 @@ namespace Core.Service
 
         }
 
+        private void GetOrCreateCacheInfo(Delegate func, out string cacheKey, out CacheInfo cacheInfo)
+        {
+            cacheKey = func.Method.GetHashCode().ToString();
+            cacheInfo = null;
+            if (!CacheConfig.CacheInfoDic.TryGetValue(cacheKey, out cacheInfo))
+            {
+                var att = func.Method.GetAttributeValue<CacheableAttribute, CacheableAttribute>(item => item);
+                CacheConfig.CacheInfoDic[cacheKey] = cacheInfo = CacheConfig.CreateCacheInfo(att, func.Method, func, cacheKey);
+                cacheInfo.Service = this;
+            }
+        }
+
         public R Cache<P1, R>(Func<P1, R> func, P1 param1, bool canUseCacheIfPossible = true)
         {
-            var cacheKey = func.Method.GetHashCode().ToString();
-            var cacheInfo = CacheConfig.CacheInfoDic[cacheKey];
+            string cacheKey;
+            CacheInfo cacheInfo;
+            GetOrCreateCacheInfo(func, out cacheKey, out cacheInfo);
             if (func != null)
             {
                 var queryableCacheExecution = new FunctionalCacheDataProvider<P1, R>(cacheInfo, func, param1);
@@ -333,8 +337,9 @@ namespace Core.Service
 
         public R Cache<P1, P2, R>(Func<P1, P2, R> func, P1 param1, P2 param2, bool canUseCacheIfPossible = true)
         {
-            var cacheKey = func.Method.GetHashCode().ToString();
-            var cacheInfo = CacheConfig.CacheInfoDic[cacheKey];
+            string cacheKey;
+            CacheInfo cacheInfo;
+            GetOrCreateCacheInfo(func, out cacheKey, out cacheInfo);
 
             if (func != null)
             {
@@ -359,8 +364,9 @@ namespace Core.Service
 
         public R Cache<P1, P2, P3, R>(Func<P1, P2, P3, R> func, P1 param1, P2 param2, P3 param3, bool canUseCacheIfPossible = true)
         {
-            var cacheKey = func.Method.GetHashCode().ToString();
-            var cacheInfo = CacheConfig.CacheInfoDic[cacheKey];
+            string cacheKey;
+            CacheInfo cacheInfo;
+            GetOrCreateCacheInfo(func, out cacheKey, out cacheInfo);
 
             if (func != null)
             {
@@ -385,8 +391,9 @@ namespace Core.Service
 
         public R Cache<P1, P2, P3, P4, R>(Func<P1, P2, P3, P4, R> func, P1 param1, P2 param2, P3 param3, P4 param4, bool canUseCacheIfPossible = true)
         {
-            var cacheKey = func.Method.GetHashCode().ToString();
-            var cacheInfo = CacheConfig.CacheInfoDic[cacheKey];
+            string cacheKey;
+            CacheInfo cacheInfo;
+            GetOrCreateCacheInfo(func, out cacheKey, out cacheInfo);
 
 
             if (func != null)
@@ -412,8 +419,9 @@ namespace Core.Service
 
         public R Cache<P1, P2, P3, P4, P5, R>(Func<P1, P2, P3, P4, P5, R> func, P1 param1, P2 param2, P3 param3, P4 param4, P5 param5, bool canUseCacheIfPossible = true)
         {
-            var cacheKey = func.Method.GetHashCode().ToString();
-            var cacheInfo = CacheConfig.CacheInfoDic[cacheKey];
+            string cacheKey;
+            CacheInfo cacheInfo;
+            GetOrCreateCacheInfo(func, out cacheKey, out cacheInfo);
 
 
             if (func != null)

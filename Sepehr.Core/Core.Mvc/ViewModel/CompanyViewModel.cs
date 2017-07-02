@@ -144,12 +144,7 @@ namespace Core.Mvc.ViewModel
                 if (_viewInfo == null)
                 {
                     var dsConfig = new DataSourceInfo();
-                    //dsConfig.CrudCr.Read.Url = "api/Core/CompanyApi";
-                    dsConfig.CrudCr.Read.Url = "api/CompanyApi/GetEntities";
-                    dsConfig.CrudCr.Insert.Url = "api/CompanyApi/PostEntity";
-                    dsConfig.CrudCr.Update.Url = "api/CompanyApi/PutEntity";
-                    dsConfig.CrudCr.Remove.Url = "api/CompanyApi/DeleteEntity";
-
+                    dsConfig.CrudCr.Read.Url = "api/Core/CompanyApi";
                     dsConfig.ModelCr.ModelIdName = "CompanyId";
                     var fConfig = new Features();
                     fConfig.EditableConfig.CustomConfig.Template.Url = "~/Areas/Core/Views/Shared/EditorTemplates/CompanyViewModelTemplate.cshtml";

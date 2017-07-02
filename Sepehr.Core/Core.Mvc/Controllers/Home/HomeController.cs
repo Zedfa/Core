@@ -24,16 +24,15 @@ namespace Core.Mvc.Controllers
 
         public PartialViewResult MainMenu()
         {
-            // return PartialView("MainLayoutTemplates/TopMainMenu",new  TopMenuViewModel());
+            
             //int? userId = CustomMembershipProvider.GetUserIdCookie();
-            //bool isPassCodeValidate = CustomMembershipProvider.ValidatePassCode(CustomMembershipProvider.GetPassCodeCookie());
-            int? userId = CustomMembershipProvider.GetUserIdCookie();
 
-            bool isPassCodeValidate = CustomMembershipProvider.ValidatePassCode(CustomMembershipProvider.GetPassCodeCookie());
+            //bool isPassCodeValidate = CustomMembershipProvider.ValidatePassCode(CustomMembershipProvider.GetPassCodeCookie());
 
             bool isOnlineUser = Core.Service.ServiceBase.appBase.OnlineUsers.Exists(user => user.UserName.ToLower().Trim() == User.Identity.Name.ToLower().Trim());
 
-            if (isPassCodeValidate && userId.HasValue && isOnlineUser)
+            //if (isPassCodeValidate && userId.HasValue && isOnlineUser)
+            if (CustomMembershipProvider.IsCurrentUserAuthenticate() && isOnlineUser)
             {
                 return PartialView("MainLayoutTemplates/TopMainMenu", new TopMenuViewModel());
             }

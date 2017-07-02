@@ -18,7 +18,8 @@ namespace Core.Service
           bool allowSaveChange = true
           );
         void SetViewElementGrantedToUser(UserProfile userProfile);
-        IList<ViewElementInfo> GetViewElementGrantedToUser(int userId);
+        IList<ViewElementInfo> GetViewElementGrantedToUserByUserId(int userId);
+        IList<ViewElementInfo> GetUserViewElements(int userId);
         IQueryable<ViewElement> GetRootViewElementsBasedOnCompany(int? id);
         List<int> GetViewElementsIdByRoleId(int? roleId);
         IQueryable<ViewElement> GetViewElementsByRoleId(int? roleId);

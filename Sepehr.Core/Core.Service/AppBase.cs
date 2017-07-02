@@ -58,18 +58,16 @@ namespace Core.Service
                 return _monitor;
             }
         }
-        //public List<UserViewElement> ViewElementsGrantedToUser
-        //{
-        //    get { return _viewElementsGrantedToUser ?? (_viewElementsGrantedToUser = new List<UserViewElement>()); }
-        //    set { _viewElementsGrantedToUser = value; }
-        //}
 
 
 
         public ConcurrentDictionary<int, UserViewElement> ViewElementsGrantedToUser
         {
             get { return _viewElementsGrantedToUser ?? (_viewElementsGrantedToUser = new ConcurrentDictionary<int, UserViewElement>()); }
-            set { _viewElementsGrantedToUser = value; }
+            set
+            {
+                _viewElementsGrantedToUser = value;
+            }
         }
 
         public UserViewElement ViewElementsGrantedToAnonymousUser
@@ -79,11 +77,6 @@ namespace Core.Service
         }
 
 
-        //public string CompanyDomainName
-        //{
-        //    get { return _companyDomainName; }
-        //    set { _companyDomainName = value; }
-        //}
 
 
 
@@ -154,54 +147,26 @@ namespace Core.Service
             set { _showAllData = value; }
         }
 
-        //public static ViewElementInfo GetMenuItemPathByUniqueName(string userName, string uniqueName)
-        //{
-        //    var commonViewElement = AppBase._viewElementsGrantedToAnonymousUser.ViewElements
-        //               .FirstOrDefault(element => element.UniqueName.Split('#')[0] == uniqueName);
-
-        //    if (commonViewElement != null)
-        //    {
-        //        return commonViewElement;
-        //    }
-
-        //    else if (userName != string.Empty)
-        //    {
-
-        //        var currentUser = AppBase._viewElementsGrantedToUser.FirstOrDefault(item => item.UserName == userName.ToLower());
-        //        if (currentUser != null)
-        //        {
-        //            var viewElement = currentUser.ViewElements
-        //                                    .FirstOrDefault(element => element.UniqueName.Split('#')[0] == uniqueName);
-
-        //            if (viewElement != null)
-        //            {
-        //                return viewElement;
-        //            }
-        //        }
-
-        //    }
-        //    throw new Exception("The entered url does not exits in any Role");
-
-        //}
 
         public static ViewElementInfo GetMenuItemPathByUniqueName(int userId, string uniqueName)
         {
-            if (userId == 0)
-            {
-                var commonViewElement = AppBase._viewElementsGrantedToAnonymousUser.ViewElements
-                                       .FirstOrDefault(element => element.ConceptualName.Split('#')[0].ToLower() == uniqueName.ToLower());
+            //if (userId == 0)
+            //{
+            var commonViewElement = AppBase._viewElementsGrantedToAnonymousUser.ViewElements
+                                   .FirstOrDefault(element => element.ConceptualName.Split('#')[0].ToLower() == uniqueName.ToLower());
 
-                //if (commonViewElement != null)
-                //{
-                    return commonViewElement;
-                //}
-                //else
-                //{
-                //    var errorViewElement = AppBase._viewElementsGrantedToAnonymousUser.ViewElements
-                //                     .FirstOrDefault(element => element.ConceptualName.Split('#')[0].ToLower() == "Error".ToLower());
-                //    return errorViewElement;
-                //}
-            }
+            //if (commonViewElement != null)
+            //{
+            if (commonViewElement != null)
+                return commonViewElement;
+            //}
+            //else
+            //{
+            //    var errorViewElement = AppBase._viewElementsGrantedToAnonymousUser.ViewElements
+            //                     .FirstOrDefault(element => element.ConceptualName.Split('#')[0].ToLower() == "Error".ToLower());
+            //    return errorViewElement;
+            //}
+            //}
 
 
             UserViewElement currentUser = null;
@@ -213,7 +178,7 @@ namespace Core.Service
 
                 //if (viewElement != null)
                 //{
-                    return viewElement;
+                return viewElement;
                 //}
                 //else
                 //{
@@ -229,48 +194,6 @@ namespace Core.Service
 
         }
 
-        //public static bool HasCurrentUserAccess(string userName, string url = null, string uniqueName = null)
-        //{
-        //    bool hasAcces = string.IsNullOrEmpty(userName);
-
-
-        //    if (url == null && uniqueName == null)
-        //    {
-        //        throw new Exception("url &  also uniqueName can't be null.");
-        //    }
-
-
-        //    else if (AppBase._viewElementsGrantedToUser.FirstOrDefault(item => item.UserName.ToLower() == userName) != null)
-        //    {
-        //        var currentUser = AppBase._viewElementsGrantedToUser.First(item => item.UserName.ToLower() == userName);
-        //        if (uniqueName == null)
-        //        {
-        //            var tempUrl = url.StartsWith("api/") ? url.ToLower().Remove(0, 4) : url.ToLower();
-
-        //            var viewElementGrantedToUser = currentUser.ViewElements;
-        //            hasAcces = viewElementGrantedToUser.Any(element => element.UniqueName.Split('#')[1].ToLower() == tempUrl);
-        //        }
-        //        else
-        //        {
-        //            var arr = uniqueName.Split('#');
-        //            //if (arr.Count() == 2)
-        //            //{
-        //            //    uniqueName = arr[0];
-        //            //}
-
-        //            var viewElementGrantedToUser = currentUser.ViewElements;
-
-        //            hasAcces = viewElementGrantedToUser.Any(element => element.UniqueName.Split('#')[0].ToLower() == arr[1]);
-        //        }
-        //    }
-        //    //when TryGetValue for _viewElementGrantedToUser doesn't exist
-        //    else
-        //    {
-        //        hasAcces = false;
-
-        //    }
-        //    return hasAcces;
-        //}
 
         public static bool HasCurrentUserAccess(int userId, string url = null, string uniqueName = null)
         {
@@ -286,7 +209,6 @@ namespace Core.Service
 
             if (AppBase._viewElementsGrantedToUser.TryGetValue(userId, out currentUser))
             {
-                //var currentUser = AppBase._viewElementsGrantedToUser.First(item => item.UserName.ToLower() == userName);
                 if (uniqueName == null)
                 {
                     var tempUrl = url.StartsWith("api/") ? url.ToLower().Remove(0, 4) : url.ToLower();
@@ -297,21 +219,13 @@ namespace Core.Service
                 else
                 {
 
-                    //var arr = uniqueName.Split('#');
-                   
-
-                    //var viewElementGrantedToUser = currentUser.ViewElements;
-
-                    //hasAcces = viewElementGrantedToUser.Any(element => element.ConceptualName.Split('#')[0].ToLower() == arr[1]);
-                                      
                     var viewElementGrantedToUser = currentUser.ViewElements;
-                    
+
                     hasAcces = viewElementGrantedToUser.Any(element => $"{element.ConceptualName.ToLower()}#{element.Url.ToLower()}" == uniqueName.ToLower());
 
 
                 }
             }
-            //when TryGetValue for _viewElementGrantedToUser doesn't exist
             else
             {
                 hasAcces = false;

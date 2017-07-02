@@ -252,6 +252,22 @@ namespace Core.Service
             }
         }
 
+        [Cacheable(ExpireCacheSecondTime = 10)]
+        public static T GetValueByCategory_Cache<T>(string key, string category)
+        {
+
+            var service = ServiceBase.DependencyInjectionFactory.CreateInjectionInstance<IConstantService>();
+            T value;
+            service.TryGetValue(key, category, out value);
+            return value;
+
+        }
+        public T GetValueByCategory<T>(string key, string category)
+        {
+            var value = Cache(GetValueByCategory_Cache<T>, key, category);
+            return (T)Convert.ChangeType(value, typeof(T));
+        }
+
         public string GetDefaultCulture(bool useCache = true)
         {
             string defaultCulture = DEFAULT_CULTURE;
@@ -283,18 +299,6 @@ namespace Core.Service
             return defaultCulture;
         }
 
-        //[Cacheable(ExpireCacheSecondTime = 60)]
-        //public static T CacheValue<T>(string key)
-        //{
-        //    return new ConstantService().TryGetValueByKey<T>(key);
-        //    // return default(T);
-        //}
-
-        //public T CachedValue<T>(string key)
-        //{
-        //    Func<string, T> a = (string key1) => { return CacheValue<T>(key1); };
-        //    return Cache<string, T>(a, key);
-        //}
 
 
         #endregion

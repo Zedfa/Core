@@ -20,26 +20,25 @@ namespace Core.Mvc.ViewModel.UserVM
             {
                 if (_viewInfo == null)
                 {
-                    var dsConfig = new DataSourceInfo();
-                    dsConfig.CrudCr.Read.Url = "api/UserApi/GetEntities";
-                    dsConfig.CrudCr.Insert.Url = "api/UserApi/PostEntity";
-                    dsConfig.CrudCr.Update.Url = "api/UserApi/PutEntity";
-                    dsConfig.CrudCr.Remove.Url = "api/UserApi/DeleteEntity";
-                    dsConfig.ModelCr.ModelIdName = "Id";
+                    var dataSource = new DataSourceInfo();
+                    dataSource.CrudCr.Read.Url = "api/Core/UserApi/GetEntities";
+                    dataSource.CrudCr.Insert.Url = "api/Core/UserApi/PostEntity";
+                    dataSource.CrudCr.Update.Url = "api/Core/UserApi/PutEntity";
+                    dataSource.CrudCr.Remove.Url = "api/Core/UserApi/DeleteEntity";
+                    dataSource.ModelCr.ModelIdName = "Id";
 
 
 
                     //------------------------
 
 
-                    var fConfig = new Features();
-                    fConfig.EditableConfig.CustomConfig.Template.Url = "~/Areas/Core/Views/Shared/EditorTemplates/UserViewModelTemplate.cshtml";
+                    var features = new Features();
+                    features.EditableConfig.CustomConfig.Template.Url = "~/Areas/Core/Views/Shared/EditorTemplates/UserViewModelTemplate.cshtml";
                     var requiredValidation = new List<ValidationRuleInfo>();
                     requiredValidation.Add(new ValidationRuleInfo("RequiredValidator"));
                     // fConfig.Paging = false;
-                    fConfig.Selectability = Selectable.Row;
-                    fConfig.Insertable = true;
-
+                    features.Selectability = Selectable.Row;
+                    features.Insertable = true;
 
                     //---------------------
 
@@ -54,9 +53,9 @@ namespace Core.Mvc.ViewModel.UserVM
 
 
                     _viewInfo = new GridInfo();
-                    _viewInfo.DataSource = dsConfig;
+                    _viewInfo.DataSource = dataSource;
                     _viewInfo.ColumnsInfo = ColumnsInfo;
-                    _viewInfo.Features = fConfig;
+                    _viewInfo.Features = features;
                     _viewInfo.DtoModelType = typeof(UserDTO);
 
                 }

@@ -1,3 +1,4 @@
+using Core.Rep.DTO;
 using System.Web.Security;
 
 namespace Core.Mvc.Infrastructure
@@ -7,7 +8,7 @@ namespace Core.Mvc.Infrastructure
     {
         //int MinPasswordLength { get; }
 
-        bool ValidateUser(string userName, string password);
+        bool ValidateUser(string userName,string password);
         MembershipCreateStatus CreateUser(string userName, string password, string email);
         bool ChangePassword(string userName, string oldPassword, string newPassword);
     }

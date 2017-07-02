@@ -178,19 +178,30 @@ function getAreaUrl(controller: string, action: string, area: string = '/core') 
 }
 
 
-function detectBrowser(): any {
+function detectBrowser(): AgentInfo {
 
     var userAgent = window.navigator.userAgent;
 
     var browsers = new BrowserTypes();
+    var devices = new DeviceTypes();
+    var agentInfo = new AgentInfo();
+
 
     for (var key in browsers) {
         if (browsers[key].test(userAgent)) {
-            return key;
+            agentInfo.browser = key;
+            break;
         }
     };
 
-    return undefined;
+    for (var key in devices) {
+        if (devices[key].test(userAgent)) {
+            agentInfo.device = key;
+            break;
+        }
+    };
+
+    return agentInfo;
 }
 function hideWaitingSign(selector, selectorForContent): void {
 

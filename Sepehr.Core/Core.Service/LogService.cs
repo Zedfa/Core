@@ -1,18 +1,12 @@
 ﻿using Core.Cmn;
-using Core.Service;
 using Core.Entity;
 using Core.Rep;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Xml;
 using System.IO;
 using System.Configuration;
-using System.Data.SqlServerCe;
-using Core.Cmn;
-using Core.Ef;
 using Core.Rep.DTO;
 using Core.Cmn.Attributes;
 
@@ -98,7 +92,7 @@ namespace Core.Service
 
             var log = GenerateLog(eventLog);
             var repositoryBase = new LogRepository();
-            if (eventLog.OccuredException == null) return;
+            //if (eventLog.OccuredException == null) return;
             repositoryBase.Create(log);
         }
 
@@ -266,10 +260,14 @@ namespace Core.Service
 
         public void Handle(Exception ex, string logFileName, string customMessage)
         {
+            Handle(ex, logFileName, "", customMessage);
+        }
+        public void Handle(Exception ex, string logFileName, string logUserId, string customMessage)
+        {
             var errorLog = this.GetEventLogObj();
             errorLog.OccuredException = ex;
             errorLog.LogFileName = logFileName;
-            // errorLog.UserId = "OTA";
+            errorLog.UserId = logUserId;
             errorLog.CustomMessage = customMessage;
             Handle(errorLog);
         }

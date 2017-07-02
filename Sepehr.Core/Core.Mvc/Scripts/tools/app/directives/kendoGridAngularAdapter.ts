@@ -106,7 +106,7 @@ kendoGridAngularAdapterModule.addDirective('gridView', ["$compile", "$http", "$q
                 //var modelsAddedSofar = [];
                 var model = null;
                 scope.toolbarTemplate = makeToolbarActions().html();
-             
+
                 scope.ajaxSuccess = false;
                 scope.selectedItem = null;
                 scope.isNewItemCommitted = true;
@@ -202,17 +202,17 @@ kendoGridAngularAdapterModule.addDirective('gridView', ["$compile", "$http", "$q
                 //    //        return false;
                 //    //    }
                 //    //});
-                //    //debugger;
+                //    //
                 //    //scope[scope.gridName].dataSource.success(cacheInfo);
                 //};
                 scope.openWin = (arg) => {
-                  
+
                     //arg.sender.element.parent().addClass("modal-fixing");
-                   // return false;
+                    // return false;
                 };
                 scope.activateWin = (arg) => {
-                  
-                  //  arg.sender.element.parent().attr("modal-fixing");
+
+                    //  arg.sender.element.parent().attr("modal-fixing");
                     // return false;
                 };
                 if (addEdit) {
@@ -320,7 +320,7 @@ kendoGridAngularAdapterModule.addDirective('gridView', ["$compile", "$http", "$q
                                 };
                                 break;
                             case "customAction":
-                               
+
                                 var custElem = '<button kendo-button ng-click="handleCustomAction(\'' + initTlbr[i].clickHandler + '\')"> <span></span>' + initTlbr[i].text + '</button>';
 
                                 toolbarTemplate.append(custElem);
@@ -424,11 +424,11 @@ kendoGridAngularAdapterModule.addDirective('gridView', ["$compile", "$http", "$q
                             $http({
                                 url: res["dataSource"]["transport"].destroy.url,
                                 method: 'DELETE',
-                                data:  res.dataSource.batch ? selectedItems : selectedItems[0],
+                                data: res.dataSource.batch ? selectedItems : selectedItems[0],
                                 dataType: "json",
                                 headers: { "Content-Type": "application/json;charset=utf-8" }
                             }).success(function (response, status) {
-                               
+
                                 if (status == 200 || response === "success" || response.Data && response.Data.length >= 1) {
 
                                     $.each(selectedItems, (selectedItemsIndex, item) => {
@@ -595,7 +595,12 @@ kendoGridAngularAdapterModule.addDirective('gridView', ["$compile", "$http", "$q
                         };
                     var cacheKey = scope[scope.gridName].dataSource.transport.parameterMap(parameters, crudType);
 
-                    var cacheData = scope[scope.gridName].dataSource.transport.cache.find(cacheKey);
+                    var cacheData = new CacheInfo(), // { AggregateResults: null, Data: [], Errors: null, Total: 0 },
+                        cacheKeyFoundData = scope[scope.gridName].dataSource.transport.cache.find(cacheKey);
+
+                    if (cacheKeyFoundData) {
+                        cacheData = cacheKeyFoundData;
+                    }
 
                     return {
                         info: cacheData,
@@ -619,9 +624,11 @@ kendoGridAngularAdapterModule.addDirective('gridView', ["$compile", "$http", "$q
 
                         var finallyCallbackFunc = () => { progressBar(container, false); },
                             succesCallbackFunc = (result) => {
-                                var entityList: Array<any> = result.Data;
+                                var entityList: Array<any> = result.Data,
+                                    cacheInfo = getCurrentCacheInfo(),
+                                    pageSize = scope[scope.gridName].dataSource.pageSize();
 
-                                if (scope.scrollPosition == "bottom") {
+                                if (scope.scrollPosition == scrollPosittion.bottom) {
 
                                     $q.when().then(() => {
 
@@ -632,17 +639,15 @@ kendoGridAngularAdapterModule.addDirective('gridView', ["$compile", "$http", "$q
 
                                     }).then(() => {
 
-                                        var cacheInfo = getCurrentCacheInfo(),
-                                            pageSize = scope[scope.gridName].dataSource.pageSize();
 
                                         if (res.dataSource.batch == false) {
 
                                             if (cacheInfo.info.Data.length < pageSize) {
 
-                                                addResultToCache(cacheInfo, entityList[0]);
+                                                addResultToCache(cacheInfo, entityList[0], scrollPosittion.bottom);
                                             }
                                             else {
-                                                addResultToCache(cacheInfo, entityList[0], true)
+                                                addResultToCache(cacheInfo, entityList[0], scrollPosittion.bottom, true)
                                             }
                                         }
                                         //when we have bulk insert in bottom
@@ -654,13 +659,19 @@ kendoGridAngularAdapterModule.addDirective('gridView', ["$compile", "$http", "$q
                                     });
                                 }
 
-                                else if (scope.scrollPosition == "top" /*&& res.dataSource.batch == true*/) {
+                                else if (scope.scrollPosition == scrollPosittion.top) {
 
-                                    var cacheInfo = getCurrentCacheInfo(),
-                                        pageSize = scope[scope.gridName].dataSource.pageSize();
-                                    scope[scope.gridName].options.editable = { mode: "incell", createAt: "top" };
+                                    scope[scope.gridName].options.editable = { mode: "incell", createAt: scrollPosittion.top };
 
-                                    bulkInsert(pageSize, cacheInfo, entityList);
+                                    if (!res.dataSource.batch) {
+
+                                        addResultToCache(cacheInfo, entityList[0], scrollPosittion.top)
+                                    }
+                                    else {
+
+
+                                        bulkInsert(pageSize, cacheInfo, entityList);
+                                    }
                                 }
 
 
@@ -709,7 +720,7 @@ kendoGridAngularAdapterModule.addDirective('gridView', ["$compile", "$http", "$q
 
                     //}
 
-                    if (scope.scrollPosition == "top" && res.dataSource.batch == false) {
+                    if (scope.scrollPosition == scrollPosittion.top && res.dataSource.batch == false) {
                         newlyInserted = scope[scope.gridName].dataSource.insert(0, model);
                     }
                     else {
@@ -750,7 +761,7 @@ kendoGridAngularAdapterModule.addDirective('gridView', ["$compile", "$http", "$q
 
                     scope.winAe.content("<div class='k-edit-form-container' >" + gridAddEditTempl + "</div>");
 
-                    var buttonActions = $('<div class="k-edit-buttons k-state-default" >' + '<button class="k-button k-button-icontext k-primary mainbtn k-grid-update" ng-click="editItem(opt)" >' + addEditObj.update + '</button> ' + '<button class="k-button k-button-icontext k-grid-cancel" ng-click="cancelItem()" >' + addEditObj.cancel + '</button> ' + '</div>');
+                    var buttonActions = $('<div class="k-edit-buttons k-state-default" >' + '<button class="k-button k-button-icontext k-primary mainbtn k-grid-update" ng-click="editItem(opt)" autoFocus >' + addEditObj.update + '</button> ' + '<button class="k-button k-button-icontext k-grid-cancel" ng-click="cancelItem()" >' + addEditObj.cancel + '</button> ' + '</div>');
 
                     var container = scope.winAe.element.find("div.k-edit-form-container");
                     container.append(buttonActions),
@@ -842,14 +853,7 @@ kendoGridAngularAdapterModule.addDirective('gridView', ["$compile", "$http", "$q
                             // setScopeForDirective(childScope, newElement);
                         }
 
-                        //newElement = newElement.attr("validators", "validators");
 
-                        //if (hasTemplate) {
-                        //    setScopeForDirectiveHasTemplatePge(childScope, relatedElement);
-                        //}
-                        //else {
-                        //    setScopeForDirective(childScope, newElement);
-                        //}
 
                         return {
                             element: newElement,
@@ -950,9 +954,16 @@ kendoGridAngularAdapterModule.addDirective('gridView', ["$compile", "$http", "$q
                 }
 
             });
-            function addResultToCache(cacheInfo, entity, nextPage = false) {
+
+            function addResultToCache(cacheInfo, entity, position, nextPage = false) {
                 if (!nextPage) {
-                    cacheInfo.info.Data.push(entity);
+                    if (position == "bottom") {
+                        cacheInfo.info.Data.push(entity);
+                    }
+                    else {
+                        cacheInfo.info.Data.unshift(entity);
+                    }
+
                     cacheInfo.info.Total += 1;
                     scope[scope.gridName].dataSource.success(cacheInfo.info);
                     //scope[scope.gridName].dataSource.transport.read(cacheData);
@@ -968,7 +979,7 @@ kendoGridAngularAdapterModule.addDirective('gridView', ["$compile", "$http", "$q
 
             function bulkInsert(pageSize, cacheInfo, entityList, top: boolean = true) {
 
-                var remainingRecords = pageSize - (cacheInfo.info ? cacheInfo.info.Data.length:0),
+                var remainingRecords = pageSize - (cacheInfo.info ? cacheInfo.info.Data.length : 0),
                     lastInsertedIndex = 0,
                     pageNo = entityList.length >= pageSize ? Math.ceil(entityList.length / pageSize) : 0,
                     mod = entityList.length > pageSize ? entityList.length % pageSize : 0;
@@ -984,7 +995,7 @@ kendoGridAngularAdapterModule.addDirective('gridView', ["$compile", "$http", "$q
                         }
                         else {
                             scope[scope.gridName].dataSource.add(entityList[i]);
-                            addResultToCache(cacheInfo, entityList[i])
+                            addResultToCache(cacheInfo, entityList[i], scrollPosittion.bottom);
                         }
                         lastInsertedIndex += 1;
 
@@ -1000,7 +1011,7 @@ kendoGridAngularAdapterModule.addDirective('gridView', ["$compile", "$http", "$q
                         }
                         else {
                             scope[scope.gridName].dataSource.add(entityList[i]);
-                            addResultToCache(cacheInfo, entityList[i])
+                            addResultToCache(cacheInfo, entityList[i], scrollPosittion.bottom);
                         }
                         lastInsertedIndex += 1;
 

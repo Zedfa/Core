@@ -237,12 +237,15 @@ namespace Core.Cmn.Cache
 
                                     PeriodicTaskFactory p = new PeriodicTaskFactory((pt) =>
                                     {
-                                        Stopwatch stopwatch = new Stopwatch();
-                                        stopwatch.Start();
-                                        (typeof(CacheBase)).GetMethod("RefreshCache").MakeGenericMethod(returnCacheType).Invoke(null, new object[] { queryableCacheExecution, currentCacheInfo });
-                                        stopwatch.Stop();
-                                        currentCacheInfo.FrequencyOfBuilding += 1;
-                                        currentCacheInfo.BuildingTime += new TimeSpan(stopwatch.ElapsedTicks);
+                                        if (currentCacheInfo.CountOfWaitingThreads < 3)
+                                        {
+                                            Stopwatch stopwatch = new Stopwatch();
+                                            stopwatch.Start();
+                                            (typeof(CacheBase)).GetMethod("RefreshCache").MakeGenericMethod(returnCacheType).Invoke(null, new object[] { queryableCacheExecution, currentCacheInfo });
+                                            stopwatch.Stop();
+                                            currentCacheInfo.FrequencyOfBuilding += 1;
+                                            currentCacheInfo.BuildingTime += new TimeSpan(stopwatch.ElapsedTicks);
+                                        }
                                     }, new TimeSpan(0, 0, cacheInfoAtt.ExpireCacheSecondTime), new TimeSpan(0, 0, cacheInfoAtt.ExpireCacheSecondTime));
 
                                     p.Start();
@@ -282,12 +285,15 @@ namespace Core.Cmn.Cache
                                 {
                                     PeriodicTaskFactory p = new PeriodicTaskFactory((pt) =>
                                     {
-                                        Stopwatch stopwatch = new Stopwatch();
-                                        stopwatch.Start();
-                                        (typeof(CacheBase)).GetMethod("RefreshCache").MakeGenericMethod(methodInfo.ReturnType).Invoke(null, new object[] { functionalCacheExecution, currentCacheInfo });
-                                        stopwatch.Stop();
-                                        currentCacheInfo.FrequencyOfBuilding += 1;
-                                        currentCacheInfo.BuildingTime += new TimeSpan(stopwatch.ElapsedTicks);
+                                        if (currentCacheInfo.CountOfWaitingThreads < 3)
+                                        {
+                                            Stopwatch stopwatch = new Stopwatch();
+                                            stopwatch.Start();
+                                            (typeof(CacheBase)).GetMethod("RefreshCache").MakeGenericMethod(methodInfo.ReturnType).Invoke(null, new object[] { functionalCacheExecution, currentCacheInfo });
+                                            stopwatch.Stop();
+                                            currentCacheInfo.FrequencyOfBuilding += 1;
+                                            currentCacheInfo.BuildingTime += new TimeSpan(stopwatch.ElapsedTicks);
+                                        }
                                     }, new TimeSpan(0, 0, cacheInfoAtt.ExpireCacheSecondTime), new TimeSpan(0, 0, cacheInfoAtt.ExpireCacheSecondTime));
 
                                     p.Start();

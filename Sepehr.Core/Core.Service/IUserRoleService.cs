@@ -11,7 +11,7 @@ namespace Core.Service
         IQueryable<UserRoleDTO> GetAllUserRolesDto();
         int Update(int newRoleId, int oldRoleId, int userId, bool allowSaveChange = true);
         IQueryable<UserRole> All(bool canUseCacheIfPossible = true);
-        IQueryable<UserRole> GetRoles(int userId);
+        IQueryable<UserRole> GetRolesByUserId(int userId);
         bool HasDuplicateRoleAssigne(int selectedRoleId, int userId);
         //List<User> GetAllKishUsers();
     }

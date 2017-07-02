@@ -18,7 +18,7 @@ namespace Core.Service
         bool TryGetValue<T>(string key, string category, string culture, out T value, bool useCache = true);
         List<Constant> GetConstantByNameOfCategory(string categoryName, bool allowGetNotShared = true, bool useCache = true);
         List<Constant> GetConstantByNameOfCategoryAndCulture(string nameCategory, string cultureName, bool useCache = true);
-
+        T GetValueByCategory<T>(string key, string category);
         string GetDefaultCulture(bool useCache = false);
 
         T TryGetValueByKey<T>(string key, bool useCache = true);

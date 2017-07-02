@@ -15,11 +15,11 @@ namespace Core.Mvc.Controllers
     public class PartialViewsController : ControllerBaseCr//System.Web.Mvc.Controller
     {
         private readonly IViewElementRoleService _viewElementRoleService;
-        private IUserProfileService _userProfileService;
-        public PartialViewsController(IViewElementRoleService viewElementRoleService, IUserProfileService userProfileService)
+      //  private IUserProfileService _userProfileService;
+        public PartialViewsController(IViewElementRoleService viewElementRoleService)
         {
             _viewElementRoleService = viewElementRoleService;
-            _userProfileService = userProfileService;
+         //   _userProfileService = userProfileService;
         }
 
 

@@ -38,37 +38,59 @@ namespace Core.Mvc.Infrastructure
             }
             var authentication = ServiceBase.DependencyInjectionFactory.CreateInjectionInstance<IAuthentication>();
             int? userId = CustomMembershipProvider.GetUserIdCookie();
+
+            if (viewElementService.HasAnonymousAccess(requestedUrl))
+                return true;
+
             if (userId == null)
             {
-                if (viewElementService.HasAnonymousAccess(requestedUrl))
-                    return true;
-
                 authentication.SignOut(httpContext.User.Identity.Name);
+                return false;
+
+            }
+            else
+            {
+                var userProfileService = ServiceBase.DependencyInjectionFactory.CreateInjectionInstance<IUserProfileService>();
+
+                UserProfile foundUserProfile = userProfileService.Filter(entity => entity.Id.Equals(userId.Value)).FirstOrDefault();
+
+                //if (foundUserProfile != null)
+                //{
+
+                    if (CustomMembershipProvider.IsUserAuthenticate(foundUserProfile))
+                    {
+                        if (!userProfileService.AppBase.OnlineUsers.Any(u => u.UserName.ToLower().Equals(foundUserProfile.UserName)))
+                        {
+                            authentication.SignIn(foundUserProfile, true, true);
+                        }
+                        return viewElementService.RoleHasAccess(foundUserProfile.Id, requestedUrl);
+                    }
+                //}
+                authentication.SignOut(httpContext.User.Identity.Name);
+
                 return false;
 
             }
 
 
-            var userProfileService = ServiceBase.DependencyInjectionFactory.CreateInjectionInstance<IUserProfileService>();
 
-            UserProfile foundUserProfile = userProfileService.Filter(entity => entity.Id.Equals(userId.Value)).FirstOrDefault();
+        }
+        protected override void HandleUnauthorizedRequest(AuthorizationContext filterContext)
+        {
+            //base.HandleUnauthorizedRequest(filterContext);
 
-            if (foundUserProfile != null)
-            {
-                var encodedUserName = Security.GetMd5Hash(MD5.Create(), foundUserProfile.UserName);
+            //filterContext.HttpContext.Response.Redirect("~/Core");
+            //filterContext.Result = new RedirectToRouteResult(new System.Web.Routing.RouteValueDictionary(new { area ="core", controller = "Home", action = "Index" }));
+            //filterContext.Result = new HttpUnauthorizedResult();
+            //filterContext.HttpContext.Response.Redirect("~/Core");
+            // filterContext.Result = new RedirectResult("http://localhost:16660/core");
 
-                var passCode = Security.GetMd5Hash(MD5.Create(), string.Format("{0}{1}", encodedUserName, foundUserProfile.Password));
 
-                if (CustomMembershipProvider.ValidatePassCode(passCode))
-                {
-                    if (!userProfileService.AppBase.OnlineUsers.Any(u => u.UserName.ToLower().Equals(foundUserProfile.UserName)))
-                    {
-                        authentication.SignIn(foundUserProfile, true, true);
-                    }
-                    return viewElementService.RoleHasAccess(foundUserProfile.Id, requestedUrl);
-                }
-            }
-            return false;
+            filterContext.HttpContext.Response.Clear();
+
+            filterContext.HttpContext.Response.StatusCode = 401;
+
+            filterContext.HttpContext.Response.TrySkipIisCustomErrors = true;
 
         }
     }
