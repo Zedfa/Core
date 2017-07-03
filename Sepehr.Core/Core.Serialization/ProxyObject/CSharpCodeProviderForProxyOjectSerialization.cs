@@ -1,18 +1,28 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using Core.Serialization;
-using Microsoft.CSharp;
+﻿using Microsoft.CSharp;
+using System;
 using System.CodeDom.Compiler;
-using System.Reflection;
+using System.Collections.Generic;
 using System.IO;
+using System.Linq;
+using System.Reflection;
+using System.Text;
 
 namespace Core.Serialization.ObjectProxy
 {
     public class CSharpCodeProviderForProxyOjectSerialization
     {
+        public CSharpCodeProviderForProxyOjectSerialization(Type type)
+        {
+            if (type.IsSimple())
+                throw new ArgumentException();
+            Type = type;
+            ObjectMetaData = ObjectMetaData.GetEntityMetaData(type);
+        }
+
+        public ObjectMetaData ObjectMetaData { get; private set; }
+
+        public Type Type { get; set; }
+
         public IObjectProxy Compile()
         {
             var code = GenerateStringCSharpCodeForCompile();
@@ -37,7 +47,6 @@ namespace Core.Serialization.ObjectProxy
                 }
                 catch (Exception ex)
                 {
-
                 }
             });
             // True - memory generation, false - external file generation
@@ -60,39 +69,6 @@ namespace Core.Serialization.ObjectProxy
             var InstanceOfObjectProxy = Activator.CreateInstance(assembly.GetTypes().FirstOrDefault(type => typeof(IObjectProxy).IsAssignableFrom(type))) as IObjectProxy;
             return InstanceOfObjectProxy;
         }
-        public CSharpCodeProviderForProxyOjectSerialization(Type type)
-        {
-            if (type.IsSimple())
-                throw new ArgumentException();
-            Type = type;
-            ObjectMetaData = ObjectMetaData.GetEntityMetaData(type);
-        }
-        string GenerateStringOfType(Type type)
-        {
-            if (type.IsGenericType)
-            {
-                var stringType = type.Namespace + "." + GenerateStringForDeclaringType(type.DeclaringType) + type.Name.Split('`')[0] + "<";
-                foreach (var t in type.GenericTypeArguments)
-                {
-                    stringType += GenerateStringOfType(t);
-                    stringType += ",";
-                }
-                //for ignoring last ',' in string ...
-                stringType = stringType.Substring(0, stringType.Count() - 1);
-                stringType += ">";
-                return stringType;
-            }
-            else
-                return type.Namespace + "." + GenerateStringForDeclaringType(type.DeclaringType) + type.Name;
-        }
-        private string GenerateStringForDeclaringType(Type declaringType)
-        {
-            if (declaringType == null)
-                return string.Empty;
-            return declaringType.Name + "." + GenerateStringForDeclaringType(declaringType.DeclaringType);
-        }
-        public Type Type { get; set; }
-        public ObjectMetaData ObjectMetaData { get; private set; }
         public string GenerateStringCSharpCodeForCompile()
         {
             var nameSpace = "a" + Guid.NewGuid().ToString().Replace("-", "");
@@ -114,7 +90,6 @@ namespace {nameSpace}
 
                 $@"public class {propertyClassName} : Core.Serialization.ObjectProxy.IPropertyProxy
     {{
-
         public System.Type Type {{ get {{ return typeof({typeClassstr}); }} }}
         public System.Type PropertyType {{ get {{ return typeof({propertyTypeString}); }} }}
         public string ProperyName {{ get {{ return  ""{ObjectMetaData.WritablePropertyList[i].Name}""; }} }}
@@ -164,13 +139,38 @@ namespace {nameSpace}
         {{
             var classCopy = new {typeClassstr}();
             return classCopy;
-            
         }}
     }}
 }}
 ";
             var sourceCode = nameSpaceBlock + properyClassesSourceCode + startPartOfObjectProxyClass + proxyPropertyListPart + endPartOfObjectProxyClass;
             return sourceCode;
+        }
+
+        private string GenerateStringForDeclaringType(Type declaringType)
+        {
+            if (declaringType == null)
+                return string.Empty;
+            return declaringType.Name + "." + GenerateStringForDeclaringType(declaringType.DeclaringType);
+        }
+
+        private string GenerateStringOfType(Type type)
+        {
+            if (type.IsGenericType)
+            {
+                var stringType = type.Namespace + "." + GenerateStringForDeclaringType(type.DeclaringType) + type.Name.Split('`')[0] + "<";
+                foreach (var t in type.GenericTypeArguments)
+                {
+                    stringType += GenerateStringOfType(t);
+                    stringType += ",";
+                }
+                //for ignoring last ',' in string ...
+                stringType = stringType.Substring(0, stringType.Count() - 1);
+                stringType += ">";
+                return stringType;
+            }
+            else
+                return type.Namespace + "." + GenerateStringForDeclaringType(type.DeclaringType) + type.Name;
         }
     }
 }

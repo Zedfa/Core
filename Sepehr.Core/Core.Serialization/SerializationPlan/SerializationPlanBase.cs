@@ -2,23 +2,21 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Core.Serialization.SerializationPlan
 {
     public static class SerializationPlan
     {
-
         static SerializationPlan()
         {
-
             SerializationPlansCachedByEveryTypeHachcode = new Dictionary<int, BinaryConverterBase>();
             SerializationPlansCachedByEveryTypeHachcode_Copy = new Dictionary<int, BinaryConverterBase>();
         }
 
         private static Dictionary<int, BinaryConverterBase> SerializationPlansCachedByEveryTypeHachcode { get; set; }
+
         private static Dictionary<int, BinaryConverterBase> SerializationPlansCachedByEveryTypeHachcode_Copy { get; set; }
+
         public static void SetSerializePlan(Type typeToSerialize, BinaryConverterBase value)
         {
             BinaryConverterBase result;
@@ -37,7 +35,6 @@ namespace Core.Serialization.SerializationPlan
                 }
             }
         }
-
 
         public static bool TryGetBinaryConverter(Type typeToSerialize, out BinaryConverterBase result)
         {

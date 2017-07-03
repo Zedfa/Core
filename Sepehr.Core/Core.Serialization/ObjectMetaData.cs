@@ -1,46 +1,152 @@
-﻿
-namespace Core.Serialization
+﻿namespace Core.Serialization
 {
+    using Core.Serialization.BinaryConverters;
+    using ObjectProxy;
     using System;
-    using System.Collections.Concurrent;
     using System.Collections.Generic;
     using System.ComponentModel.DataAnnotations.Schema;
     using System.Linq;
     using System.Reflection;
     using System.Runtime.Serialization;
-    using System.ComponentModel.DataAnnotations;
-    using Core.Serialization.Exceptions;
-    using Core.Serialization.ObjectProxy;
-    using Core.Serialization.BinaryConverters;
 
     [Serializable]
     public class ObjectMetaData
     {
+        private static object _lockObjectForEntityInfo = new object();
+
+        private int? _countOfWritableProperties;
+
+        private List<object> _defaultValueForWritablePropertyList;
+
+        private bool[] _isSerializablePropertyByIndexList;
+
+        private Dictionary<string, PropertyInfo> _properties;
+
+        private IObjectProxy _proxyObject;
+
+        private BinaryConverterBase[] _serializeItemList;
+
+        private Dictionary<string, PropertyInfo> _writableMappedProperties;
+
+        private Dictionary<string, PropertyInfo> _writableProperties;
+
+        private List<PropertyInfo> _writablePropertyList;
+
+        private Dictionary<string, int> _writablePropertyNames;
+
         static ObjectMetaData()
         {
             ObjectMetaData.EntityMetaDataDic = new Dictionary<Type, Core.Serialization.ObjectMetaData>();
         }
-        internal static Dictionary<Type, ObjectMetaData> EntityMetaDataDic { get; private set; }
-        private static object _lockObjectForEntityInfo = new object();
-        public static ObjectMetaData GetEntityMetaData(Type entityType)
+
+        public ObjectMetaData(Type objectType)
         {
-            ObjectMetaData entityInfo = null;
-            if (!ObjectMetaData.EntityMetaDataDic.TryGetValue(entityType, out entityInfo))
+            ObjectType = objectType;
+            ReflectionEmitPropertyAccessor = new Serialization.ReflectionEmitPropertyAccessor(objectType, this);
+        }
+
+        public BinaryConverterBase[] BinaryConverterList
+        {
+            get
             {
-                lock (_lockObjectForEntityInfo)
+                if (_serializeItemList == null)
                 {
-                    if (!ObjectMetaData.EntityMetaDataDic.TryGetValue(entityType, out entityInfo))
+                    lock (Properties)
                     {
-                        entityInfo = new ObjectMetaData(entityType);
-                        ObjectMetaData.EntityMetaDataDic[entityType] = entityInfo;
-                        //if (typeof(SerializableEntity).IsAssignableFrom(entityType))
-                        //    ValidateImplementationProperties(entityType);
+                        if (_serializeItemList == null)
+                        {
+                            int count = CountOfWritableProperties;
+                            _serializeItemList = new BinaryConverterBase[count];
+                            var writableProperties = WritableProperties.ToList();
+                            for (int i = 0; i < count; i++)
+                            {
+                                if (IsSerializablePropertyByIndexList[i])
+                                    _serializeItemList[i] = BinaryConverterBase.GetBinaryConverter(writableProperties[i].Value.PropertyType).Copy();
+                            };
+                        }
                     }
                 }
+                return _serializeItemList;
             }
-
-            return entityInfo;
         }
+
+        public int CountOfWritableProperties
+        {
+            get
+            {
+                if (_countOfWritableProperties == null)
+                {
+                    _countOfWritableProperties = WritableProperties.Count();
+                }
+
+                return _countOfWritableProperties.Value;
+            }
+        }
+
+        public List<object> DefaultValueForWritablePropertyList
+        {
+            get
+            {
+                if (_defaultValueForWritablePropertyList == null)
+                {
+                    lock (Properties)
+                    {
+                        if (_defaultValueForWritablePropertyList == null)
+                        {
+                            _defaultValueForWritablePropertyList = new List<object>();
+                            WritableProperties.ToList().ForEach(item =>
+                            {
+                                _defaultValueForWritablePropertyList.Add(item.Value.PropertyType.GetDefaultValue());
+                            });
+                        }
+                    }
+                }
+
+                return _defaultValueForWritablePropertyList;
+            }
+        }
+
+        public bool[] IsSerializablePropertyByIndexList
+        {
+            get
+            {
+                if (_isSerializablePropertyByIndexList == null)
+                {
+                    lock (Properties)
+                    {
+                        if (_isSerializablePropertyByIndexList == null)
+                        {
+                            int count = CountOfWritableProperties;
+                            _isSerializablePropertyByIndexList = new bool[count];
+                            var hasDataContractAtt = Attribute.IsDefined(ObjectType, typeof(DataContractAttribute));
+                            var writableProperties = WritableProperties.ToList();
+
+                            for (int i = 0; i < count; i++)
+                            {
+                                if (hasDataContractAtt)
+                                {
+                                    var dataMemberAttribute = Attribute.GetCustomAttribute(writableProperties[i].Value, typeof(DataMemberAttribute));
+                                    _isSerializablePropertyByIndexList[i] = dataMemberAttribute != null;
+                                }
+                                else
+                                {
+                                    _isSerializablePropertyByIndexList[i] = true;
+                                }
+                            };
+                        }
+                    }
+                }
+
+                return _isSerializablePropertyByIndexList;
+            }
+        }
+
+        //        propInfo.SetValue(entity, value);
+        //        if (!value.Equals(entity.PropertyValues[i]) || !value.Equals(propInfo.GetValue(entity)))
+        //            throw new BadPropertyImplementationException(entity.GetEntityMetaData.WritablePropertyList[i].Name, entity.GetEntityMetaData.ObjectType.Name);
+        //    }
+        //}
+        public Type ObjectType { get; private set; }
 
         //private static void ValidateImplementationProperties(Type entityType)
         //{
@@ -72,21 +178,6 @@ namespace Core.Serialization
         //            else
         //                value = Activator.CreateInstance(propInfo.PropertyType);
         //        }
-
-        //        propInfo.SetValue(entity, value);
-        //        if (!value.Equals(entity.PropertyValues[i]) || !value.Equals(propInfo.GetValue(entity)))
-        //            throw new BadPropertyImplementationException(entity.GetEntityMetaData.WritablePropertyList[i].Name, entity.GetEntityMetaData.ObjectType.Name);
-        //    }
-        //}
-
-        public ObjectMetaData(Type objectType)
-        {
-            ObjectType = objectType;
-            ReflectionEmitPropertyAccessor = new Serialization.ReflectionEmitPropertyAccessor(objectType, this);
-        }
-
-        public Type ObjectType { get; private set; }
-        private Dictionary<string, PropertyInfo> _properties;
         public Dictionary<string, PropertyInfo> Properties
         {
             get
@@ -111,8 +202,26 @@ namespace Core.Serialization
             }
         }
 
-        private Dictionary<string, PropertyInfo> _writableMappedProperties;
-        private Dictionary<string, PropertyInfo> _writableProperties;
+        public IObjectProxy ProxyObject
+        {
+            get
+            {
+                if (_proxyObject == null)
+                {
+                    lock (Properties)
+                    {
+                        if (_proxyObject == null)
+                        {
+                            _proxyObject = new CSharpCodeProviderForProxyOjectSerialization(ObjectType).Compile();
+                        }
+                    }
+                }
+
+                return _proxyObject;
+            }
+        }
+
+        public ReflectionEmitPropertyAccessor ReflectionEmitPropertyAccessor { get; private set; }
         public Dictionary<string, PropertyInfo> WritableMappedProperties
         {
             get
@@ -137,6 +246,7 @@ namespace Core.Serialization
                 return _writableMappedProperties;
             }
         }
+
         public Dictionary<string, PropertyInfo> WritableProperties
         {
             get
@@ -160,34 +270,6 @@ namespace Core.Serialization
             }
         }
 
-        private Dictionary<string, int> _writablePropertyNames;
-        public Dictionary<string, int> WritablePropertyNames
-        {
-            get
-            {
-                if (_writablePropertyNames == null)
-                {
-                    lock (Properties)
-                    {
-                        if (_writablePropertyNames == null)
-                        {
-                            _writablePropertyNames = new Dictionary<string, int>();
-                            var i = 0;
-                            WritableProperties.ToList().ForEach(item =>
-                          {
-                              _writablePropertyNames.Add(item.Key, i);
-                              i++;
-                          });
-                        }
-                    }
-                }
-
-
-                return _writablePropertyNames;
-            }
-        }
-
-        private List<PropertyInfo> _writablePropertyList;
         public List<PropertyInfo> WritablePropertyList
         {
             get
@@ -211,129 +293,50 @@ namespace Core.Serialization
             }
         }
 
-        private bool[] _isSerializablePropertyByIndexList;
-        public bool[] IsSerializablePropertyByIndexList
+        public Dictionary<string, int> WritablePropertyNames
         {
             get
             {
-                if (_isSerializablePropertyByIndexList == null)
+                if (_writablePropertyNames == null)
                 {
                     lock (Properties)
                     {
-                        if (_isSerializablePropertyByIndexList == null)
+                        if (_writablePropertyNames == null)
                         {
-                            int count = CountOfWritableProperties;
-                            _isSerializablePropertyByIndexList = new bool[count];
-                            var hasDataContractAtt = Attribute.IsDefined(ObjectType, typeof(DataContractAttribute));
-                            var writableProperties = WritableProperties.ToList();
-
-                            for (int i = 0; i < count; i++)
-                            {
-                                if (hasDataContractAtt)
-                                {
-                                    var dataMemberAttribute = Attribute.GetCustomAttribute(writableProperties[i].Value, typeof(DataMemberAttribute));
-                                    _isSerializablePropertyByIndexList[i] = dataMemberAttribute != null;
-                                }
-                                else
-                                {
-                                    _isSerializablePropertyByIndexList[i] = true;
-                                }
-
-                            };
-                        }
-                    }
-                }
-
-                return _isSerializablePropertyByIndexList;
-            }
-        }
-
-        private int? _countOfWritableProperties;
-        public int CountOfWritableProperties
-        {
-            get
-            {
-                if (_countOfWritableProperties == null)
-                {
-                    _countOfWritableProperties = WritableProperties.Count();
-                }
-
-                return _countOfWritableProperties.Value;
-            }
-        }
-        private BinaryConverterBase[] _serializeItemList;
-        public BinaryConverterBase[] BinaryConverterList
-        {
-            get
-            {
-                if (_serializeItemList == null)
-                {
-                    lock (Properties)
-                    {
-                        if (_serializeItemList == null)
-                        {
-                            int count = CountOfWritableProperties;
-                            _serializeItemList = new BinaryConverterBase[count];
-                            var writableProperties = WritableProperties.ToList();
-                            for (int i = 0; i < count; i++)
-                            {
-                                if (IsSerializablePropertyByIndexList[i])
-                                    _serializeItemList[i] = BinaryConverterBase.GetBinaryConverter(writableProperties[i].Value.PropertyType).Copy();
-                            };
-
-                        }
-                    }
-                }
-                return _serializeItemList;
-            }
-        }
-
-        private List<object> _defaultValueForWritablePropertyList;
-        private IObjectProxy _proxyObject;
-
-        public List<object> DefaultValueForWritablePropertyList
-        {
-            get
-            {
-                if (_defaultValueForWritablePropertyList == null)
-                {
-                    lock (Properties)
-                    {
-                        if (_defaultValueForWritablePropertyList == null)
-                        {
-                            _defaultValueForWritablePropertyList = new List<object>();
+                            _writablePropertyNames = new Dictionary<string, int>();
+                            var i = 0;
                             WritableProperties.ToList().ForEach(item =>
-                            {
-                                _defaultValueForWritablePropertyList.Add(item.Value.PropertyType.GetDefaultValue());
-                            });
+                          {
+                              _writablePropertyNames.Add(item.Key, i);
+                              i++;
+                          });
                         }
                     }
                 }
 
-                return _defaultValueForWritablePropertyList;
+                return _writablePropertyNames;
             }
         }
 
-        public IObjectProxy ProxyObject
+        internal static Dictionary<Type, ObjectMetaData> EntityMetaDataDic { get; private set; }
+        public static ObjectMetaData GetEntityMetaData(Type entityType)
         {
-            get
+            ObjectMetaData entityInfo = null;
+            if (!ObjectMetaData.EntityMetaDataDic.TryGetValue(entityType, out entityInfo))
             {
-                if (_proxyObject == null)
+                lock (_lockObjectForEntityInfo)
                 {
-                    lock (Properties)
+                    if (!ObjectMetaData.EntityMetaDataDic.TryGetValue(entityType, out entityInfo))
                     {
-                        if (_proxyObject == null)
-                        {
-                            _proxyObject = new CSharpCodeProviderForProxyOjectSerialization(ObjectType).Compile();
-                        }
+                        entityInfo = new ObjectMetaData(entityType);
+                        ObjectMetaData.EntityMetaDataDic[entityType] = entityInfo;
+                        //if (typeof(SerializableEntity).IsAssignableFrom(entityType))
+                        //    ValidateImplementationProperties(entityType);
                     }
                 }
-
-                return _proxyObject;
             }
-        }
 
-        public ReflectionEmitPropertyAccessor ReflectionEmitPropertyAccessor { get; private set; }
+            return entityInfo;
+        }
     }
 }
-

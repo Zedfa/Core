@@ -1,52 +1,85 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Reflection;
 using System.Reflection.Emit;
-using System.Text;
-using System.Threading;
-using System.Threading.Tasks;
-using Core.Serialization;
 using System.Runtime.Serialization;
-using System.Security;
 
 namespace Core.Serialization
 {
-
     public class ReflectionEmitPropertyAccessor
     {
-
         private readonly Type targetType;
         private Dictionary<Type, OpCode> typeOpCodes;
+
         public ReflectionEmitPropertyAccessor(Type targetType, ObjectMetaData objectMetaData)
         {
             this.targetType = targetType;
             ObjectMetaData = objectMetaData;
             Init();
         }
+
+        public Func<SerializationInfo, StreamingContext, object> CreateInstanceForISerialzableObject
+        {
+            get;
+            private set;
+        }
+
+        public Func<object> EmittedObjectInstanceCreator
+        {
+            get;
+            private set;
+        }
+
+        public Func<object, object>[] EmittedPropertyGetters
+        {
+            get;
+            private set;
+        }
+
+        public Action<object, object>[] EmittedPropertySetters
+        {
+            get;
+            private set;
+        }
+
         public Type TargetType
         {
             get { return targetType; }
         }
+
         private ObjectMetaData ObjectMetaData { get; set; }
 
-        private void InitTypeOpCodes()
+        private Func<object> CreateInstanceMethodIL()
         {
-            typeOpCodes = new Dictionary<Type, OpCode>
-                            {
-                                {typeof (sbyte), OpCodes.Ldind_I1},
-                                {typeof (byte), OpCodes.Ldind_U1},
-                                {typeof (char), OpCodes.Ldind_U2},
-                                {typeof (short), OpCodes.Ldind_I2},
-                                {typeof (ushort), OpCodes.Ldind_U2},
-                                {typeof (int), OpCodes.Ldind_I4},
-                                {typeof (uint), OpCodes.Ldind_U4},
-                                {typeof (long), OpCodes.Ldind_I8},
-                                {typeof (ulong), OpCodes.Ldind_I8},
-                                {typeof (bool), OpCodes.Ldind_I1},
-                                {typeof (double), OpCodes.Ldind_R8},
-                                {typeof (float), OpCodes.Ldind_R4}
-                            };
+            var createInstanceReturnType = typeof(object);
+            var createInstanceDynamicMethod
+              = new DynamicMethod("CreateInstance" + Guid.NewGuid(),
+                                    createInstanceReturnType,
+                                    Type.EmptyTypes, true);
+
+            var createInstanceIL = createInstanceDynamicMethod.GetILGenerator();
+            if (TargetType.IsValueType)
+            {
+                createInstanceIL.Emit(OpCodes.Ldloca_S, createInstanceIL.DeclareLocal(TargetType));
+                createInstanceIL.Emit(OpCodes.Initobj, TargetType);
+                createInstanceIL.Emit(OpCodes.Ldloc_0);
+                createInstanceIL.Emit(OpCodes.Box, TargetType);
+                createInstanceIL.Emit(OpCodes.Ret);
+            }
+            else
+            {
+                var targetCreateInstanceMethod = targetType.GetConstructor(Type.EmptyTypes);
+                if (targetCreateInstanceMethod != null)
+                {
+                    createInstanceIL.Emit(OpCodes.Newobj, targetCreateInstanceMethod);
+                    createInstanceIL.Emit(OpCodes.Ret);
+                }
+                else
+                {
+                    createInstanceIL.ThrowException(typeof(MissingMethodException));
+                }
+            }
+            return (Func<object>)createInstanceDynamicMethod.CreateDelegate(typeof(Func<object>));
         }
 
         private void Init()
@@ -68,11 +101,11 @@ namespace Core.Serialization
                 var targetGetMethod = prop.GetGetMethod(true);
                 if (targetGetMethod != null)
                 {
-                    getIL.Emit(OpCodes.Ldarg_0); //Load the first argument 
+                    getIL.Emit(OpCodes.Ldarg_0); //Load the first argument
                     if (TargetType.IsValueType)
                     {
                         getIL.Emit(OpCodes.Unbox, TargetType);
-                        getIL.EmitCall(OpCodes.Call, targetGetMethod, null); //Get the property value                        
+                        getIL.EmitCall(OpCodes.Call, targetGetMethod, null); //Get the property value
                     }
                     else
                     {
@@ -115,11 +148,11 @@ namespace Core.Serialization
                         setIL.Emit(OpCodes.Castclass, targetType); //Cast to the source type
                     }
 
-                    setIL.Emit(OpCodes.Ldarg_1); //Load the second argument 
+                    setIL.Emit(OpCodes.Ldarg_1); //Load the second argument
                                                  //(value object)
                     if (paramType.IsValueType)
                     {
-                        setIL.Emit(OpCodes.Unbox, paramType); //Unbox it    
+                        setIL.Emit(OpCodes.Unbox, paramType); //Unbox it
                         if (typeOpCodes.ContainsKey(paramType)) //and load
                         {
                             var load = typeOpCodes[paramType];
@@ -138,14 +171,11 @@ namespace Core.Serialization
                     if (TargetType.IsValueType)
                     {
                         setIL.EmitCall(OpCodes.Call, targetSetMethod, null); //Set the property value
-
                     }
                     else
                     {
                         setIL.EmitCall(OpCodes.Callvirt, targetSetMethod, null); //Set the property value
-
                     }
-
                 }
                 else
                 {
@@ -155,60 +185,6 @@ namespace Core.Serialization
                 EmittedPropertySetters[i] = (Action<object, object>)setMethod.CreateDelegate(typeof(Action<object, object>));
                 i++;
             });
-        }
-
-        private Func<object> CreateInstanceMethodIL()
-        {
-            var createInstanceReturnType = typeof(object);
-            var createInstanceDynamicMethod
-              = new DynamicMethod("CreateInstance" + Guid.NewGuid(),
-                                    createInstanceReturnType,
-                                    Type.EmptyTypes, true);
-
-            var createInstanceIL = createInstanceDynamicMethod.GetILGenerator();
-            if (TargetType.IsValueType)
-            {
-                createInstanceIL.Emit(OpCodes.Ldloca_S, createInstanceIL.DeclareLocal(TargetType));
-                createInstanceIL.Emit(OpCodes.Initobj, TargetType);
-                createInstanceIL.Emit(OpCodes.Ldloc_0);
-                createInstanceIL.Emit(OpCodes.Box, TargetType);
-                createInstanceIL.Emit(OpCodes.Ret);
-            }
-            else
-            {
-                var targetCreateInstanceMethod = targetType.GetConstructor(Type.EmptyTypes);
-                if (targetCreateInstanceMethod != null)
-                {
-                    createInstanceIL.Emit(OpCodes.Newobj, targetCreateInstanceMethod);
-                    createInstanceIL.Emit(OpCodes.Ret);
-                }
-                else
-                {
-                    createInstanceIL.ThrowException(typeof(MissingMethodException));
-                }
-            }
-            return (Func<object>)createInstanceDynamicMethod.CreateDelegate(typeof(Func<object>));
-        }
-        public Func<SerializationInfo, StreamingContext, object> CreateInstanceForISerialzableObject
-        {
-            get;
-            private set;
-        }
-
-        public Func<object, object>[] EmittedPropertyGetters
-        {
-            get;
-            private set;
-        }
-        public Action<object, object>[] EmittedPropertySetters
-        {
-            get;
-            private set;
-        }
-        public Func<object> EmittedObjectInstanceCreator
-        {
-            get;
-            private set;
         }
 
         private Func<SerializationInfo, StreamingContext, object> InitCreateInstanceForISerialzableObject()
@@ -235,7 +211,7 @@ namespace Core.Serialization
                     createInstanceIL.ThrowException(typeof(MissingMethodException));
                 }
 
-                createInstanceIL.Emit(OpCodes.Ldarg_0); //Load the first argument 
+                createInstanceIL.Emit(OpCodes.Ldarg_0); //Load the first argument
                 createInstanceIL.Emit(OpCodes.Ldarg_1);
                 createInstanceIL.Emit(OpCodes.Newobj, targetCreateInstanceMethod);
                 if (TargetType.IsValueType)
@@ -245,6 +221,25 @@ namespace Core.Serialization
             }
 
             return null;
+        }
+
+        private void InitTypeOpCodes()
+        {
+            typeOpCodes = new Dictionary<Type, OpCode>
+                            {
+                                {typeof (sbyte), OpCodes.Ldind_I1},
+                                {typeof (byte), OpCodes.Ldind_U1},
+                                {typeof (char), OpCodes.Ldind_U2},
+                                {typeof (short), OpCodes.Ldind_I2},
+                                {typeof (ushort), OpCodes.Ldind_U2},
+                                {typeof (int), OpCodes.Ldind_I4},
+                                {typeof (uint), OpCodes.Ldind_U4},
+                                {typeof (long), OpCodes.Ldind_I8},
+                                {typeof (ulong), OpCodes.Ldind_I8},
+                                {typeof (bool), OpCodes.Ldind_I1},
+                                {typeof (double), OpCodes.Ldind_R8},
+                                {typeof (float), OpCodes.Ldind_R4}
+                            };
         }
     }
 }

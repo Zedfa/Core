@@ -1,30 +1,14 @@
 ﻿using System;
 using System.Collections;
-using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Core.Serialization.BinaryConverters
 {
     public class ListBinaryConverter : BinaryConverter<IList>
     {
-        public override Type ItemType
-        {
-            get
-            {
-                return typeof(IList);
-            }
-        }
-
         public BinaryConverterBase ElementItem { get; private set; }
         public Type ElementType { get; private set; }
-
-        protected override BinaryConverter<IList> CopyBase()
-        {
-            return new ListBinaryConverter();
-        }
 
         protected override void BeforDeserialize(BinaryReader reader, Type objectType, DeserializationContext context)
         {
@@ -35,6 +19,7 @@ namespace Core.Serialization.BinaryConverters
                 ElementItem = GetBinaryConverter(ElementType).Copy();
             }
         }
+
         protected override void BeforSerialize(IList obj, BinaryWriter writer, SerializationContext context)
         {
             if (ElementItem == null)
@@ -44,7 +29,11 @@ namespace Core.Serialization.BinaryConverters
                 CurrentType = objType;
                 ElementItem = GetBinaryConverter(ElementType).Copy();
             }
+        }
 
+        protected override BinaryConverter<IList> CopyBase()
+        {
+            return new ListBinaryConverter();
         }
         protected override IList DeserializeBase(BinaryReader reader, Type objectType, DeserializationContext context)
         {
@@ -55,7 +44,6 @@ namespace Core.Serialization.BinaryConverters
             {
                 for (int i = 0; i < count; i++)
                 {
-                   // var aaa = typeof(IList).IsAssignableFrom(ElementType);
                     var value = ElementItem.Deserialize(reader, ElementType, context);
                     result.Add(value);
                 }

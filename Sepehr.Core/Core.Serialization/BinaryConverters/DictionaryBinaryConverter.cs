@@ -1,31 +1,17 @@
 ﻿using System;
 using System.Collections;
-using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Core.Serialization.BinaryConverters
 {
     public class DictionaryBinaryConverter : BinaryConverter<IDictionary>
     {
-        public override Type ItemType
-        {
-            get
-            {
-                return typeof(IDictionary);
-            }
-        }
         public BinaryConverterBase KeyItem { get; private set; }
-        public BinaryConverterBase ValueItem { get; private set; }
         public Type KeyType { get; private set; }
+        public BinaryConverterBase ValueItem { get; private set; }
         public Type ValueType { get; private set; }
 
-        protected override BinaryConverter<IDictionary> CopyBase()
-        {
-            return new DictionaryBinaryConverter();
-        }
         protected override void BeforDeserialize(BinaryReader reader, Type objectType, DeserializationContext context)
         {
             if (KeyItem == null)
@@ -37,6 +23,7 @@ namespace Core.Serialization.BinaryConverters
                 ValueItem = GetBinaryConverter(ValueType).Copy();
             }
         }
+
         protected override void BeforSerialize(IDictionary obj, BinaryWriter writer, SerializationContext context)
         {
             if (KeyItem == null)
@@ -48,6 +35,11 @@ namespace Core.Serialization.BinaryConverters
                 KeyItem = GetBinaryConverter(KeyType).Copy();
                 ValueItem = GetBinaryConverter(ValueType).Copy();
             }
+        }
+
+        protected override BinaryConverter<IDictionary> CopyBase()
+        {
+            return new DictionaryBinaryConverter();
         }
         protected override IDictionary DeserializeBase(BinaryReader reader, Type objectType, DeserializationContext context)
         {

@@ -1,18 +1,13 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.IO;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Core.Serialization.BinaryConverters
 {
     public class EnumBinaryConverter : BinaryConverter<Enum>
     {
-        public Type UnderlyingType { get; private set; }
-        public Action<Enum, BinaryWriter, SerializationContext> SerializeAction { get; private set; }
         public Func<BinaryReader, Type, DeserializationContext, Enum> DeserializeFunc { get; private set; }
-
+        public Action<Enum, BinaryWriter, SerializationContext> SerializeAction { get; private set; }
+        public Type UnderlyingType { get; private set; }
         protected override void BeforDeserialize(BinaryReader reader, Type objectType, DeserializationContext context)
         {
             if (this.CurrentType == null)
@@ -40,13 +35,24 @@ namespace Core.Serialization.BinaryConverters
                 SetSerializeDeserializeActionByUnderlyingType(UnderlyingType);
             }
         }
+
+        protected override BinaryConverter<Enum> CopyBase()
+        {
+            return new EnumBinaryConverter();
+        }
+
+        protected override Enum DeserializeBase(BinaryReader reader, Type objectType, DeserializationContext context)
+        {
+            return DeserializeFunc(reader, objectType, context);
+        }
+
         protected override void SerializeBase(Enum objectItem, BinaryWriter writer, SerializationContext context)
         {
             SerializeAction(objectItem, writer, context);
         }
-        void SetSerializeDeserializeActionByUnderlyingType(Type underlyingType)
-        {
 
+        private void SetSerializeDeserializeActionByUnderlyingType(Type underlyingType)
+        {
             if (underlyingType == typeof(sbyte))
             {
                 SerializeAction = (Enum objectItem, BinaryWriter writer, SerializationContext context) =>
@@ -148,14 +154,5 @@ namespace Core.Serialization.BinaryConverters
                 throw new NotSupportedException($"enum '{CurrentType}' has UnderlyingType '{UnderlyingType}'! this type has not implemented in EnumBinaryConverter and not supported yet.");
             }
         }
-        protected override Enum DeserializeBase(BinaryReader reader, Type objectType, DeserializationContext context)
-        {
-            return DeserializeFunc(reader, objectType, context);
-        }
-        protected override BinaryConverter<Enum> CopyBase()
-        {
-            return new EnumBinaryConverter();
-        }
     }
-
 }

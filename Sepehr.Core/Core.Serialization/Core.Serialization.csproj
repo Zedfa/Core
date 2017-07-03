@@ -67,11 +67,14 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="BinaryConverters\ISerializableTypeBinaryConverter.cs" />
     <Compile Include="BinaryReaderCore.cs" />
     <Compile Include="BinaryWriterCore.cs" />
     <Compile Include="DeserializationContext.cs" />
     <Compile Include="Extention\TypeExt.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="ProxyObject\CSharpCodeProviderForProxyOjectSerialization.cs" />
+    <Compile Include="ProxyObject\IProxyObject.cs" />
     <Compile Include="SerializationPlan\SerializationPlanBase.cs" />
     <Compile Include="BinaryConverters\ArrayBinaryConverter.cs" />
     <Compile Include="BinaryConverters\DictionaryBinaryConverter.cs" />
@@ -79,7 +82,7 @@
     <Compile Include="ObjectMetaData.cs" />
     <Compile Include="BinaryConverters\ListBinaryConverter.cs" />
     <Compile Include="BinaryCoverter.cs" />
-    <Compile Include="BinaryConverters\SerializeBinaryConverter.cs" />
+    <Compile Include="BinaryConverters\BinaryConverter.cs" />
     <Compile Include="BinaryConverters\BinaryConverterBase.cs" />
     <Compile Include="BinaryConverters\SimpleTypesBinaryConverter.cs" />
     <Compile Include="BinaryConverters\UserDefinedTypeBinaryConverter.cs" />
