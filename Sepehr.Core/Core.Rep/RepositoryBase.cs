@@ -53,7 +53,7 @@ namespace Core.Rep
 
         protected IDbContextBase ContextBase;
 
-        protected IUserLog UserLog;
+      
         private IDbSetBase<TObject> dbSet;
 
         //public virtual IDbContextBase ContextGenerator()
@@ -63,13 +63,7 @@ namespace Core.Rep
 
         Stopwatch Stopwatch { get; set; }
 
-        public RepositoryBase(IDbContextBase dbContextBase, IUserLog userLog)
-        {
-            Stopwatch = new Stopwatch();
-            ContextBase = dbContextBase;
-            UserLog = userLog;
-        }
-
+        
         public RepositoryBase(IDbContextBase dbContextBase)
         {
             Stopwatch = new Stopwatch();

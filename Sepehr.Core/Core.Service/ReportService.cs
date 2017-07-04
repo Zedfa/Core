@@ -24,11 +24,11 @@ namespace Core.Service
         {
             _repositoryBase = new ReportRepository();
         }
-        public ReportService(IDbContextBase dbContextBase, IUserLog userLog)
-            : base(dbContextBase, userLog)
+        public ReportService(IDbContextBase dbContextBase)
+            : base(dbContextBase)
         {
             //_userLog = userLog;
-            _repositoryBase = new ReportRepository(ContextBase, userLog);
+            _repositoryBase = new ReportRepository(ContextBase);
         }
     }
 }

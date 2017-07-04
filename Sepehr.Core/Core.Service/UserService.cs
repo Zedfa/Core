@@ -15,10 +15,10 @@ namespace Core.Service
     {
 
 
-        public UserService(IDbContextBase dbContextBase, IUserLog userLog)
-            : base(dbContextBase, userLog)
+        public UserService(IDbContextBase dbContextBase)
+            : base(dbContextBase)
         {
-           _repositoryBase = new UserRepository(dbContextBase, userLog);
+           _repositoryBase = new UserRepository(dbContextBase);
 
 
         }

@@ -13,11 +13,11 @@ namespace Core.Service
         //private CompanyViewElementRepository _companyViewElementRepository;
         private IDbContextBase _dbcontcontext;
 
-        public CompanyViewElementService(IDbContextBase appContextBase, IUserLog userLog)
-            : base(appContextBase, userLog)
+        public CompanyViewElementService(IDbContextBase appContextBase)
+            : base(appContextBase)
         {
 
-            _repositoryBase = new CompanyViewElementRepository(appContextBase, userLog);
+            _repositoryBase = new CompanyViewElementRepository(appContextBase);
             _dbcontcontext = appContextBase;
         }
        
@@ -26,9 +26,9 @@ namespace Core.Service
 
             var viewlementCompany = (_repositoryBase as CompanyViewElementRepository).Create(inseretedCompanyViewElement, deletedCompanyViewElement, companyId, allowSaveChange);
 
-            var viewElementRoleRepo = new ViewElementRoleRepository(_dbcontcontext, UserLog);
+            var viewElementRoleRepo = new ViewElementRoleRepository(_dbcontcontext);
 
-            var _companyService = new CompanyService(_dbcontcontext, UserLog);
+            var _companyService = new CompanyService(_dbcontcontext);
             var foundedCMP = _companyService.Find(companyId);
             var CompanyRole = foundedCMP.CompanyRoles.FirstOrDefault();
             viewElementRoleRepo.Create(inseretedCompanyViewElement, deletedCompanyViewElement, CompanyRole.RoleId, true);
@@ -37,7 +37,7 @@ namespace Core.Service
 
         public IList<ViewElement> GetViewElement(int? id)
         {
-            return (_repositoryBase as CompanyViewElementRepository).GetViewElementList(id);
+            return (_repositoryBase as CompanyViewElementRepository).GetViewElementList(id ,appBase.CompanyId);
         }
 
     }

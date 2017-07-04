@@ -21,7 +21,10 @@ namespace Core.Service
         {
 
         }
+        public DomainAuthenticationService() : base()
+        {
 
+        }
         public bool Logon(string userName, string password, string domain, out string fullName, out List<string> roles)
         {
             roles = null;

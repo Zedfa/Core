@@ -148,7 +148,7 @@ namespace Core.Mvc.Controllers
 
         public JsonResult DeleteEntity(int selectedViewElementMenuId)
         {
-            _viewElementService.Delete(selectedViewElementMenuId);
+            _viewElementService.Delete(selectedViewElementMenuId, HttpContext.User.Identity.Name);
             return Json(new { id = selectedViewElementMenuId }, JsonRequestBehavior.AllowGet);
 
         }

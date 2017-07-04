@@ -299,20 +299,20 @@ namespace Core.Mvc.Infrastructure
         }
 
         private static bool isUserAuthenticate(UserProfile userProfile)
-        {                
+        {
             var isPassCodeValidate = false;
 
-                    if (userProfile.IsDCUser && userProfile.DCPassword == null)
-                    {
-                        return isPassCodeValidate;
-                    }
-                    var encodedUserName = Security.GetMd5Hash(MD5.Create(), userProfile.UserName);
-                    var password = userProfile.IsDCUser ? Security.GetMd5Hash(MD5.Create(), userProfile.DCPassword ): userProfile.Password;
-                    var passCode = Security.GetMd5Hash(MD5.Create(), string.Format("{0}{1}", encodedUserName, password));
-                    isPassCodeValidate = ValidatePassCode(passCode);
-               
+            if (userProfile.IsDCUser && userProfile.DCPassword == null)
+            {
+                return isPassCodeValidate;
+            }
+            var encodedUserName = Security.GetMd5Hash(MD5.Create(), userProfile.UserName);
+            var password = userProfile.IsDCUser ? Security.GetMd5Hash(MD5.Create(), userProfile.DCPassword) : userProfile.Password;
+            var passCode = Security.GetMd5Hash(MD5.Create(), string.Format("{0}{1}", encodedUserName, password));
+            isPassCodeValidate = ValidatePassCode(passCode);
 
-            
+
+
             return isPassCodeValidate;
         }
         public static bool IsCurrentUserAuthenticate()
@@ -337,7 +337,7 @@ namespace Core.Mvc.Infrastructure
         }
         public static bool IsUserAuthenticate(UserProfile userProfile)
         {
-            return userProfile != null? isUserAuthenticate(userProfile):false;
+            return userProfile != null ? isUserAuthenticate(userProfile) : false;
         }
         private static bool ValidatePassCode(string key)
         {
@@ -383,6 +383,8 @@ namespace Core.Mvc.Infrastructure
                 return 365;
             }
         }
+
+
 
     }
 }

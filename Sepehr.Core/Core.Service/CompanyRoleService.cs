@@ -14,10 +14,10 @@ namespace Core.Service
     public class CompanyRoleService : ServiceBase<CompanyRole>, ICompanyRoleService
     {
 
-        public CompanyRoleService(IDbContextBase dbContextBase, IUserLog userLog)
-            : base(dbContextBase, userLog)
+        public CompanyRoleService(IDbContextBase dbContextBase)
+            : base(dbContextBase)
         {
-            _repositoryBase = new CompanyRoleRepository(dbContextBase, userLog);
+            _repositoryBase = new CompanyRoleRepository(dbContextBase);
 
         }
         //public List<ViewElement> GetRootViewElementsDependOnCompany(int? id)

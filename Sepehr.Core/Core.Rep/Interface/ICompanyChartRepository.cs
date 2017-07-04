@@ -11,6 +11,6 @@ namespace Core.Rep
     public interface ICompanyChartRepository : IRepositoryBase<CompanyChart>
     {
         IQueryable<CompanyChart> GetCompanyChart(int? id);
-        int Delete(int id);
+        int Delete(int id, string userName);
     }
 }

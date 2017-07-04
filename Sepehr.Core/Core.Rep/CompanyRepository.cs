@@ -7,8 +7,8 @@ namespace Core.Rep
 {
     public class CompanyRepository : RepositoryBase<Company>, ICompanyRepository
     {
-        public CompanyRepository(IDbContextBase dbContextBase, IUserLog userLog)
-            : base(dbContextBase, userLog)
+        public CompanyRepository(IDbContextBase dbContextBase)
+            : base(dbContextBase)
         {
 
         }

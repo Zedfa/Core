@@ -10,8 +10,8 @@ namespace Core.Rep
         
          private List<Role> resultRoles=new List<Role>();
         
-         public CompanyChartRoleRepository(IDbContextBase dbContext,IUserLog userLog)
-             : base(dbContext,userLog)
+         public CompanyChartRoleRepository(IDbContextBase dbContext)
+             : base(dbContext)
          {
              
          }

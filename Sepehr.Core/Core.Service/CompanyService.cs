@@ -12,11 +12,11 @@ namespace Core.Service
 
         private CompanyRepository _companyRepository;
 
-        public CompanyService(IDbContextBase dbContextBase, IUserLog userLog)
-            : base(dbContextBase, userLog)
+        public CompanyService(IDbContextBase dbContextBase)
+            : base(dbContextBase)
         {
 
-            _companyRepository = new CompanyRepository(dbContextBase, userLog);
+            _companyRepository = new CompanyRepository(dbContextBase);
             
         }
         public void SetCompany(int currentCompanyId)

@@ -12,14 +12,10 @@ namespace Core.Rep
 {
     public class CompanyChartRepository :RepositoryBase<CompanyChart>, ICompanyChartRepository
     {
-
-        private IUserLog _userLog;
-       
-
-        public CompanyChartRepository(IDbContextBase dbContext,IUserLog userLog)
-            : base(dbContext, userLog)
+        
+        public CompanyChartRepository(IDbContextBase dbContext)
+            : base(dbContext)
         {
-            _userLog = userLog;
         }
 
         public IQueryable<CompanyChart> GetCompanyChart(int? id)
@@ -29,7 +25,7 @@ namespace Core.Rep
       
         }
 
-        public int Delete(int id)
+        public int Delete(int id,string userName)
         {
             var dtResult = CheckRelationBeforeDelete(string.Format("{0}.{1}", Schema, TableName), KeyName, id.ToString());
             if (dtResult.Count >= 1)
@@ -47,9 +43,9 @@ namespace Core.Rep
                 throw new Exception(s.ToString(), new Exception(s.ToString(), null));
             }
 
-            var uName = _userLog.GetUserName();
+            
             var userProfile =
-             ContextBase.Set<UserProfile>().SingleOrDefault(a => a.UserName.ToLower() == uName);
+             ContextBase.Set<UserProfile>().SingleOrDefault(a => a.UserName.ToLower() == userName);
 
             var sqlParams = new List<SqlParameter>();
 

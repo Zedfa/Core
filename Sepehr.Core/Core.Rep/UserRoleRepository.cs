@@ -15,12 +15,7 @@ namespace Core.Rep
         #endregion
 
 
-        public UserRoleRepository(IDbContextBase dbContext, IUserLog userLog)
-            : base(dbContext, userLog)
-        {
-            _dc = dbContext;
-        }
-
+       
         public UserRoleRepository(IDbContextBase dc)
             : base(dc)
         {

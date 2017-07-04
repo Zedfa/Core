@@ -16,13 +16,10 @@ namespace Core.Rep
             : base(dbContext)
         {
             _dbContext = dbContext;
+            viewElementRepository = new ViewElementRepository(dbContext);
+
         }
-        public ViewElementRoleRepository(IDbContextBase dbContext, IUserLog userLog)
-            : base(dbContext, userLog)
-        {
-            _dbContext = dbContext;
-            viewElementRepository = new ViewElementRepository(dbContext, userLog);
-        }
+        
 
         [Cacheable(EnableUseCacheServer = false, ExpireCacheSecondTime = 60)]
         public static IQueryable<ViewElementRole> AllViewElementsCache(IQueryable<ViewElementRole> query)
@@ -310,9 +307,9 @@ namespace Core.Rep
         {
             return AllCache().Include(item => item.Role).Include(item => item.ViewElement);
         }
-        public IQueryable<ViewElement> GetRootViewElementsBasedOnCompany(int? id)
+        public IQueryable<ViewElement> GetRootViewElementsBasedOnCompany(int? id,int companyId)
         {
-            var companyId = UserLog.GetCompanyId().Value;
+           
             var allViewElementsBasedOnCompany = All_ViewElement_Role()
                 .Where(viewElementRole => viewElementRole.Role.CurrentCompanyId == companyId &&
                     viewElementRole.ViewElement.ParentId == id &&

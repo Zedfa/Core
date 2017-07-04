@@ -8,14 +8,10 @@ namespace Core.Rep
     public class RoleRepository : RepositoryBase<Role>
     {
 
-        //public RoleRepository(IDbContextBase dbContext, IUserLog userLog)
-        //    : base(dbContext,userLog)
-        //{
+        
 
-        //}
-
-        public RoleRepository(IDbContextBase dbContext, IUserLog userLog)
-            : base(dbContext, userLog)
+        public RoleRepository(IDbContextBase dbContext)
+            : base(dbContext)
         {
 
         }

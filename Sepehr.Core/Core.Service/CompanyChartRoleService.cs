@@ -14,10 +14,10 @@ namespace Core.Service
 
         //private CompanyChartRoleRepository _companyChartRoleRepository;
 
-        public CompanyChartRoleService(IDbContextBase dbContextBase, IUserLog userLog)
-            : base(dbContextBase, userLog)
+        public CompanyChartRoleService(IDbContextBase dbContextBase)
+            : base(dbContextBase)
         {
-            _repositoryBase = new CompanyChartRoleRepository(dbContextBase, userLog);
+            _repositoryBase = new CompanyChartRoleRepository(dbContextBase);
         }
         public IQueryable<Role> GetRoles(int OrganizationChartId)
         {

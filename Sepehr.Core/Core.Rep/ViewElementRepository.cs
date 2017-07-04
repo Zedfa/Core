@@ -12,19 +12,8 @@ namespace Core.Rep
 {
 
     public class ViewElementRepository : RepositoryBase<ViewElement>
-    {
-
-        private IUserLog _userLog;
+    {       
         IDbContextBase _dc;
-
-        public ViewElementRepository(IDbContextBase dbContext, IUserLog userLog)
-            : base(dbContext, userLog)
-        {
-            _dc = dbContext;
-            dbContext.Configuration.LazyLoadingEnabled = true;
-            dbContext.Configuration.ProxyCreationEnabled = true;
-            _userLog = userLog;
-        }
 
         public ViewElementRepository(IDbContextBase dbContext)
             : base(dbContext)
@@ -32,7 +21,10 @@ namespace Core.Rep
             _dc = dbContext;
             dbContext.Configuration.LazyLoadingEnabled = true;
             dbContext.Configuration.ProxyCreationEnabled = true;
+           
         }
+
+       
         public IQueryable<ViewElement> All_ChildViewElement()
         {
             //var c = (DbContext)ContextBase;
@@ -157,7 +149,7 @@ namespace Core.Rep
             return false;
         }
 
-        public int Delete(int id)
+        public int Delete(int id,string userName)
         {
 
             var dtResult = CheckRelationBeforeDelete(string.Format("{0}.{1}", Schema, TableName), KeyName, id.ToString());
@@ -175,10 +167,10 @@ namespace Core.Rep
                 s.Append("در حال استفاده می باشد");
                 throw new Exception(s.ToString(), new Exception(s.ToString(), null));
             }
-            var uName = _userLog.GetUserName();
+           
             var sqlParams = new List<SqlParameter>();
             var user =
-             ContextBase.Set<User>().AsNoTracking().Include("UserProfile").SingleOrDefault(a => a.UserProfile.UserName.ToLower() == uName.ToLower());
+             ContextBase.Set<User>().AsNoTracking().Include("UserProfile").SingleOrDefault(a => a.UserProfile.UserName.ToLower() == userName.ToLower());
 
 
             sqlParams.Add(new SqlParameter()

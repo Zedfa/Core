@@ -14,10 +14,10 @@ namespace Core.Service
     [Injectable(InterfaceType = typeof(IRoleService), DomainName = "Core")]
     public class RoleService : ServiceBase<Role>, IRoleService
     {
-        public RoleService(IDbContextBase dbContextBase, IUserLog userLog)
-            : base(dbContextBase, userLog)
+        public RoleService(IDbContextBase dbContextBase)
+            : base(dbContextBase)
         {
-            _repositoryBase = new RoleRepository(dbContextBase, userLog);
+            _repositoryBase = new RoleRepository(dbContextBase);
 
 
         }

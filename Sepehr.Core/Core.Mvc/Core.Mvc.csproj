@@ -128,7 +128,6 @@
     <Compile Include="Helpers\CustomWrapper\DataModel\IFilterItem.cs" />
     <Compile Include="Helpers\CustomWrapper\SearchRelated\DropDownListInfo.cs" />
     <Compile Include="MessageType.cs" />
-    <Compile Include="Models\UserLog.cs" />
     <Compile Include="Attribute\ExceptionHandler.cs" />
     <Compile Include="Attribute\Filter\SearchExcludingFields.cs" />
     <Compile Include="Attribute\Filter\SearchLookup.cs" />

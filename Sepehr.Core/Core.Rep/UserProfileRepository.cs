@@ -12,10 +12,7 @@ namespace Core.Rep
 
     public class UserProfileRepository : RepositoryBase<UserProfile>, IUserProfileRepository 
     {
-        public UserProfileRepository(IDbContextBase dbContextBase, IUserLog userLog)
-            : base(dbContextBase, userLog)
-        {
-        }
+        
         public UserProfileRepository(IDbContextBase dbContextBase)
             : base(dbContextBase)
         {

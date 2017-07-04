@@ -72,7 +72,7 @@ namespace Core.Mvc.Controllers
 
         public JsonResult Delete(int selectedNodeId)
         {
-            _CompanyChartService.Delete(selectedNodeId);
+            _CompanyChartService.Delete(selectedNodeId , HttpContext.User.Identity.Name);
             return Json(new { id = selectedNodeId });
 
 

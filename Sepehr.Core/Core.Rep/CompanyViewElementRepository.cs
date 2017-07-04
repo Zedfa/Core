@@ -9,8 +9,8 @@ namespace Core.Rep
 {
     public class CompanyViewElementRepository : RepositoryBase<CompanyViewElement>
     {
-        public CompanyViewElementRepository(IDbContextBase dbContextBase, IUserLog userLog)
-            : base(dbContextBase, userLog)
+        public CompanyViewElementRepository(IDbContextBase dbContextBase)
+            : base(dbContextBase)
         {
 
 
@@ -173,20 +173,20 @@ namespace Core.Rep
             return resultElements;
         }
 
-         public IQueryable<ViewElement> GetViewElement(int? id)
+         public IQueryable<ViewElement> GetViewElement(int? id, int companyId)
         {
-            var currentCompany = UserLog.GetCompanyId();
+          
             //if (id.HasValue)
             //{
             //    return DbSet.Where(a => a.CompanyId == currentCompany).Select(a => a.ViewElement).Where(a => a.ParentId == id && a.IsHidden != true && (!a.InVisible));
             //}
-            return DbSet.Where(a => a.CompanyId == currentCompany).Select(a => a.ViewElement).Where(a => a.ParentId == id && a.IsHidden != true && (!a.InVisible)).Include("ChildViewElement");
+            return DbSet.Where(a => a.CompanyId == companyId).Select(a => a.ViewElement).Where(a => a.ParentId == id && a.IsHidden != true && (!a.InVisible)).Include("ChildViewElement");
         }
 
-         public IList<ViewElement> GetViewElementList(int? id)
+         public IList<ViewElement> GetViewElementList(int? id,int companyId)
          {
-             var currentCompany = UserLog.GetCompanyId();
-             return DbSet.Where(a => a.CompanyId == currentCompany).Select(a => a.ViewElement).Where(a => a.ParentId == id && a.IsHidden != true && (!a.InVisible)).Include("ChildViewElement").ToList();
+          
+             return DbSet.Where(a => a.CompanyId == companyId).Select(a => a.ViewElement).Where(a => a.ParentId == id && a.IsHidden != true && (!a.InVisible)).Include("ChildViewElement").ToList();
          }
 
          

@@ -42,7 +42,7 @@ namespace Core.Service
     {
         public IDbContextBase ContextBase { get; private set; }
         protected IRepositoryBase<T> _repositoryBase;
-        protected IUserLog UserLog;
+       
         public CultureInfo CurrentCulture { get; set; }
 
 
@@ -68,23 +68,14 @@ namespace Core.Service
 
         }
 
-        public ServiceBase(IDbContextBase CoreContextBase, IUserLog userLog)
-        {
-            ContextBase = CoreContextBase;
-            UserLog = userLog;
-            _repositoryBase = GetRepository(ContextBase, UserLog);
-            CurrentCulture = Thread.CurrentThread.CurrentUICulture;
-        }
-
-
-
+       
         public IRepositoryBase<T> RepositoryBase
         {
             get { return _repositoryBase; }
         }
 
 
-        public virtual IRepositoryBase<T> GetRepository(IDbContextBase dbContext = null, IUserLog uLog = null)
+        public virtual IRepositoryBase<T> GetRepository(IDbContextBase dbContext = null)
         {
             if (dbContext == null)
             {
@@ -93,14 +84,8 @@ namespace Core.Service
             }
             else
             {
-                if (uLog != null)
-                {
-                    return new RepositoryBase<T>(ContextBase, UserLog);
-                }
-                else
-                {
                     return new RepositoryBase<T>(ContextBase);
-                }
+                
             }
         }
 

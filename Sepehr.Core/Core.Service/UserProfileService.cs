@@ -21,14 +21,7 @@ namespace Core.Service
             _repositoryBase = new UserProfileRepository(dbContextBase);
             _domainAuthenticationService = domainAuthenticationService;
         }
-
-        public UserProfileService(IDbContextBase dbContextBase, IUserLog userLog, IDomainAuthenticationService domainAuthenticationService)
-            : base(dbContextBase, userLog)
-        {
-            _repositoryBase = new UserProfileRepository(dbContextBase, userLog);
-            _domainAuthenticationService = domainAuthenticationService;
-
-        }
+              
 
         public void AddOnlineUsers(UserProfile userProfile)
         {

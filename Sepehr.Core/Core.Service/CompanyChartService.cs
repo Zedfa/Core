@@ -15,10 +15,10 @@ namespace Core.Service
         private IUserProfileService UserProfileService { get; set; }
 
 
-        public CompanyChartService(IDbContextBase dbContextBase, IUserLog userLog, IUserProfileService userProfileService)
-            : base(dbContextBase, userLog)
+        public CompanyChartService(IDbContextBase dbContextBase, IUserProfileService userProfileService)
+            : base(dbContextBase)
         {
-            _repositoryBase = new CompanyChartRepository(ContextBase, userLog);
+            _repositoryBase = new CompanyChartRepository(ContextBase);
             UserProfileService = userProfileService;
         }
         public IQueryable<CompanyChart> GetCompanyChart(int? id)
@@ -27,9 +27,9 @@ namespace Core.Service
         }
 
 
-        public int Delete(int id)
+        public int Delete(int id, string userName)
         {
-            return (_repositoryBase as CompanyChartRepository).Delete(id);
+            return (_repositoryBase as CompanyChartRepository).Delete(id,userName);
         }
 
         public void SetCompanyChartInfo(string userName)

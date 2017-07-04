@@ -105,7 +105,6 @@
     <Compile Include="Enum\LogicalOprator.cs" />
     <Compile Include="ExpressionInfo.cs" />
     <Compile Include="ExceptionLog.cs" />
-    <Compile Include="IUserLog.cs" />
     <Compile Include="IRole.cs" />
     <Compile Include="IUser.cs" />
     <Compile Include="IUserProfile.cs" />

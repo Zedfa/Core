@@ -13,26 +13,18 @@ namespace Core.Service
     public class ViewElementRoleService : ServiceBase<ViewElementRole>, IViewElementRoleService
     {
 
-        private IUserLog _userLog;
-
-        //[Dependency]
+      
         private IUserService UserService { get; set; }
-        private IUserRoleService UserRoleService { get; set; }
-
-
-
-        //[Dependency]
+        private IUserRoleService UserRoleService { get; set; }                  
         private ICompanyChartRoleService CompanyChartRoleService { get; set; }
+        
 
-        // private ViewElementRoleRepository _viewElementRepository;
-        //private IViewElementService _viewElementService { get; set; }
-
-        public ViewElementRoleService(IDbContextBase dbContextBase, IUserRoleService userRoleService, IUserLog userLog, IUserService userService, ICompanyChartRoleService companyChartRoleService)//,IViewElementService viewElementService)
-            : base(dbContextBase, userLog)
+        public ViewElementRoleService(IDbContextBase dbContextBase, IUserRoleService userRoleService, IUserService userService, ICompanyChartRoleService companyChartRoleService)//,IViewElementService viewElementService)
+            : base(dbContextBase)
         {
 
-            _userLog = userLog;
-            _repositoryBase = new ViewElementRoleRepository(ContextBase, userLog);
+        
+            _repositoryBase = new ViewElementRoleRepository(ContextBase);
             UserService = userService;
             UserRoleService = userRoleService;
             CompanyChartRoleService = companyChartRoleService;
@@ -55,7 +47,7 @@ namespace Core.Service
         }
         public IQueryable<ViewElement> GetRootViewElementsBasedOnCompany(int? id)
         {
-            return (_repositoryBase as ViewElementRoleRepository).GetRootViewElementsBasedOnCompany(id);
+            return (_repositoryBase as ViewElementRoleRepository).GetRootViewElementsBasedOnCompany(id,appBase.CompanyId);
         }
         public int Create(List<int> addedViewElementRole, List<int> deletedviewElementRole, int roleId, bool allowSaveChange = true)
         {

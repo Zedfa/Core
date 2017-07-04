@@ -10,8 +10,8 @@ namespace Core.Rep
     public class CompanyRoleRepository : RepositoryBase<CompanyRole>
     {
 
-        public CompanyRoleRepository(IDbContextBase dbContextBase, Core.Entity.IUserLog userLog)
-            : base(dbContextBase, userLog)
+        public CompanyRoleRepository(IDbContextBase dbContextBase)
+            : base(dbContextBase)
         {
 
 

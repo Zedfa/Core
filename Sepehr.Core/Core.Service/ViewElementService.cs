@@ -26,12 +26,12 @@ namespace Core.Service
         private IViewElementRoleService ViewElementRoleService { get; set; }
 
 
-        public ViewElementService(IDbContextBase dbContextBase, IUserLog userLog, IUserService userService,
+        public ViewElementService(IDbContextBase dbContextBase, IUserService userService,
             IUserProfileService userProfileService, ICompanyChartRoleService companyChartRoleService, IViewElementRoleService viewElementRoleService)
-            : base(dbContextBase, userLog)
+            : base(dbContextBase)
         {
 
-            _repositoryBase = new ViewElementRepository(ContextBase, userLog);
+            _repositoryBase = new ViewElementRepository(ContextBase);
 
             UserService = userService;
             UserProfileService = userProfileService;
@@ -310,10 +310,10 @@ namespace Core.Service
             return (_repositoryBase as ViewElementRepository).IsDuplicateUniqueName(uniqueName, viewElementId);
         }
 
-        public int Delete(int id)
+        public int Delete(int id, string userName)
         {
 
-            return (_repositoryBase as ViewElementRepository).Delete(id);
+            return (_repositoryBase as ViewElementRepository).Delete(id, userName);
         }
         //public override void Create(List<ViewElement> objectList, bool allowSaveChange = true)
         //{

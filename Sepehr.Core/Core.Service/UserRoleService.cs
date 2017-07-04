@@ -16,11 +16,11 @@ namespace Core.Service
         private UserRoleRepository _userRoleRepository;
 
 
-        public UserRoleService(IDbContextBase dbContextBase, IUserLog userLog)
-            : base(dbContextBase, userLog)
+        public UserRoleService(IDbContextBase dbContextBase)
+            : base(dbContextBase)
         {
-            _repositoryBase = new UserRoleRepository(ContextBase, userLog);
-            _userRoleRepository = new UserRoleRepository(ContextBase, userLog);
+            _repositoryBase = new UserRoleRepository(ContextBase);
+            _userRoleRepository = new UserRoleRepository(ContextBase);
         }
         public IQueryable<UserRoleDTO> GetAllUserRolesDto()
         {

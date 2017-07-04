@@ -13,8 +13,8 @@ namespace Core.Rep
          {
              
          }
-         public ReportRepository(IDbContextBase dbContextBase, IUserLog userLog)
-            : base(dbContextBase, userLog)
+         public ReportRepository(IDbContextBase dbContextBase)
+            : base(dbContextBase)
         {
             _dbContext = dbContextBase;
         }

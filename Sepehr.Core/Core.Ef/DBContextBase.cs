@@ -191,7 +191,7 @@ namespace Core.Ef
             //System.Data.Entity.Validation.DbEntityValidationException
             //DbUpdateConcurrencyException
 
-            var modifiedOrAddedEntities = GetAllModifiendOrAddEntities();
+            var modifiedOrAddedEntities = GetAllModifiedOrAddEntities();
 
             foreach (_EntityBase entry in modifiedOrAddedEntities)
             {
@@ -209,7 +209,7 @@ namespace Core.Ef
             }
 
         }
-        private List<object> GetAllModifiendOrAddEntities()
+        private List<object> GetAllModifiedOrAddEntities()
         {
 
             List<object> modifiedOrAddedEntities = (this as DbContext).ChangeTracker.Entries()

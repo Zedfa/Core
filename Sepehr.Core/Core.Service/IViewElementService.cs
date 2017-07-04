@@ -18,7 +18,7 @@ namespace Core.Service
         MenuItem AccessibleViewElements(int userId);
         //void SetViewElementGrantedToUser(string userName);
         bool IsDuplicateUniqueName(string uniqueName, int viewElementId);
-        int Delete(int Id);
+        int Delete(int Id, string userName);
         ViewElement GetViewElementAndChildsById(int id);
         ViewElement GetViewElementByUniqueName(string uniqueName);
         List<ViewElementDTO> GetAccessibleViewElements(int userId);

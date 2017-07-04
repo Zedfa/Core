@@ -30,19 +30,10 @@ namespace Core.Rep
             : base(dbContextBase)
         {
             _dbContext = dbContextBase;
-
             _userProfileRepository = AppBase.DependencyInjectionManager.Resolve<IUserProfileRepository>();
 
         }
-        public UserRepository(IDbContextBase dbContextBase, IUserLog userLog)
-            : base(dbContextBase, userLog)
-        {
-
-            _dbContext = dbContextBase;
-            _userProfileRepository = AppBase.DependencyInjectionManager.Resolve<IUserProfileRepository>();
-
-        }
-
+        
 
         public User GetUser(string userName, string password)
         {
