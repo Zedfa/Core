@@ -39,23 +39,5 @@ namespace Core.UnitTesting.Cmn
             public int Count { get; set; }
 
         }
-
-        [TestMethod]
-        public void SerializableComplexPropertiesGetterIsCorrectForUserEntity()
-        {
-
-            Assert.AreEqual(new EntityInfoTests.User().EntityInfo().SerializableComplexProperties.Count, 5);
-            Assert.AreEqual(new EntityInfoTests.User().EntityInfo().SerializableComplexProperties.First().Name, "CompanyChart");
-            Assert.AreEqual(new EntityInfoTests.User().EntityInfo().SerializableComplexProperties.Last().Name, "UserRoles");
-        }
-
-
-        [TestMethod]
-        public void SerializableSimplePropertiesGetterIsCorrectForUserEntity()
-        {
-            Assert.AreEqual(new EntityInfoTests.User().EntityInfo().SerializableSimpleProperties.Count, 7);
-            Assert.AreEqual(new EntityInfoTests.User().EntityInfo().SerializableSimpleProperties.First().Name, "Active");
-            Assert.AreEqual(new EntityInfoTests.User().EntityInfo().SerializableSimpleProperties.Last().Name, "LName");
-        }
     }
 }

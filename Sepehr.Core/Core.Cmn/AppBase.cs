@@ -21,7 +21,7 @@ namespace Core.Cmn
         public static ILogService LogService { get; set; }
         public static IDependencyInjectionManager DependencyInjectionManager { get; set; }
         public static ITraceViewer TraceViewer { get; set; }
-       
+
 
         static AppBase()
         {
@@ -84,37 +84,37 @@ namespace Core.Cmn
         public static IEnumerable<Assembly> GetAssemblies()
         {
 
-                ///chegini:ountori k man motavje shodam, dll ha dar iis hame load migardand va dar baghie mavared zaheran dll ha dar zamane niazeshan load migardand.
-                ///chon ma mikhahim tamame dll haye app ro peymayesh konim man hameye dll ha ro dar code zir load mikonam. 
-                string binPath;
-                if (IsWebApp)
-                    binPath = AppDomain.CurrentDomain.RelativeSearchPath;
-                else
-                    binPath = System.IO.Directory.GetCurrentDirectory();
+            ///chegini:ountori k man motavje shodam, dll ha dar iis hame load migardand va dar baghie mavared zaheran dll ha dar zamane niazeshan load migardand.
+            ///chon ma mikhahim tamame dll haye app ro peymayesh konim man hameye dll ha ro dar code zir load mikonam. 
+            string binPath;
+            if (IsWebApp)
+                binPath = AppDomain.CurrentDomain.RelativeSearchPath;
+            else
+                binPath = System.IO.Directory.GetCurrentDirectory();
 
-                foreach (string dll in Directory.GetFiles(binPath, "*.dll", SearchOption.AllDirectories))
+            foreach (string dll in Directory.GetFiles(binPath, "*.dll", SearchOption.AllDirectories))
+            {
+                try
                 {
-                    try
-                    {
-                        Assembly loadedAssembly = Assembly.LoadFrom(dll);
-                    }
-                    catch
-                    { }
+                    Assembly loadedAssembly = Assembly.LoadFrom(dll);
                 }
+                catch
+                { }
+            }
 
-                return AppDomain.CurrentDomain.GetAssemblies()
-                    .Where(a =>
-                   a.ManifestModule.Name != "<In Memory Module>"
-                    && !a.FullName.StartsWith("System")
-                    && !a.FullName.StartsWith("Microsoft")
-                    && a.Location.IndexOf("App_Web") == -1
-                    && a.Location.IndexOf("App_global") == -1
-                    && a.FullName.IndexOf("CppCodeProvider") == -1
-                    && a.FullName.IndexOf("WebMatrix") == -1
-                    && a.FullName.IndexOf("SMDiagnostics") == -1
-                    && a.FullName.IndexOf("Stimulsoft") == -1
-                    && !string.IsNullOrEmpty(a.Location)
-                    );            
+            return AppDomain.CurrentDomain.GetAssemblies()
+                .Where(a =>
+               a.ManifestModule.Name != "<In Memory Module>"
+                && !a.FullName.StartsWith("System")
+                && !a.FullName.StartsWith("Microsoft")
+                && a.Location.IndexOf("App_Web") == -1
+                && a.Location.IndexOf("App_global") == -1
+                && a.FullName.IndexOf("CppCodeProvider") == -1
+                && a.FullName.IndexOf("WebMatrix") == -1
+                && a.FullName.IndexOf("SMDiagnostics") == -1
+                && a.FullName.IndexOf("Stimulsoft") == -1
+                && !string.IsNullOrEmpty(a.Location)
+                );
         }
         public static IList<Type> GetAlltypes()
         {
@@ -143,24 +143,7 @@ namespace Core.Cmn
             Type iApplicationStartBaseType = typeof(ApplicationStartBase);
             return allTypes.Where(type => iApplicationStartBaseType.IsAssignableFrom(type) && !type.IsAbstract).ToList();
         }
-        public static void BuildEntityInfoDic(IList<Type> allTypes)
-        {
-            _EntityBase.EntityInfoDic = new Dictionary<int, EntityInfo>();
-            Type entityBaseType = typeof(_EntityBase);
-            List<Type> allTypeOfEntities = allTypes.Where(type => entityBaseType.IsAssignableFrom(type)).ToList();
-            allTypeOfEntities.ForEach(type =>
-            {
-                var typeKey = type.GetHashCode();
-                if (_EntityBase.EntityInfoDic.ContainsKey(typeKey))
-                {
-                    throw new Exception($"The key for entity type {type.Name} is duplicate!");
-                }
-                else
-                {
-                    _EntityBase.EntityInfoDic[typeKey] = _EntityBase.GetEntityInfo(type);
-                }
-            });
-        }
+
 
         private static void LogMinThreads()
         {
@@ -202,7 +185,7 @@ namespace Core.Cmn
                         instanceType.BeforeApplicationStart();
                     });
 
-                    BuildEntityInfoDic(allTypes);
+                    EntityInfo.BuildEntityInfoDic(allTypes);
 
                     applicationStartInstaces.OrderBy(i => i.ExecutionPriorityOnApplicationStart).ToList().ForEach(instance =>
                       {

@@ -6,28 +6,23 @@ namespace Core.Serialization
 {
     public static class BinaryConverter
     {
+        public static object obj = new object();
         public static object Deserialize(byte[] binary, Type objectType)
         {
-            Core.Serialization.Utility.Debuging.WriteLine("Start Binary Deserializaing ...");
-            using (var memoryStream = new MemoryStream(binary))
+            lock (obj)
             {
-                using (var reader = new BinaryReaderCore(memoryStream))
+                Core.Serialization.Utility.Debuging.WriteLine("Start Binary Deserializaing ...");
+                using (var memoryStream = new MemoryStream(binary))
                 {
-                    BinaryConverterBase serializationPlan;
-                    var context = new DeserializationContext();
-                    object obj;
-                    if (!SerializationPlan.SerializationPlan.TryGetBinaryConverter(objectType, out serializationPlan))
+                    using (var reader = new BinaryReaderCore(memoryStream))
                     {
-                        serializationPlan = BinaryConverterBase.GetBinaryConverter(objectType).Copy();
+                        BinaryConverterBase serializationPlan;
+                        var context = new DeserializationContext();
+                        object obj;
+                        serializationPlan = BinaryConverterBase.GetBinaryConverter(objectType);
                         obj = serializationPlan.Deserialize(reader, objectType, context);
-                        SerializationPlan.SerializationPlan.SetSerializePlan(objectType, serializationPlan);
+                        return obj;
                     }
-                    else
-                    {
-                        obj = serializationPlan.Deserialize(reader, objectType, context);
-                    }
-
-                    return obj;
                 }
             }
         }
@@ -47,17 +42,8 @@ namespace Core.Serialization
                     var type = obj.GetType();
                     BinaryConverterBase serializationPlan;
                     var context = new SerializationContext();
-                    if (!SerializationPlan.SerializationPlan.TryGetBinaryConverter(type, out serializationPlan))
-                    {
-                        serializationPlan = BinaryConverterBase.GetBinaryConverter(type).Copy();
-                        serializationPlan.Serialize(obj, writer, context);
-                        SerializationPlan.SerializationPlan.SetSerializePlan(type, serializationPlan);
-                    }
-                    else
-                    {
-                        serializationPlan.Serialize(obj, writer, context);
-                    }
-
+                    serializationPlan = BinaryConverterBase.GetBinaryConverter(type);
+                    serializationPlan.Serialize(obj, writer, context);
                     return memoryStream.ToArray();
                 }
             }

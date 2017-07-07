@@ -16,30 +16,14 @@ namespace Core.Serialization.BinaryConverters
                 return typeof(Array);
             }
         }
-        protected override void BeforDeserialize(BinaryReader reader, Type objectType, DeserializationContext context)
-        {
-            if (ElementItem == null)
-            {
-                ElementType = objectType.GetElementType();
-                CurrentType = objectType;
-                ElementItem = GetBinaryConverter(ElementType).Copy();
-            }
-        }
 
-        protected override void BeforSerialize(Array obj, BinaryWriter writer, SerializationContext context)
+        public override BinaryConverterBase Copy(Type type)
         {
-            if (ElementItem == null)
-            {
-                var objType = obj.GetType();
-                ElementType = objType.GetElementType();
-                CurrentType = objType;
-                ElementItem = GetBinaryConverter(ElementType).Copy();
-            }
-        }
-
-        protected override BinaryConverter<Array> CopyBase()
-        {
-            return new ArrayBinaryConverter();
+            var binaryConverter = new ArrayBinaryConverter();
+            binaryConverter.Init(type);
+            binaryConverter.ElementType = binaryConverter.CurrentType.GetElementType();
+            binaryConverter.ElementItem = GetBinaryConverter(binaryConverter.ElementType);
+            return binaryConverter;
         }
 
         protected override Array DeserializeBase(BinaryReader reader, Type objectType, DeserializationContext context)

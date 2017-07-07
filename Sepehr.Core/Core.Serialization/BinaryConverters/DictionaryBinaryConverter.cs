@@ -12,34 +12,15 @@ namespace Core.Serialization.BinaryConverters
         public BinaryConverterBase ValueItem { get; private set; }
         public Type ValueType { get; private set; }
 
-        protected override void BeforDeserialize(BinaryReader reader, Type objectType, DeserializationContext context)
+        public override BinaryConverterBase Copy(Type type)
         {
-            if (KeyItem == null)
-            {
-                CurrentType = objectType;
-                KeyType = objectType.GetGenericArguments().First();
-                ValueType = objectType.GetGenericArguments().Last();
-                KeyItem = GetBinaryConverter(KeyType).Copy();
-                ValueItem = GetBinaryConverter(ValueType).Copy();
-            }
-        }
-
-        protected override void BeforSerialize(IDictionary obj, BinaryWriter writer, SerializationContext context)
-        {
-            if (KeyItem == null)
-            {
-                var objectType = obj.GetType();
-                CurrentType = objectType;
-                KeyType = objectType.GetGenericArguments().First();
-                ValueType = objectType.GetGenericArguments().Last();
-                KeyItem = GetBinaryConverter(KeyType).Copy();
-                ValueItem = GetBinaryConverter(ValueType).Copy();
-            }
-        }
-
-        protected override BinaryConverter<IDictionary> CopyBase()
-        {
-            return new DictionaryBinaryConverter();
+            var binaryConverter = new DictionaryBinaryConverter();
+            binaryConverter.Init(type);
+            binaryConverter.KeyType = binaryConverter.CurrentType.GetGenericArguments().First();
+            binaryConverter.ValueType = binaryConverter.CurrentType.GetGenericArguments().Last();
+            binaryConverter.KeyItem = GetBinaryConverter(binaryConverter.KeyType);
+            binaryConverter.ValueItem = GetBinaryConverter(binaryConverter.ValueType);
+            return binaryConverter;
         }
         protected override IDictionary DeserializeBase(BinaryReader reader, Type objectType, DeserializationContext context)
         {

@@ -19,59 +19,29 @@ namespace Core.Serialization.BinaryConverters
         protected Type[] BinaryConverterTypesForISerializable { get; private set; }
 
         protected string[] ItemNamesForISerializable { get; private set; }
-
-        protected override void BeforDeserialize(BinaryReader reader, Type objectType, DeserializationContext context)
+        public override BinaryConverterBase Copy(Type type)
         {
-            if (BinaryConverters == null)
+            var binaryConverter = new ISerializableTypeBinaryConverter();
+            binaryConverter.ObjectType = type;
+            binaryConverter.Init(type);
+            binaryConverter.EntityMetaData = ObjectMetaData.GetEntityMetaData(type);
+            binaryConverter.UserDefinedObject = Activator.CreateInstance(type);
+            SerializationInfo serializationInfo = new SerializationInfo(type, new FormatterConverter());
+            ((ISerializable)binaryConverter.UserDefinedObject).GetObjectData(serializationInfo, _context);
+            binaryConverter.ItemNamesForISerializable = new string[serializationInfo.MemberCount];
+            binaryConverter.BinaryConverters = new BinaryConverterBase[serializationInfo.MemberCount];
+            binaryConverter.BinaryConverterTypesForISerializable = new Type[serializationInfo.MemberCount];
+            var i = 0;
+            foreach (SerializationEntry serializationEntry in serializationInfo)
             {
-                ObjectType = objectType;
-                CurrentType = ObjectType;
-                EntityMetaData = ObjectMetaData.GetEntityMetaData(CurrentType);
-                UserDefinedObject = Activator.CreateInstance(CurrentType);
-                SerializationInfo serializationInfo = new SerializationInfo(CurrentType, new FormatterConverter());
-                ((ISerializable)UserDefinedObject).GetObjectData(serializationInfo, _context);
-                ItemNamesForISerializable = new string[serializationInfo.MemberCount];
-                BinaryConverters = new BinaryConverterBase[serializationInfo.MemberCount];
-                BinaryConverterTypesForISerializable = new Type[serializationInfo.MemberCount];
-                var i = 0;
-                foreach (SerializationEntry serializationEntry in serializationInfo)
-                {
-                    BinaryConverters[i] = BinaryConverterBase.GetBinaryConverter(serializationEntry.ObjectType).Copy();
-                    BinaryConverterTypesForISerializable[i] = serializationEntry.ObjectType;
-                    ItemNamesForISerializable[i] = serializationEntry.Name;
-                    i++;
-                }
+                binaryConverter.BinaryConverters[i] = BinaryConverterBase.GetBinaryConverter(serializationEntry.ObjectType);
+                binaryConverter.BinaryConverterTypesForISerializable[i] = serializationEntry.ObjectType;
+                binaryConverter.ItemNamesForISerializable[i] = serializationEntry.Name;
+                i++;
             }
+            return binaryConverter;
         }
 
-        protected override void BeforSerialize(ISerializable obj, BinaryWriter writer, SerializationContext context)
-        {
-            if (BinaryConverters == null)
-            {
-                ObjectType = obj.GetType();
-                CurrentType = ObjectType;
-                EntityMetaData = ObjectMetaData.GetEntityMetaData(CurrentType);
-                UserDefinedObject = Activator.CreateInstance(CurrentType);
-                SerializationInfo serializationInfo = new SerializationInfo(CurrentType, new FormatterConverter());
-                ((ISerializable)UserDefinedObject).GetObjectData(serializationInfo, _context);
-                ItemNamesForISerializable = new string[serializationInfo.MemberCount];
-                BinaryConverters = new BinaryConverterBase[serializationInfo.MemberCount];
-                BinaryConverterTypesForISerializable = new Type[serializationInfo.MemberCount];
-                var i = 0;
-                foreach (SerializationEntry serializationEntry in serializationInfo)
-                {
-                    BinaryConverters[i] = BinaryConverterBase.GetBinaryConverter(serializationEntry.ObjectType).Copy();
-                    BinaryConverterTypesForISerializable[i] = serializationEntry.ObjectType;
-                    ItemNamesForISerializable[i] = serializationEntry.Name;
-                    i++;
-                }
-            }
-        }
-
-        protected override BinaryConverter<ISerializable> CopyBase()
-        {
-            return new ISerializableTypeBinaryConverter();
-        }
         protected override ISerializable DeserializeBase(BinaryReader reader, Type objectType, DeserializationContext context)
         {
             ISerializable result;

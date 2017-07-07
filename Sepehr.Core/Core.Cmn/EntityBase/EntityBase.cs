@@ -24,11 +24,11 @@ namespace Core.Cmn
 
     [Serializable]
     [DataContract(IsReference = true)]
-    public  class _EntityBase : SerializableEntity
+    public class _EntityBase
     {
         private ConcurrentDictionary<string, object> _navigationPropertyDataDic;
-        public ConcurrentDictionary<string, object> NavigationPropertyDataDic => _navigationPropertyDataDic ??
-                                                                                (_navigationPropertyDataDic = new ConcurrentDictionary<string, object>());        
+        internal ConcurrentDictionary<string, object> NavigationPropertyDataDic => _navigationPropertyDataDic ??
+                                                                                (_navigationPropertyDataDic = new ConcurrentDictionary<string, object>());
         /// <summary>
         /// It just works right for Single Pirimarykey, e.g: Id, not Id, name as PrimaryKey.
         /// </summary>
@@ -529,7 +529,7 @@ namespace Core.Cmn
 
     [Serializable]
     [DataContract(IsReference = true)]
-    public  class EntityBase<T> : _EntityBase, IEntity, System.IEquatable<_EntityBase> where T : IEntity
+    public class EntityBase<T> : _EntityBase, IEntity, System.IEquatable<_EntityBase> where T : IEntity
     {
 
         public EntityBase()

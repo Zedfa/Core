@@ -37,7 +37,7 @@ namespace Core.Service
                     if (pc.ValidateCredentials(userName, password))
                     {
                         roles = new List<string>();
-                        using (UserPrincipal userPrincipal = UserPrincipal.FindByIdentity(pc, IdentityType.UserPrincipalName, userName))
+                        using (UserPrincipal userPrincipal = UserPrincipal.FindByIdentity(pc, IdentityType.SamAccountName, userName))
                         {
 
                             fullName = userPrincipal.DisplayName;

@@ -62,9 +62,10 @@ coreAppModule.addController('clearTabContainer', ['$scope', 'viewElementService'
             viewElementService.topMenu.closeAllOpenTabStrips();
         }
     }]);
-coreAppModule.addController('renderMenuController', ['$scope', 'getAuthorize', 'isAuthorizeService',
-    function ($scope, getAuthorize, isAuthorizeService) {
+coreAppModule.addController('renderMenuController', ['$scope', 'getAuthorize', 'isAuthorizeService', function ($scope, getAuthorize, isAuthorizeService) {
+        $scope.isAuthorize = isAuthorizeService.isAuthorize;
+        $scope.isAuthorizeValue = isAuthorizeService;
         getAuthorize($scope).then(function (authorize) {
-            $scope.isAuthorize = isAuthorizeService.isAuthorize;
+            $scope.isAuthorizeValue = isAuthorizeService;
         });
     }]);

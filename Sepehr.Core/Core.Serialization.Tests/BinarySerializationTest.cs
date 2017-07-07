@@ -1,4 +1,5 @@
 ﻿using Core.Serialization.BinaryConverters;
+using Core.Serialization.Test;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Newtonsoft.Json;
 using System;
@@ -14,9 +15,9 @@ namespace Core.Serialization.Tests
     [TestClass]
     public class BinarySerializationTest
     {
-        private ConcurrentDictionary<int, User<UserRole>> aa;
-        private List<UserRole> listDetails;
-        private List<UserRole> listSelectedDetails;
+        private ConcurrentDictionary<int, User<IUserRole>> aa;
+        private List<IUserRole> listDetails;
+        private List<IUserRole> listSelectedDetails;
 
         [TestMethod]
         public void AnonymousTypeIntegrateTestForBinarySerializeDeserialize()
@@ -96,18 +97,18 @@ namespace Core.Serialization.Tests
         {
             var count = 1000;
             var countOfDetails = 100;
-            aa = new ConcurrentDictionary<int, User<UserRole>>();
+            aa = new ConcurrentDictionary<int, User<IUserRole>>();
             //  var ii = 123456;
             var random = new Random();
-            listDetails = new List<UserRole>();
+            listDetails = new List<IUserRole>();
             for (int j = 0; j < countOfDetails; j++)
             {
                 listDetails.Add(new UserRole { Id = j, TestEnum2 = TestEnum2.e, User = new User<UserRole> { Email = "saeedcheginy@yahoo.com" }, Role = new Role { Id = 10 }, SomeArray = new int[] { 0, 1, 2, 3, 4, 5, 6 } });
             }
             for (int ii = 0; ii < count; ii++)
             {
-                var dic = new List<UserRole>() { null, listDetails[random.Next(0, countOfDetails)], new UserRole { Id = ii + 1, TestEnum2 = TestEnum2.c, SomeArray = new int[] { 0, 1, 2, 3, 4, 5, 6 } } };
-                aa.TryAdd(ii, new User<UserRole>
+                var lst = new List<IUserRole>() { null, listDetails[random.Next(0, listDetails.Count - 1)], new UserRole { Id = ii + 1, TestEnum2 = TestEnum2.c, SomeArray = new int[] { 0, 1, 2, 3, 4, 5, 6 } } };
+                aa.TryAdd(ii, new User<IUserRole>
                 {
                     TestEnum = TestEnum.b,
                     UserDefined = new Test.ObjectMetadataTests.UserDefined()
@@ -123,8 +124,8 @@ namespace Core.Serialization.Tests
                     },
                     Id = random.Next(1, 10000000),
                     FName = "saeed" + ii,
-                    LName = "chegini" + ii,
-                    UserRoles = dic
+                    LName = "چگینی  دول.پری که تست انجام میدهد و چه کسی میداند نتیجه ی این تست را dfgdfgfh" + ii,
+                    UserRoles = lst
                 });
             }
 
@@ -146,8 +147,8 @@ namespace Core.Serialization.Tests
                 Assert.AreEqual(aa[i].FName, c[i].FName);
                 Assert.AreEqual(aa[i].Id, c[i].Id);
                 Assert.AreEqual(aa[i].LName, c[i].LName);
-                Assert.AreEqual(aa[i].UserRoles[1].Id, c[i].UserRoles[1].Id);
-                Assert.AreEqual(aa[i].UserRoles[1].User.Email, c[i].UserRoles[1].User.Email);
+                Assert.AreEqual(((UserRole)aa[i].UserRoles[1]).Id, c[i].UserRoles[1].Id);
+                Assert.AreEqual(((UserRole)aa[i].UserRoles[1]).User.Email, c[i].UserRoles[1].User.Email);
                 Assert.AreEqual(null, c[i].UserRoles[0]);
                 Assert.AreEqual(aa[i].UserDefined.Id, c[i].UserDefined.Id);
                 Assert.AreEqual(aa[i].UserDefined.Date1, c[i].UserDefined.Date1);
@@ -184,16 +185,13 @@ namespace Core.Serialization.Tests
                 Assert.AreEqual(aa[i].FName, c[i].FName);
                 Assert.AreEqual(aa[i].Id, c[i].Id);
                 Assert.AreEqual(aa[i].LName, c[i].LName);
-                Assert.AreEqual(aa[i].UserRoles[1].Id, c[i].UserRoles[1].Id);
-                Assert.AreEqual(aa[i].UserRoles[1].TestEnum2, c[i].UserRoles[1].TestEnum2);
-                Assert.AreEqual(aa[i].UserRoles[2].TestEnum2, c[i].UserRoles[2].TestEnum2);
-                Assert.AreEqual(aa[i].UserRoles[1].User.Email, c[i].UserRoles[1].User.Email);
+                Assert.AreEqual(((UserRole)aa[i].UserRoles[1]).Id, c[i].UserRoles[1].Id);
+                Assert.AreEqual(((UserRole)aa[i].UserRoles[1]).User.Email, c[i].UserRoles[1].User.Email);
                 Assert.AreEqual(null, c[i].UserRoles[0]);
                 Assert.AreEqual(aa[i].UserDefined.Id, c[i].UserDefined.Id);
                 Assert.AreEqual(aa[i].UserDefined.Date1, c[i].UserDefined.Date1);
                 Assert.AreEqual(aa[i].UserDefined.Date2, c[i].UserDefined.Date2);
-                Assert.AreEqual(aa[i].TestEnum, c[i].TestEnum);
-                Assert.AreEqual(aa[i].TestEnumNullable, c[i].TestEnumNullable);
+                Assert.AreEqual(aa[i].UserDefined.Pint, c[i].UserDefined.Pint);
                 dic[c[i].UserRoles[1]] = 1;
             }
         }

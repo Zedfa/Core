@@ -224,7 +224,7 @@ namespace Core.Cmn.Cache
             if ((cacheInfo.EnableUseCacheServer && ConfigHelper.GetConfigValue<bool>("IsCacheServer")) || !cacheInfo.EnableUseCacheServer)
             {
 
-                if (!string.IsNullOrEmpty(cacheInfo.NameOfNavigationPropsForFetchingOnlyChangedDataFromDB) || (cacheInfo.EnableCoreSerialization && cacheInfo.NotYetGetCacheData))
+                if (!string.IsNullOrEmpty(cacheInfo.NameOfNavigationPropsForFetchingOnlyChangedDataFromDB) || (cacheInfo.EnableSaveCacheOnHDD && cacheInfo.NotYetGetCacheData))
                 {
                     QueryableCacheDataProvider<object>.CalcAllTimeStampAndSet(newData as IList, cacheInfo, isQueryableCache);
                 }

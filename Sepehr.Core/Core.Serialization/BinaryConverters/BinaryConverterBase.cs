@@ -10,15 +10,18 @@ namespace Core.Serialization.BinaryConverters
     {
         private static bool? _fullyTrusted;
 
-        private static Dictionary<int, BinaryConverterBase> _serializeItemsCachedByEveryTypeHachcode;
+        private static Dictionary<Type, BinaryConverterBase> _serializeItemsCachedByEveryType;
 
         private static List<BinaryConverterBase> _serializeItemsForAllTypes;
+        private static Dictionary<string, BinaryConverterBase> _serializeItemsCachedByEveryTypeName;
 
         static BinaryConverterBase()
         {
             BinaryConvertersForAllTypes = new List<BinaryConverterBase>();
-            BinaryConvertersCachedByEveryTypeHachcode = new Dictionary<int, BinaryConverterBase>();
-            BinaryConvertersCachedByEveryTypeHachcode_Copy = new Dictionary<int, BinaryConverterBase>();
+            BinaryConvertersCachedByEveryType = new Dictionary<Type, BinaryConverterBase>();
+            BinaryConvertersCachedByEveryType_Copy = new Dictionary<Type, BinaryConverterBase>();
+            BinaryConvertersCachedByEveryTypeName = new Dictionary<string, BinaryConverterBase>();
+            BinaryConvertersCachedByEveryTypeName_Copy = new Dictionary<string, BinaryConverterBase>();
             var allBinaryConverterBaseInCoreCmn = typeof(BinaryConverterBase).Assembly.GetTypes().Where(type =>
             (typeof(BinaryConverterBase)).IsAssignableFrom(type) &&
             type != typeof(BinaryConverter<>) && type != typeof(BinaryConverterBase)).ToList();
@@ -38,20 +41,23 @@ namespace Core.Serialization.BinaryConverters
             BinaryConvertersForAllTypes = BinaryConvertersForAllTypes.OrderBy(item => item.SortOrder).ToList();
         }
 
-        public static Dictionary<int, BinaryConverterBase> BinaryConvertersCachedByEveryTypeHachcode
+        public static Dictionary<Type, BinaryConverterBase> BinaryConvertersCachedByEveryType
         {
-            get { return _serializeItemsCachedByEveryTypeHachcode; }
-            private set { _serializeItemsCachedByEveryTypeHachcode = value; }
+            get { return _serializeItemsCachedByEveryType; }
+            private set { _serializeItemsCachedByEveryType = value; }
         }
-
-        public static Dictionary<int, BinaryConverterBase> BinaryConvertersCachedByEveryTypeHachcode_Copy { get; private set; }
-
+        public static Dictionary<string, BinaryConverterBase> BinaryConvertersCachedByEveryTypeName
+        {
+            get { return _serializeItemsCachedByEveryTypeName; }
+            private set { _serializeItemsCachedByEveryTypeName = value; }
+        }
+        public static Dictionary<Type, BinaryConverterBase> BinaryConvertersCachedByEveryType_Copy { get; private set; }
+        public static Dictionary<string, BinaryConverterBase> BinaryConvertersCachedByEveryTypeName_Copy { get; private set; }
         public static List<BinaryConverterBase> BinaryConvertersForAllTypes
         {
             get { return _serializeItemsForAllTypes; }
             private set { _serializeItemsForAllTypes = value; }
         }
-
         public static bool FullyTrusted
         {
             get
@@ -74,41 +80,96 @@ namespace Core.Serialization.BinaryConverters
                 return _fullyTrusted.GetValueOrDefault();
             }
         }
-
+        public Type CurrentType
+        {
+            get;
+            protected set;
+        }
+        public bool IsInherritable { get; private set; }
         public abstract Type ItemType { get; }
-
+        public bool IsNullableType { get; private set; }
+        public bool IsSimpleOrStructureType { get; private set; }
         public int SortOrder { get; set; }
-
         public static BinaryConverterBase GetBinaryConverter(Type typeToSerialize)
         {
             BinaryConverterBase result;
-            if (!BinaryConvertersCachedByEveryTypeHachcode.TryGetValue(typeToSerialize.GetHashCode(), out result))
+            if (!BinaryConvertersCachedByEveryType.TryGetValue(typeToSerialize, out result))
             {
+                Type typeToFineConverter = typeToSerialize;
                 var underlyingType = Nullable.GetUnderlyingType(typeToSerialize);
                 if (underlyingType != null)
-                    typeToSerialize = underlyingType;
-                result = BinaryConvertersForAllTypes.FirstOrDefault(item => item.ItemType == typeToSerialize);
+                    typeToFineConverter = underlyingType;
+                result = BinaryConvertersForAllTypes.FirstOrDefault(item => item.ItemType == typeToFineConverter);
                 if (result == null)
                 {
-                    result = BinaryConvertersForAllTypes.FirstOrDefault(item => item.ItemType.IsAssignableFrom(typeToSerialize));
+                    result = BinaryConvertersForAllTypes.FirstOrDefault(item => item.ItemType.IsAssignableFrom(typeToFineConverter));
                 }
                 if (result == null)
                     throw new ArgumentException($"The type '{typeToSerialize}' not found in implemented BinaryConverters for serializing! you should impelement a custom BinaryConverter for this Type in Core.Serialization.");
 
-                lock (BinaryConvertersCachedByEveryTypeHachcode_Copy)
+                lock (BinaryConvertersCachedByEveryType_Copy)
                 {
-                    if (!BinaryConvertersCachedByEveryTypeHachcode_Copy.ContainsKey(typeToSerialize.GetHashCode()))
+                    BinaryConverterBase foundResult;
+                    if (!BinaryConvertersCachedByEveryType_Copy.TryGetValue(typeToSerialize, out foundResult))
                     {
-                        BinaryConvertersCachedByEveryTypeHachcode_Copy[result.GetHashCode()] = result;
-                        BinaryConvertersCachedByEveryTypeHachcode = BinaryConvertersCachedByEveryTypeHachcode_Copy.ToDictionary(item => item.Key, item => item.Value);
+                        result = result.Copy(typeToSerialize);
+                        BinaryConvertersCachedByEveryType_Copy[typeToSerialize] = result;
+                        BinaryConvertersCachedByEveryType = BinaryConvertersCachedByEveryType_Copy.ToDictionary(item => item.Key, item => item.Value);
+                    }
+                    else
+                    {
+                        result = foundResult;
                     }
                 }
             }
 
             return result;
         }
+        public static BinaryConverterBase GetBinaryConverter(string fullTypeNameToSerialize)
+        {
+            BinaryConverterBase result;
+            if (!BinaryConvertersCachedByEveryTypeName.TryGetValue(fullTypeNameToSerialize, out result))
+            {
+                Type typeToFineConverter = Type.GetType(fullTypeNameToSerialize);
+                var typeToSerialize = typeToFineConverter;
+                var underlyingType = Nullable.GetUnderlyingType(typeToSerialize);
+                if (underlyingType != null)
+                    typeToFineConverter = underlyingType;
+                result = BinaryConvertersForAllTypes.FirstOrDefault(item => item.ItemType == typeToFineConverter);
+                if (result == null)
+                {
+                    result = BinaryConvertersForAllTypes.FirstOrDefault(item => item.ItemType.IsAssignableFrom(typeToFineConverter));
+                }
+                if (result == null)
+                    throw new ArgumentException($"The type '{typeToSerialize}' not found in implemented BinaryConverters for serializing! you should impelement a custom BinaryConverter for this Type in Core.Serialization.");
 
-        public abstract BinaryConverterBase Copy();
+                lock (BinaryConvertersCachedByEveryTypeName_Copy)
+                {
+                    BinaryConverterBase foundResult;
+                    if (!BinaryConvertersCachedByEveryTypeName_Copy.TryGetValue(fullTypeNameToSerialize, out foundResult))
+                    {
+                        result = result.Copy(typeToSerialize);
+                        BinaryConvertersCachedByEveryTypeName_Copy[fullTypeNameToSerialize] = result;
+                        BinaryConvertersCachedByEveryTypeName = BinaryConvertersCachedByEveryTypeName_Copy.ToDictionary(item => item.Key, item => item.Value);
+                    }
+                    else
+                    {
+                        result = foundResult;
+                    }
+                }
+            }
+
+            return result;
+        }
+        protected BinaryConverterBase Init(Type type)
+        {
+            CurrentType = type;
+            IsInherritable = type.IsInheritable();
+            IsNullableType = type.IsNullable();
+            IsSimpleOrStructureType = ItemType.IsSimple() || ItemType.IsValueType;
+            return this;
+        }
+        public abstract BinaryConverterBase Copy(Type objectType);
 
         public abstract object Deserialize(BinaryReader reader, Type objectType, DeserializationContext context);
 

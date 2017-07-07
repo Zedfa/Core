@@ -56,12 +56,12 @@ namespace Core.Cmn.Extensions
 
         public static byte[] SerializetoBinary(this object toConvertToJsonStr)
         {
-            var binary = Core.Serialization.BinarySerialization.Serialize(toConvertToJsonStr);
+            var binary = Core.Serialization.BinaryConverter.Serialize(toConvertToJsonStr);
             return binary;
         }
         public static T DeSerializeBinaryToObject<T>(this byte[] binary)
         {
-            var obj = Core.Serialization.BinarySerialization.Deserialize<T>(binary);
+            var obj = Core.Serialization.BinaryConverter.Deserialize<T>(binary);
             return obj;
 
         }

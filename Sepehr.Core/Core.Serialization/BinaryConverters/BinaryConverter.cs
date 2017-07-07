@@ -6,42 +6,6 @@ namespace Core.Serialization.BinaryConverters
 {
     public abstract class BinaryConverter<T> : BinaryConverterBase
     {
-        private bool? _isNullableType;
-
-        private bool? _isSimpleType;
-
-        public Type CurrentType
-        {
-            get;
-            protected set;
-        }
-
-        public bool IsNullableType
-        {
-            get
-            {
-                if (_isNullableType == null)
-                {
-                    _isNullableType = CurrentType.IsNullable();
-                }
-
-                return _isNullableType.Value;
-            }
-        }
-
-        public bool IsSimpleOrStructureType
-        {
-            get
-            {
-                if (_isSimpleType == null)
-                {
-                    _isSimpleType = ItemType.IsSimple() || ItemType.IsValueType;
-                }
-
-                return _isSimpleType.Value;
-            }
-        }
-
         public override Type ItemType
         {
             get
@@ -50,14 +14,8 @@ namespace Core.Serialization.BinaryConverters
             }
         }
 
-        public override BinaryConverterBase Copy()
-        {
-            return CopyBase();
-        }
-
         public override object Deserialize(BinaryReader reader, Type objectType, DeserializationContext context)
         {
-            BeforDeserialize(reader, objectType, context);
             object obj;
             if (IsNullableType)
             {
@@ -76,13 +34,49 @@ namespace Core.Serialization.BinaryConverters
                         {
                             if (!referenceIds.TryGetValue(currentReferenceId, out obj))
                             {
-                                referenceIds[currentReferenceId] = obj = DeserializeBase(reader, objectType, context);
+                                if (IsInherritable)
+                                {
+                                    var isFullTypeNameWritten = reader.ReadBoolean();
+                                    if (isFullTypeNameWritten)
+                                    {
+                                        var objTypeString = reader.ReadString();
+                                        var currentBinaryConverter = GetBinaryConverter(objTypeString);
+                                        var dynamicGivenType = currentBinaryConverter.CurrentType;
+                                        referenceIds[currentReferenceId] = obj = ((BinaryConverter<T>)currentBinaryConverter).DeserializeBase(reader, dynamicGivenType, context);
+                                    }
+                                    else
+                                    {
+                                        referenceIds[currentReferenceId] = obj = DeserializeBase(reader, objectType, context);
+                                    }
+                                }
+                                else
+                                {
+                                    referenceIds[currentReferenceId] = obj = DeserializeBase(reader, objectType, context);
+                                }
                             }
                         }
                         else
                         {
                             context.ReferenceObjs[CurrentType] = referenceIds = new Dictionary<int, object>();
-                            referenceIds[currentReferenceId] = obj = DeserializeBase(reader, objectType, context);
+                            if (IsInherritable)
+                            {
+                                var isFullTypeNameWritten = reader.ReadBoolean();
+                                if (isFullTypeNameWritten)
+                                {
+                                    var objTypeString = reader.ReadString();
+                                    var currentBinaryConverter = GetBinaryConverter(objTypeString);
+                                    var dynamicGivenType = currentBinaryConverter.CurrentType;
+                                    referenceIds[currentReferenceId] = obj = ((BinaryConverter<T>)currentBinaryConverter).DeserializeBase(reader, dynamicGivenType, context);
+                                }
+                                else
+                                {
+                                    referenceIds[currentReferenceId] = obj = DeserializeBase(reader, objectType, context);
+                                }
+                            }
+                            else
+                            {
+                                referenceIds[currentReferenceId] = obj = DeserializeBase(reader, objectType, context);
+                            }
                         }
                     }
                     else
@@ -109,7 +103,6 @@ namespace Core.Serialization.BinaryConverters
             else
             {
                 var castedObject = (T)obj;
-                BeforSerialize(castedObject, writer, context);
                 if (IsNullableType)
                 {
                     writer.Write(isNull);
@@ -140,7 +133,28 @@ namespace Core.Serialization.BinaryConverters
 
                         writer.Write(currentReferenceId);
                         if (!isObjReferenced)
-                            SerializeBase(castedObject, writer, context);
+                        {
+                            if (IsInherritable)
+                            {
+                                Type objType = obj.GetType();
+                                if (CurrentType != objType)
+                                {
+                                    writer.Write(/*Is FullTypeName Written*/true);
+                                    writer.Write(/*Is FullTypeName Written*/objType.FullName + "," + objType.Assembly.FullName);
+                                    var currentBinaryConverter = GetBinaryConverter(objType);
+                                    (currentBinaryConverter as BinaryConverter<T>).SerializeBase(castedObject, writer, context);
+                                }
+                                else
+                                {
+                                    writer.Write(/*Is FullTypeName Written*/false);
+                                    SerializeBase(castedObject, writer, context);
+                                }
+                            }
+                            else
+                            {
+                                SerializeBase(castedObject, writer, context);
+                            }
+                        }
                     }
                     else
                     {
@@ -154,21 +168,7 @@ namespace Core.Serialization.BinaryConverters
             }
         }
 
-        protected virtual void BeforDeserialize(BinaryReader reader, Type objectType, DeserializationContext context)
-        {
-            if (CurrentType == null)
-                CurrentType = objectType;
-        }
-
-        protected virtual void BeforSerialize(T obj, BinaryWriter writer, SerializationContext context)
-        {
-            if (CurrentType == null)
-                CurrentType = obj.GetType();
-        }
-
-        protected abstract BinaryConverter<T> CopyBase();
         protected abstract T DeserializeBase(BinaryReader reader, Type objectType, DeserializationContext context);
-
         protected abstract void SerializeBase(T objectItem, BinaryWriter writer, SerializationContext context);
         protected virtual void UpdateDeserializeContext(BinaryReader reader, Type objectType, DeserializationContext context)
         {

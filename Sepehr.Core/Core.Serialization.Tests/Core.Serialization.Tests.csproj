@@ -63,6 +63,8 @@
     </Otherwise>
   </Choose>
   <ItemGroup>
+    <Compile Include="IRole.cs" />
+    <Compile Include="IUserRole.cs" />
     <Compile Include="ObjectMetadataTests.cs" />
     <Compile Include="BinarySerializationTest.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

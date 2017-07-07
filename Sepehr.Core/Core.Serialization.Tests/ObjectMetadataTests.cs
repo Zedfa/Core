@@ -28,7 +28,7 @@ namespace Core.Serialization.Test
         }
 
         [DataContract]
-        public class Role
+        public class Role : IRole
         {
             [DataMember]
             public int Id
@@ -156,7 +156,7 @@ namespace Core.Serialization.Test
         }
 
         [DataContract]
-        public class UserRole
+        public class UserRole : IUserRole
         {
             [DataMember]
             public int Id
@@ -165,7 +165,7 @@ namespace Core.Serialization.Test
             }
 
             [DataMember]
-            public Role Role
+            public IRole Role
             {
                 get; set;
             }

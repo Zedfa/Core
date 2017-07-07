@@ -33,6 +33,22 @@ namespace Core.Serialization.Tests
             Assert.IsFalse(typeof(Point).IsNullable());
             Assert.IsTrue(typeof(Point?).IsNullable());
         }
+        [TestMethod]
+        public void IsInheritable_ForAllTypes()
+        {
+            Assert.IsFalse(typeof(int).IsInheritable());
+            Assert.IsFalse(typeof(int?).IsInheritable());
+            Assert.IsFalse(typeof(TestEnum2).IsInheritable());
+            Assert.IsTrue(typeof(Enum).IsInheritable());
+            Assert.IsFalse(typeof(int[]).IsInheritable());
+            Assert.IsTrue(typeof(List<int>).IsInheritable());
+            Assert.IsTrue(typeof(Dictionary<int, string>).IsInheritable());
+            Assert.IsFalse(typeof(string).IsInheritable());
+            Assert.IsTrue(typeof(User<int>).IsInheritable());
+            Assert.IsTrue(typeof(Role).IsInheritable());
+            Assert.IsFalse(typeof(Point).IsInheritable());
+            Assert.IsFalse(typeof(Point?).IsInheritable());
+        }
 
         [TestMethod]
         public void IsSimple_Test_AllSimple_Type_And_Some_Complex()

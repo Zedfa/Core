@@ -39,7 +39,7 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|x64'">
     <DebugSymbols>true</DebugSymbols>
     <OutputPath>bin\x64\Debug\</OutputPath>
-    <DefineConstants>TRACE;DEBUG</DefineConstants>
+    <DefineConstants>TRACE;DEBUG;DEBUGOUTPUT</DefineConstants>
     <DebugType>full</DebugType>
     <PlatformTarget>AnyCPU</PlatformTarget>
     <ErrorReport>prompt</ErrorReport>
@@ -75,7 +75,6 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="ProxyObject\CSharpCodeProviderForProxyOjectSerialization.cs" />
     <Compile Include="ProxyObject\IProxyObject.cs" />
-    <Compile Include="SerializationPlan\SerializationPlanBase.cs" />
     <Compile Include="BinaryConverters\ArrayBinaryConverter.cs" />
     <Compile Include="BinaryConverters\DictionaryBinaryConverter.cs" />
     <Compile Include="BinaryConverters\EnumBinaryConverter.cs" />

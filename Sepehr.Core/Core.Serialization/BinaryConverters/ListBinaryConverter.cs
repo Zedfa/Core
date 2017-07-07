@@ -9,31 +9,13 @@ namespace Core.Serialization.BinaryConverters
     {
         public BinaryConverterBase ElementItem { get; private set; }
         public Type ElementType { get; private set; }
-
-        protected override void BeforDeserialize(BinaryReader reader, Type objectType, DeserializationContext context)
+        public override BinaryConverterBase Copy(Type type)
         {
-            if (ElementItem == null)
-            {
-                ElementType = objectType.GetGenericArguments().First();
-                CurrentType = objectType;
-                ElementItem = GetBinaryConverter(ElementType).Copy();
-            }
-        }
-
-        protected override void BeforSerialize(IList obj, BinaryWriter writer, SerializationContext context)
-        {
-            if (ElementItem == null)
-            {
-                var objType = obj.GetType();
-                ElementType = objType.GetGenericArguments().First();
-                CurrentType = objType;
-                ElementItem = GetBinaryConverter(ElementType).Copy();
-            }
-        }
-
-        protected override BinaryConverter<IList> CopyBase()
-        {
-            return new ListBinaryConverter();
+            var binaryConverter = new ListBinaryConverter();
+            binaryConverter.Init(type);
+            binaryConverter.ElementType = type.GetGenericArguments().First();
+            binaryConverter.ElementItem = GetBinaryConverter(binaryConverter.ElementType);
+            return binaryConverter;
         }
         protected override IList DeserializeBase(BinaryReader reader, Type objectType, DeserializationContext context)
         {

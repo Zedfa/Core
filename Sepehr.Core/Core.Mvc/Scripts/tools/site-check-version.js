@@ -66,6 +66,8 @@ function checkVersion(hub) {
                         var name = eqPos > -1 ? cookie.substr(0, eqPos) : cookie;
                         document.cookie = name + "=;expires=1970-01-10T08:38:40.048Z; path=/;";
                     }
+                    localStorage.clear(),
+                        sessionStorage.clear();
                     window.location.assign(window.location.origin);
                 }
             }

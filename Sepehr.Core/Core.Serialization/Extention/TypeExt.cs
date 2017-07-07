@@ -15,7 +15,7 @@ namespace Core.Serialization
             return null;
         }
 
-        public static Boolean IsAnonymousType(this Type type)
+        public static bool IsAnonymousType(this Type type)
         {
             Boolean hasCompilerGeneratedAttribute = type.GetCustomAttributes(typeof(CompilerGeneratedAttribute), false).Count() > 0;
             Boolean nameContainsAnonymousType = type.FullName.Contains("AnonymousType");
@@ -23,9 +23,16 @@ namespace Core.Serialization
             return isAnonymousType;
         }
 
+        public static bool IsInheritable(this Type type)
+        {
+            if (type.IsInterface || (type.IsClass && !type.IsSealed))
+                return true;
+            return false;
+        }
+
         public static bool IsNullable(this Type type)
         {
-            if (((Nullable.GetUnderlyingType(type) != null) || !type.IsValueType) && !((typeof(Enum)).IsAssignableFrom(type) && typeof(Enum) != type))
+            if (((Nullable.GetUnderlyingType(type) != null) || !type.IsValueType) && !type.IsEnum)
             {
                 return true;
             }

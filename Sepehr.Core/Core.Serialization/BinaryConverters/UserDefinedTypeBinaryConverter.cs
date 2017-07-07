@@ -14,32 +14,16 @@ namespace Core.Serialization.BinaryConverters
 
         protected BinaryConverterBase[] BinaryConverters { get; private set; }
 
-        protected override void BeforDeserialize(BinaryReader reader, Type objectType, DeserializationContext context)
+        public override BinaryConverterBase Copy(Type type)
         {
-            if (BinaryConverters == null)
-            {
-                ObjectType = objectType;
-                CurrentType = ObjectType;
-                EntityMetaData = ObjectMetaData.GetEntityMetaData(CurrentType);
-                BinaryConverters = EntityMetaData.BinaryConverterList;
-            }
+            var binaryConverter = new UserDefinedTypeBinaryConverter();
+            binaryConverter.Init(type);
+            binaryConverter.ObjectType = type;
+            binaryConverter.EntityMetaData = ObjectMetaData.GetEntityMetaData(type);
+            binaryConverter.BinaryConverters = binaryConverter.EntityMetaData.BinaryConverterList;
+            return binaryConverter;
         }
 
-        protected override void BeforSerialize(object obj, BinaryWriter writer, SerializationContext context)
-        {
-            if (BinaryConverters == null)
-            {
-                ObjectType = obj.GetType();
-                CurrentType = ObjectType;
-                EntityMetaData = ObjectMetaData.GetEntityMetaData(CurrentType);
-                BinaryConverters = EntityMetaData.BinaryConverterList;
-            }
-        }
-
-        protected override BinaryConverter<object> CopyBase()
-        {
-            return new UserDefinedTypeBinaryConverter();
-        }
         protected override object DeserializeBase(BinaryReader reader, Type objectType, DeserializationContext context)
         {
             object result;
@@ -63,7 +47,8 @@ namespace Core.Serialization.BinaryConverters
             {
                 if (EntityMetaData.IsSerializablePropertyByIndexList[i])
                 {
-                    BinaryConverters[i].Serialize(EntityMetaData.ReflectionEmitPropertyAccessor.EmittedPropertyGetters[i](objectItem), writer, context);
+                    var currentObjToSerialize = EntityMetaData.ReflectionEmitPropertyAccessor.EmittedPropertyGetters[i](objectItem);
+                    BinaryConverters[i].Serialize(currentObjToSerialize, writer, context);
                 }
             }
         }

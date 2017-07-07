@@ -3,6 +3,7 @@
     using Core.Serialization.BinaryConverters;
     using ObjectProxy;
     using System;
+    using System.Collections.Concurrent;
     using System.Collections.Generic;
     using System.ComponentModel.DataAnnotations.Schema;
     using System.Linq;
@@ -36,7 +37,7 @@
 
         static ObjectMetaData()
         {
-            ObjectMetaData.EntityMetaDataDic = new Dictionary<Type, Core.Serialization.ObjectMetaData>();
+            ObjectMetaData.EntityMetaDataDic = new ConcurrentDictionary<Type, Core.Serialization.ObjectMetaData>();
         }
 
         public ObjectMetaData(Type objectType)
@@ -61,7 +62,7 @@
                             for (int i = 0; i < count; i++)
                             {
                                 if (IsSerializablePropertyByIndexList[i])
-                                    _serializeItemList[i] = BinaryConverterBase.GetBinaryConverter(writableProperties[i].Value.PropertyType).Copy();
+                                    _serializeItemList[i] = BinaryConverterBase.GetBinaryConverter(writableProperties[i].Value.PropertyType);
                             };
                         }
                     }
@@ -318,20 +319,18 @@
             }
         }
 
-        internal static Dictionary<Type, ObjectMetaData> EntityMetaDataDic { get; private set; }
+        private static ConcurrentDictionary<Type, ObjectMetaData> EntityMetaDataDic { get; set; }
         public static ObjectMetaData GetEntityMetaData(Type entityType)
         {
             ObjectMetaData entityInfo = null;
             if (!ObjectMetaData.EntityMetaDataDic.TryGetValue(entityType, out entityInfo))
             {
-                lock (_lockObjectForEntityInfo)
+                lock (EntityMetaDataDic)
                 {
                     if (!ObjectMetaData.EntityMetaDataDic.TryGetValue(entityType, out entityInfo))
                     {
                         entityInfo = new ObjectMetaData(entityType);
                         ObjectMetaData.EntityMetaDataDic[entityType] = entityInfo;
-                        //if (typeof(SerializableEntity).IsAssignableFrom(entityType))
-                        //    ValidateImplementationProperties(entityType);
                     }
                 }
             }

@@ -72,7 +72,7 @@ namespace Core.Cmn
                                 var notMappedAttribute = Attribute.GetCustomAttribute(item.Value, typeof(NotMappedAttribute));
                                 var fillNavigationProperyByCache = Attribute.GetCustomAttribute(item.Value, typeof(FillNavigationProperyByCacheAttribute));
                                 if (notMappedAttribute == null && fillNavigationProperyByCache == null)
-                                    _writableProperties.Add(item.Key, item.Value);
+                                    _writableMappedProperties.Add(item.Key, item.Value);
                             });
                         }
                     }
@@ -187,6 +187,24 @@ namespace Core.Cmn
 
                 return _infoForFillingNavigationPropertyDic;
             }
+        }
+        public static void BuildEntityInfoDic(IList<Type> allTypes)
+        {
+            EntityInfo.EntityInfoDic = new Dictionary<Type, EntityInfo>();
+            Type entityBaseType = typeof(_EntityBase);
+            List<Type> allTypeOfEntities = allTypes.Where(type => entityBaseType.IsAssignableFrom(type)).ToList();
+            allTypeOfEntities.ForEach(type =>
+            {
+                var typeKey = type.GetHashCode();
+                if (EntityInfo.EntityInfoDic.ContainsKey(type))
+                {
+                    throw new Exception($"The key for entity type {type.Name} is duplicate!");
+                }
+                else
+                {
+                    EntityInfo.EntityInfoDic[type] = _EntityBase.GetEntityInfo(type);
+                }
+            });
         }
     }
 }

@@ -8,37 +8,18 @@ namespace Core.Serialization.BinaryConverters
         public Func<BinaryReader, Type, DeserializationContext, Enum> DeserializeFunc { get; private set; }
         public Action<Enum, BinaryWriter, SerializationContext> SerializeAction { get; private set; }
         public Type UnderlyingType { get; private set; }
-        protected override void BeforDeserialize(BinaryReader reader, Type objectType, DeserializationContext context)
-        {
-            if (this.CurrentType == null)
-            {
-                CurrentType = objectType;
-                var currentNonNullableType = Nullable.GetUnderlyingType(CurrentType);
-                if (currentNonNullableType == null)
-                    UnderlyingType = Enum.GetUnderlyingType(CurrentType);
-                else
-                    UnderlyingType = Enum.GetUnderlyingType(currentNonNullableType);
-                SetSerializeDeserializeActionByUnderlyingType(UnderlyingType);
-            }
-        }
 
-        protected override void BeforSerialize(Enum obj, BinaryWriter writer, SerializationContext context)
+        public override BinaryConverterBase Copy(Type type)
         {
-            if (this.CurrentType == null)
-            {
-                CurrentType = obj.GetType();
-                var currentNonNullableType = Nullable.GetUnderlyingType(CurrentType);
-                if (currentNonNullableType == null)
-                    UnderlyingType = Enum.GetUnderlyingType(CurrentType);
-                else
-                    UnderlyingType = Enum.GetUnderlyingType(currentNonNullableType);
-                SetSerializeDeserializeActionByUnderlyingType(UnderlyingType);
-            }
-        }
-
-        protected override BinaryConverter<Enum> CopyBase()
-        {
-            return new EnumBinaryConverter();
+            var binaryConverter = new EnumBinaryConverter();
+            binaryConverter.Init(type);
+            var currentNonNullableType = Nullable.GetUnderlyingType(binaryConverter.CurrentType);
+            if (currentNonNullableType == null)
+                binaryConverter.UnderlyingType = Enum.GetUnderlyingType(binaryConverter.CurrentType);
+            else
+                binaryConverter.UnderlyingType = Enum.GetUnderlyingType(currentNonNullableType);
+            binaryConverter.SetSerializeDeserializeActionByUnderlyingType(binaryConverter.UnderlyingType);
+            return binaryConverter;
         }
 
         protected override Enum DeserializeBase(BinaryReader reader, Type objectType, DeserializationContext context)

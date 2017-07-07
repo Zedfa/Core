@@ -34,5 +34,6 @@ namespace Core.Cmn.Attributes
 
         public bool DisableCache { get; set; }
         public bool EnableSaveCacheOnHDD { get; set; }
+        public bool EnableCoreSerialization { get; set; }
     }
 }

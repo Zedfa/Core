@@ -6,9 +6,9 @@ namespace Core.Serialization.BinaryConverters
 {
     public class BoolBinaryConverter : BinaryConverter<bool>
     {
-        protected override BinaryConverter<bool> CopyBase()
+        public override BinaryConverterBase Copy(Type type)
         {
-            return new BoolBinaryConverter();
+            return new BoolBinaryConverter().Init(type);
         }
 
         protected override bool DeserializeBase(BinaryReader reader, Type objectType, DeserializationContext context)
@@ -24,9 +24,9 @@ namespace Core.Serialization.BinaryConverters
 
     public class ByteArrayBinaryConverter : BinaryConverter<byte[]>
     {
-        protected override BinaryConverter<byte[]> CopyBase()
+        public override BinaryConverterBase Copy(Type type)
         {
-            return new ByteArrayBinaryConverter();
+            return new ByteArrayBinaryConverter().Init(type);
         }
 
         protected override byte[] DeserializeBase(BinaryReader reader, Type objectType, DeserializationContext context)
@@ -44,9 +44,9 @@ namespace Core.Serialization.BinaryConverters
 
     public class ByteBinaryConverter : BinaryConverter<byte>
     {
-        protected override BinaryConverter<byte> CopyBase()
+        public override BinaryConverterBase Copy(Type type)
         {
-            return new ByteBinaryConverter();
+            return new ByteBinaryConverter().Init(type);
         }
 
         protected override byte DeserializeBase(BinaryReader reader, Type objectType, DeserializationContext context)
@@ -62,9 +62,9 @@ namespace Core.Serialization.BinaryConverters
 
     public class CharArrayBinaryConverter : BinaryConverter<char[]>
     {
-        protected override BinaryConverter<char[]> CopyBase()
+        public override BinaryConverterBase Copy(Type type)
         {
-            return new CharArrayBinaryConverter();
+            return new CharArrayBinaryConverter().Init(type);
         }
 
         protected override char[] DeserializeBase(BinaryReader reader, Type objectType, DeserializationContext context)
@@ -82,9 +82,9 @@ namespace Core.Serialization.BinaryConverters
 
     public class CharBinaryConverter : BinaryConverter<char>
     {
-        protected override BinaryConverter<char> CopyBase()
+        public override BinaryConverterBase Copy(Type type)
         {
-            return new CharBinaryConverter();
+            return new CharBinaryConverter().Init(type);
         }
 
         protected override char DeserializeBase(BinaryReader reader, Type objectType, DeserializationContext context)
@@ -103,9 +103,9 @@ namespace Core.Serialization.BinaryConverters
         private const byte Local = 2;
         private const byte Unspecified = 0;
         private const byte Utc = 1;
-        protected override BinaryConverter<DateTime> CopyBase()
+        public override BinaryConverterBase Copy(Type type)
         {
-            return new DateTimeBinaryConverter();
+            return new DateTimeBinaryConverter().Init(type);
         }
 
         protected override DateTime DeserializeBase(BinaryReader reader, Type objectType, DeserializationContext context)
@@ -161,9 +161,9 @@ namespace Core.Serialization.BinaryConverters
 
     public class DecimalBinaryConverter : BinaryConverter<decimal>
     {
-        protected override BinaryConverter<decimal> CopyBase()
+        public override BinaryConverterBase Copy(Type type)
         {
-            return new DecimalBinaryConverter();
+            return new DecimalBinaryConverter().Init(type);
         }
 
         protected override decimal DeserializeBase(BinaryReader reader, Type objectType, DeserializationContext context)
@@ -179,9 +179,9 @@ namespace Core.Serialization.BinaryConverters
 
     public class DoubleBinaryConverter : BinaryConverter<double>
     {
-        protected override BinaryConverter<double> CopyBase()
+        public override BinaryConverterBase Copy(Type type)
         {
-            return new DoubleBinaryConverter();
+            return new DoubleBinaryConverter().Init(type);
         }
 
         protected override double DeserializeBase(BinaryReader reader, Type objectType, DeserializationContext context)
@@ -197,9 +197,9 @@ namespace Core.Serialization.BinaryConverters
 
     public class FloatBinaryConverter : BinaryConverter<float>
     {
-        protected override BinaryConverter<float> CopyBase()
+        public override BinaryConverterBase Copy(Type type)
         {
-            return new FloatBinaryConverter();
+            return new FloatBinaryConverter().Init(type);
         }
 
         protected override float DeserializeBase(BinaryReader reader, Type objectType, DeserializationContext context)
@@ -215,9 +215,9 @@ namespace Core.Serialization.BinaryConverters
 
     public class IntBinaryConverter : BinaryConverter<int>
     {
-        protected override BinaryConverter<int> CopyBase()
+        public override BinaryConverterBase Copy(Type type)
         {
-            return new IntBinaryConverter();
+            return new IntBinaryConverter().Init(type);
         }
 
         protected override int DeserializeBase(BinaryReader reader, Type objectType, DeserializationContext context)
@@ -232,9 +232,9 @@ namespace Core.Serialization.BinaryConverters
     }
     public class LongBinaryConverter : BinaryConverter<long>
     {
-        protected override BinaryConverter<long> CopyBase()
+        public override BinaryConverterBase Copy(Type type)
         {
-            return new LongBinaryConverter();
+            return new LongBinaryConverter().Init(type);
         }
 
         protected override long DeserializeBase(BinaryReader reader, Type objectType, DeserializationContext context)
@@ -250,9 +250,9 @@ namespace Core.Serialization.BinaryConverters
 
     public class SbyteBinaryConverter : BinaryConverter<sbyte>
     {
-        protected override BinaryConverter<sbyte> CopyBase()
+        public override BinaryConverterBase Copy(Type type)
         {
-            return new SbyteBinaryConverter();
+            return new SbyteBinaryConverter().Init(type);
         }
 
         protected override sbyte DeserializeBase(BinaryReader reader, Type objectType, DeserializationContext context)
@@ -268,9 +268,9 @@ namespace Core.Serialization.BinaryConverters
 
     public class ShortBinaryConverter : BinaryConverter<short>
     {
-        protected override BinaryConverter<short> CopyBase()
+        public override BinaryConverterBase Copy(Type type)
         {
-            return new ShortBinaryConverter();
+            return new ShortBinaryConverter().Init(type);
         }
 
         protected override short DeserializeBase(BinaryReader reader, Type objectType, DeserializationContext context)
@@ -286,9 +286,9 @@ namespace Core.Serialization.BinaryConverters
 
     public class StringBinaryConverter : BinaryConverter<string>
     {
-        protected override BinaryConverter<string> CopyBase()
+        public override BinaryConverterBase Copy(Type type)
         {
-            return new StringBinaryConverter();
+            return new StringBinaryConverter().Init(type);
         }
 
         protected override string DeserializeBase(BinaryReader reader, Type objectType, DeserializationContext context)
@@ -304,9 +304,9 @@ namespace Core.Serialization.BinaryConverters
 
     public class UintBinaryConverter : BinaryConverter<uint>
     {
-        protected override BinaryConverter<uint> CopyBase()
+        public override BinaryConverterBase Copy(Type type)
         {
-            return new UintBinaryConverter();
+            return new UintBinaryConverter().Init(type);
         }
 
         protected override uint DeserializeBase(BinaryReader reader, Type objectType, DeserializationContext context)
@@ -322,9 +322,9 @@ namespace Core.Serialization.BinaryConverters
 
     public class UlongBinaryConverter : BinaryConverter<ulong>
     {
-        protected override BinaryConverter<ulong> CopyBase()
+        public override BinaryConverterBase Copy(Type type)
         {
-            return new UlongBinaryConverter();
+            return new UlongBinaryConverter().Init(type);
         }
 
         protected override ulong DeserializeBase(BinaryReader reader, Type objectType, DeserializationContext context)
@@ -340,9 +340,9 @@ namespace Core.Serialization.BinaryConverters
 
     public class UshortBinaryConverter : BinaryConverter<ushort>
     {
-        protected override BinaryConverter<ushort> CopyBase()
+        public override BinaryConverterBase Copy(Type type)
         {
-            return new UshortBinaryConverter();
+            return new UshortBinaryConverter().Init(type);
         }
 
         protected override ushort DeserializeBase(BinaryReader reader, Type objectType, DeserializationContext context)
@@ -353,6 +353,24 @@ namespace Core.Serialization.BinaryConverters
         protected override void SerializeBase(ushort objectItem, BinaryWriter writer, SerializationContext context)
         {
             writer.Write(objectItem);
+        }
+    }
+
+    public class GuidBinaryConverter : BinaryConverter<Guid>
+    {
+        public override BinaryConverterBase Copy(Type type)
+        {
+            return new GuidBinaryConverter().Init(type);
+        }
+
+        protected override Guid DeserializeBase(BinaryReader reader, Type objectType, DeserializationContext context)
+        {
+            return new Guid(reader.ReadBytes(16));
+        }
+
+        protected override void SerializeBase(Guid objectItem, BinaryWriter writer, SerializationContext context)
+        {
+            writer.Write(objectItem.ToByteArray());
         }
     }
 }

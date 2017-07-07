@@ -9,7 +9,7 @@ using System.Runtime.Serialization;
 
 using System.Collections;
 using System.Collections.Concurrent;
-
+using Core.Serialization;
 
 namespace Core.Cmn.Cache
 {
@@ -41,7 +41,7 @@ namespace Core.Cmn.Cache
 
 
     [DataContract]
-    public class CacheDataProvider : ICacheDataProvider
+    public abstract class CacheDataProvider : ICacheDataProvider
     {
         public static ConcurrentDictionary<int, string[]> TimeStamps;
 
@@ -82,10 +82,10 @@ namespace Core.Cmn.Cache
             binding.ReaderQuotas.MaxNameTableCharCount = int.MaxValue;
             binding.ReaderQuotas.MaxStringContentLength = int.MaxValue;
             binding.Security.Mode = SecurityMode.None;
-            binding.CloseTimeout = new TimeSpan(0, 2, 0);
-            binding.OpenTimeout = new TimeSpan(0, 2, 0);
-            binding.ReceiveTimeout = new TimeSpan(0, 2, 0);
-            binding.SendTimeout = new TimeSpan(0, 2, 0);
+            binding.CloseTimeout = new TimeSpan(0, 20, 0);
+            binding.OpenTimeout = new TimeSpan(0, 20, 0);
+            binding.ReceiveTimeout = new TimeSpan(0, 20, 0);
+            binding.SendTimeout = new TimeSpan(0, 20, 0);
             binding.Security.Message.ClientCredentialType = MessageCredentialType.None;
             binding.Security.Transport.ClientCredentialType = TcpClientCredentialType.None;
             using (ServiceClient proxy = new ServiceClient(binding, endpointAddress))
@@ -94,9 +94,9 @@ namespace Core.Cmn.Cache
                 try
                 {
                     var result = proxy.GetCacheDataViaWcf(this);
-                    if(CacheInfo.EnableCoreSerialization)
+                    if (CacheInfo.EnableCoreSerialization)
                     {
-                        result = DeserializeCacheData(result);
+                        result = DeserializeCacheData((byte[])result);
                     }
 
                     proxy.Close();
@@ -142,10 +142,7 @@ namespace Core.Cmn.Cache
             }
         }
 
-        private object DeserializeCacheData(object result)
-        {
-            throw new NotImplementedException();
-        }
+        protected abstract object DeserializeCacheData(byte[] result);
 
         public virtual string GenerateCacheKey()
         {
@@ -356,6 +353,10 @@ namespace Core.Cmn.Cache
         {
             CacheInfo = cacheInfo;
         }
+        protected override object DeserializeCacheData(byte[] result)
+        {
+            return BinaryConverter.Deserialize<T>(result);
+        }
         public T GetFreshData()
         {
             T resultList;
@@ -366,7 +367,7 @@ namespace Core.Cmn.Cache
                 resultList = (T)GetDataFromCacheServer();
             }
             else
-            if (CacheInfo.EnableCoreSerialization && CacheInfo.NotYetGetCacheData && TryGetDataFromHDD(out hDDResult))
+            if (CacheInfo.EnableSaveCacheOnHDD && CacheInfo.NotYetGetCacheData && TryGetDataFromHDD(out hDDResult))
             {
                 resultList = hDDResult;
             }
