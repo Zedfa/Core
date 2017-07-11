@@ -23,7 +23,7 @@ namespace Core.Serialization.Test
         [TestMethod]
         public void SerializablePropertiesGetterIsCorrectForUserEntity()
         {
-            Assert.AreEqual(ObjectMetaData.GetEntityMetaData(typeof(ObjectMetadataTests.User<UserRole>)).WritablePropertyList.Count, 11);
+            Assert.AreEqual(ObjectMetaData.GetEntityMetaData(typeof(ObjectMetadataTests.User<UserRole>)).WritablePropertyList.Count, 12);
             Assert.AreEqual(ObjectMetaData.GetEntityMetaData(typeof(ObjectMetadataTests.User<UserRole>)).WritablePropertyList.First().Name, "Active");
         }
 
@@ -75,6 +75,8 @@ namespace Core.Serialization.Test
             }
 
             [DataMember]
+            public HashSet<UserDefined> HashSet { get; internal set; }
+            [DataMember]
             public int Id
             {
                 get; set;
@@ -123,7 +125,8 @@ namespace Core.Serialization.Test
 
             [DataMember]
             public decimal Grade { get; set; }
-
+            [DataMember]
+            public HashSet<UserDefined> HashSet { get; set; }
             [DataMember]
             public int Id { get; set; }
 

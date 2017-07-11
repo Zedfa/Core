@@ -1,44 +1,46 @@
 ﻿using System;
-using System.Collections;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
 
 namespace Core.Serialization.BinaryConverters
 {
-    public class ListBinaryConverter : BinaryConverter<IList>
+    public class HashSetBinaryConverter<T> : BinaryConverter<HashSet<T>>
     {
         public BinaryConverterBase ElementItem { get; private set; }
         public Type ElementType { get; private set; }
         public override BinaryConverterBase Copy(Type type)
         {
-            var binaryConverter = new ListBinaryConverter();
+            var binaryConverter = new HashSetBinaryConverter<T>();
             binaryConverter.Init(type);
             binaryConverter.ElementType = type.GetGenericArguments().First();
             binaryConverter.ElementItem = GetBinaryConverter(binaryConverter.ElementType);
             return binaryConverter;
         }
-        protected override IList DeserializeBase(BinaryReader reader, Type objectType, DeserializationContext context)
+        protected override HashSet<T> DeserializeBase(BinaryReader reader, Type objectType, DeserializationContext context)
         {
-            IList result;
-            result = (IList)Activator.CreateInstance(objectType);
+            HashSet<T> result;
+            result = (HashSet<T>)Activator.CreateInstance(objectType);
             var count = reader.ReadInt32();
             if (count > 0)
             {
                 for (int i = 0; i < count; i++)
                 {
                     var value = ElementItem.Deserialize(reader, ElementType, context);
-                    result.Add(value);
+                    result.Add((T)value);
                 }
             }
 
             return result;
         }
 
-        protected override void SerializeBase(IList objectItem, BinaryWriter writer, SerializationContext context)
+        protected override void SerializeBase(HashSet<T> objectItem, BinaryWriter writer, SerializationContext context)
         {
             writer.Write(objectItem.Count);
             foreach (var item in objectItem)
-            {                
+            {
                 SerializeChildItem(ElementItem, item, writer, context);
             }
         }

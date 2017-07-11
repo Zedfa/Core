@@ -111,6 +111,7 @@ namespace Core.Serialization.Tests
                 aa.TryAdd(ii, new User<IUserRole>
                 {
                     TestEnum = TestEnum.b,
+                    HashSet = new HashSet<UserDefined>(),
                     UserDefined = new Test.ObjectMetadataTests.UserDefined()
                     {
                         Id = ii,
@@ -120,11 +121,12 @@ namespace Core.Serialization.Tests
                         Grade = (decimal)0.3254587,
                         LongId = 74108520410,
                         Mony = (float)0.245788,
-                        Pint = new Point() { X = 10, Y = 54 }
+                        Pint = new Point() { X = 10, Y = 54 },
+                        HashSet = new HashSet<UserDefined>() { new UserDefined() { Id = 45874 } }
                     },
                     Id = random.Next(1, 10000000),
                     FName = "saeed" + ii,
-                    LName = "چگینی  دول.پری که تست انجام میدهد و چه کسی میداند نتیجه ی این تست را dfgdfgfh" + ii,
+                    LName = "چگینی dfgdfgfh" + ii,
                     UserRoles = lst
                 });
             }
@@ -137,6 +139,9 @@ namespace Core.Serialization.Tests
         {
             var a = BinaryConverter.Serialize(aa);
             var c = BinaryConverter.Deserialize(a, typeof(ConcurrentDictionary<int, User<UserRole>>)) as ConcurrentDictionary<int, User<UserRole>>;
+            var nullCheckBinary = BinaryConverter.Serialize(null);
+            var nullCheck = BinaryConverter.Deserialize(nullCheckBinary, typeof(ConcurrentDictionary<int, User<UserRole>>)) as ConcurrentDictionary<int, User<UserRole>>;
+            Assert.AreEqual(nullCheck, null);
             var dic = new Dictionary<object, int>();
             for (var i = 0; i < aa.Count; i++)
             {
@@ -154,6 +159,7 @@ namespace Core.Serialization.Tests
                 Assert.AreEqual(aa[i].UserDefined.Date1, c[i].UserDefined.Date1);
                 Assert.AreEqual(aa[i].UserDefined.Date2, c[i].UserDefined.Date2);
                 Assert.AreEqual(aa[i].UserDefined.Pint, c[i].UserDefined.Pint);
+                Assert.AreEqual(aa[i].UserDefined.HashSet.First().Id, c[i].UserDefined.HashSet.First().Id);
                 dic[c[i].UserRoles[1]] = 1;
             }
 

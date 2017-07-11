@@ -40,7 +40,7 @@
     <OutputPath>bin\x64\Debug\</OutputPath>
     <DefineConstants>DEBUG;TRACE</DefineConstants>
     <DebugType>full</DebugType>
-    <PlatformTarget>AnyCPU</PlatformTarget>
+    <PlatformTarget>x64</PlatformTarget>
     <ErrorReport>prompt</ErrorReport>
     <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
   </PropertyGroup>
@@ -138,10 +138,6 @@
     <ProjectReference Include="..\Core.Cmn\Core.Cmn.csproj">
       <Project>{9632df26-f002-453f-b9f3-8c6fc35d92b0}</Project>
       <Name>Core.Cmn</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\Core.Serialization\Core.Serialization.csproj">
-      <Project>{5324964c-6ed2-44c3-a457-141b0eeb081d}</Project>
-      <Name>Core.Serialization</Name>
     </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

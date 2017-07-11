@@ -1,7 +1,6 @@
 ﻿namespace Core.Serialization
 {
     using Core.Serialization.BinaryConverters;
-    using ObjectProxy;
     using System;
     using System.Collections.Concurrent;
     using System.Collections.Generic;
@@ -22,8 +21,6 @@
         private bool[] _isSerializablePropertyByIndexList;
 
         private Dictionary<string, PropertyInfo> _properties;
-
-        private IObjectProxy _proxyObject;
 
         private BinaryConverterBase[] _serializeItemList;
 
@@ -190,35 +187,18 @@
                         if (_properties == null)
                         {
                             _properties = new Dictionary<string, PropertyInfo>();
-                            foreach (PropertyInfo propInfo in ObjectType.GetProperties().OrderBy(prop => prop.Name).ToList())
+                            foreach (PropertyInfo propInfo in
+                                ObjectType.GetProperties()
+                                .Where(prop => prop.GetIndexParameters().Count() == 0)
+                                .OrderBy(prop => prop.Name).ToList())
                             {
-                                if (propInfo.Name != "CustomIndexerProperty")
-                                    _properties.Add(propInfo.Name, propInfo);
+                                _properties.Add(propInfo.Name, propInfo);
                             }
                         }
                     }
                 }
 
                 return _properties;
-            }
-        }
-
-        public IObjectProxy ProxyObject
-        {
-            get
-            {
-                if (_proxyObject == null)
-                {
-                    lock (Properties)
-                    {
-                        if (_proxyObject == null)
-                        {
-                            _proxyObject = new CSharpCodeProviderForProxyOjectSerialization(ObjectType).Compile();
-                        }
-                    }
-                }
-
-                return _proxyObject;
             }
         }
 
@@ -234,7 +214,7 @@
                         if (_writableMappedProperties == null)
                         {
                             _writableMappedProperties = new Dictionary<string, PropertyInfo>();
-                            WritableProperties.Where(prop => prop.Value.CanWrite).ToList().ForEach(item =>
+                            WritableProperties.ToList().ForEach(item =>
                             {
                                 var notMappedAttribute = Attribute.GetCustomAttribute(item.Value, typeof(NotMappedAttribute));
                                 if (notMappedAttribute == null)
@@ -260,9 +240,9 @@
                         {
                             _writableProperties = new Dictionary<string, PropertyInfo>();
                             Properties.Where(prop => prop.Value.CanWrite).ToList().ForEach(item =>
-                            {
-                                _writableProperties.Add(item.Key, item.Value);
-                            });
+                              {
+                                  _writableProperties.Add(item.Key, item.Value);
+                              });
                         }
                     }
                 }

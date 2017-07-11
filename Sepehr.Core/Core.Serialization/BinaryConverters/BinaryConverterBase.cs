@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -17,15 +18,18 @@ namespace Core.Serialization.BinaryConverters
 
         static BinaryConverterBase()
         {
+            GenericTypeDefinitionForConverters = new ConcurrentDictionary<Type, Type>();
+            BinaryConverterBase.GenericTypeDefinitionForConverters.TryAdd(typeof(HashSet<>), typeof(HashSetBinaryConverter<>));
             BinaryConvertersForAllTypes = new List<BinaryConverterBase>();
             BinaryConvertersCachedByEveryType = new Dictionary<Type, BinaryConverterBase>();
             BinaryConvertersCachedByEveryType_Copy = new Dictionary<Type, BinaryConverterBase>();
             BinaryConvertersCachedByEveryTypeName = new Dictionary<string, BinaryConverterBase>();
             BinaryConvertersCachedByEveryTypeName_Copy = new Dictionary<string, BinaryConverterBase>();
-            var allBinaryConverterBaseInCoreCmn = typeof(BinaryConverterBase).Assembly.GetTypes().Where(type =>
+            AllBinaryConverterTypes = typeof(BinaryConverterBase).Assembly.GetTypes().Where(type =>
             (typeof(BinaryConverterBase)).IsAssignableFrom(type) &&
-            type != typeof(BinaryConverter<>) && type != typeof(BinaryConverterBase)).ToList();
-            allBinaryConverterBaseInCoreCmn.ForEach(type =>
+            type != typeof(BinaryConverter<>) && type != typeof(NullBinaryConverter) && type != typeof(BinaryConverterBase)).ToList();
+            AllGenericBinaryConverterTypes = AllBinaryConverterTypes.Where(converterType => converterType.IsGenericType).ToList();
+            AllBinaryConverterTypes.Where(converterType => !converterType.IsGenericType).ToList().ForEach(type =>
             {
                 var serializeItem = (Activator.CreateInstance(type) as BinaryConverterBase);
                 BinaryConvertersForAllTypes.Add(serializeItem);
@@ -90,6 +94,9 @@ namespace Core.Serialization.BinaryConverters
         public bool IsNullableType { get; private set; }
         public bool IsSimpleOrStructureType { get; private set; }
         public int SortOrder { get; set; }
+        public static List<Type> AllBinaryConverterTypes { get; private set; }
+        public static List<Type> AllGenericBinaryConverterTypes { get; private set; }
+        public static ConcurrentDictionary<Type, Type> GenericTypeDefinitionForConverters { get; private set; }
         public static BinaryConverterBase GetBinaryConverter(Type typeToSerialize)
         {
             BinaryConverterBase result;
@@ -102,7 +109,18 @@ namespace Core.Serialization.BinaryConverters
                 result = BinaryConvertersForAllTypes.FirstOrDefault(item => item.ItemType == typeToFineConverter);
                 if (result == null)
                 {
-                    result = BinaryConvertersForAllTypes.FirstOrDefault(item => item.ItemType.IsAssignableFrom(typeToFineConverter));
+                    if (typeToSerialize.IsGenericType)
+                    {
+                        Type definitionGenericType;
+                        GenericTypeDefinitionForConverters.TryGetValue(typeToSerialize.GetGenericTypeDefinition(), out definitionGenericType);
+                        if (definitionGenericType != null)
+                        {
+                            result = (BinaryConverterBase)Activator.CreateInstance(definitionGenericType.MakeGenericType(typeToSerialize.GetGenericArguments()));
+                        }
+                    }
+
+                    if (result == null)
+                        result = BinaryConvertersForAllTypes.FirstOrDefault(item => item.ItemType.IsAssignableFrom(typeToFineConverter));
                 }
                 if (result == null)
                     throw new ArgumentException($"The type '{typeToSerialize}' not found in implemented BinaryConverters for serializing! you should impelement a custom BinaryConverter for this Type in Core.Serialization.");

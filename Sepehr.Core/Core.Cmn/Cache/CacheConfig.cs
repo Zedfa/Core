@@ -87,10 +87,10 @@ namespace Core.Cmn.Cache
             binding.ReaderQuotas.MaxNameTableCharCount = int.MaxValue;
             binding.ReaderQuotas.MaxStringContentLength = int.MaxValue;
             binding.Security.Mode = SecurityMode.None;
-            binding.CloseTimeout = new TimeSpan(0, 20, 0);
-            binding.OpenTimeout = new TimeSpan(0, 20, 0);
-            binding.ReceiveTimeout = new TimeSpan(0, 20, 0);
-            binding.SendTimeout = new TimeSpan(0, 20, 0);
+            binding.CloseTimeout = new TimeSpan(0, 2, 0);
+            binding.OpenTimeout = new TimeSpan(0, 2, 0);
+            binding.ReceiveTimeout = new TimeSpan(0, 2, 0);
+            binding.SendTimeout = new TimeSpan(0, 2, 0);
             //binding.Security.Transport.ClientCredentialType = TcpClientCredentialType.Windows;
             //binding.Security.Transport.ProtectionLevel = System.Net.Security.ProtectionLevel.EncryptAndSign;
             //binding.Security.Message.ClientCredentialType =  MessageCredentialType.Windows;

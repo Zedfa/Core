@@ -33,13 +33,22 @@ namespace Core.Cmn
         /// It just works right for Single Pirimarykey, e.g: Id, not Id, name as PrimaryKey.
         /// </summary>
         /// <returns></returns>
-        public override int GetHashCode()
-        {
-            return this.EntityInfo().KeyColumns.Count > 0 ?
-                this.EntityInfo().KeyColumns.Values.First().GetValue(this).GetHashCode() :
-                base.GetHashCode();
-        }
+        //public override int GetHashCode()
+        //{
+        //    // var key = this.EntityInfo().KeyColumns.Values.First();
+        //    if (func == null)
+        //    {
+        //        var md = Core.Serialization.ObjectMetaData.GetEntityMetaData(this.GetType());
+        //        func = md.ReflectionEmitPropertyAccessor.EmittedPropertyGetters[md.WritablePropertyNames["ID"]];
+        //    }
 
+
+        //    // return rnd.Next(0, int.MaxValue);
+        //    return func(this).GetHashCode();
+        //}
+
+        Func<object, object> func;
+        static Random rnd = new Random();
         protected _EntityBase()
         {
         }
@@ -177,15 +186,15 @@ namespace Core.Cmn
             }
         }
 
-        public override bool Equals(object obj)
-        {
-            if (ReferenceEquals(null, obj)) return false;
-            if (ReferenceEquals(this, obj)) return true;
-            if (obj.GetType() != typeof(_EntityBase)) return false;
-            return Equals((_EntityBase)obj);
-        }
+        //public override bool Equals(object obj)
+        //{
+        //    if (ReferenceEquals(null, obj)) return false;
+        //    if (ReferenceEquals(this, obj)) return true;
+        //    if (obj.GetType() != typeof(_EntityBase)) return false;
+        //    return Equals((_EntityBase)obj);
+        //}
 
-        protected ICollection<T> GetNavigationPropertyDataListFromCache<T>(string navigationPropertyName) where T : IEntity
+        protected ICollection<T> GetNavigationPropertyDataListFromCache<T>([CallerMemberName]string navigationPropertyName = null) where T : IEntity
         {
             ICollection<T> result = null;
             if (IsEnableFillNavigationProperyByCache)
@@ -353,13 +362,13 @@ namespace Core.Cmn
             }
         }
 
-        protected void SetNavigationPropertyDataList(string navigationPropertyName, object value)
+        protected void SetNavigationPropertyDataList(object value, [CallerMemberName]string navigationPropertyName = null)
         {
             NavigationPropertyDataDic[navigationPropertyName + 1] = value;
         }
 
 
-        protected T GetNavigationPropertyDataItemFromCache<T>(string navigationPropertyName) where T : IEntity
+        protected T GetNavigationPropertyDataItemFromCache<T>([System.Runtime.CompilerServices.CallerMemberName]string navigationPropertyName = null) where T : IEntity
         {
             T result = default(T);
             if (IsEnableFillNavigationProperyByCache)
@@ -389,7 +398,7 @@ namespace Core.Cmn
             return result;
         }
 
-        protected IT GetNavigationPropertyDataItemFromCache<T, IT>(string navigationPropertyName) where T : IEntity
+        protected IT GetNavigationPropertyDataItemFromCache<T, IT>([CallerMemberName]string navigationPropertyName = null) where T : IEntity
         {
 
             IT result = default(IT);
@@ -460,31 +469,31 @@ namespace Core.Cmn
             }
         }
 
-        public static bool operator ==(_EntityBase left, _EntityBase right)
-        {
-            if (ReferenceEquals(null, left))
-            {
-                if (ReferenceEquals(null, right))
-                    return true;
-                else
-                    return false;
-            }
-            else
-                return left.Equals(right);
-        }
+        //public static bool operator ==(_EntityBase left, _EntityBase right)
+        //{
+        //    if (ReferenceEquals(null, left))
+        //    {
+        //        if (ReferenceEquals(null, right))
+        //            return true;
+        //        else
+        //            return false;
+        //    }
+        //    else
+        //        return left.Equals(right);
+        //}
 
-        public static bool operator !=(_EntityBase left, _EntityBase right)
-        {
-            if (ReferenceEquals(null, left))
-            {
-                if (ReferenceEquals(null, right))
-                    return false;
-                else
-                    return true;
-            }
-            else
-                return !left.Equals(right);
-        }
+        //public static bool operator !=(_EntityBase left, _EntityBase right)
+        //{
+        //    if (ReferenceEquals(null, left))
+        //    {
+        //        if (ReferenceEquals(null, right))
+        //            return false;
+        //        else
+        //            return true;
+        //    }
+        //    else
+        //        return !left.Equals(right);
+        //}
 
         // protected abstract void SetEntityInfo();
 

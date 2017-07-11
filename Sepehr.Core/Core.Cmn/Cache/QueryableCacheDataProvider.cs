@@ -82,10 +82,10 @@ namespace Core.Cmn.Cache
             binding.ReaderQuotas.MaxNameTableCharCount = int.MaxValue;
             binding.ReaderQuotas.MaxStringContentLength = int.MaxValue;
             binding.Security.Mode = SecurityMode.None;
-            binding.CloseTimeout = new TimeSpan(0, 20, 0);
-            binding.OpenTimeout = new TimeSpan(0, 20, 0);
-            binding.ReceiveTimeout = new TimeSpan(0, 20, 0);
-            binding.SendTimeout = new TimeSpan(0, 20, 0);
+            binding.CloseTimeout = new TimeSpan(0, 2, 0);
+            binding.OpenTimeout = new TimeSpan(0, 2, 0);
+            binding.ReceiveTimeout = new TimeSpan(0, 2, 0);
+            binding.SendTimeout = new TimeSpan(0, 2, 0);
             binding.Security.Message.ClientCredentialType = MessageCredentialType.None;
             binding.Security.Transport.ClientCredentialType = TcpClientCredentialType.None;
             using (ServiceClient proxy = new ServiceClient(binding, endpointAddress))
@@ -388,8 +388,8 @@ namespace Core.Cmn.Cache
         {
             try
             {
-                var text = System.IO.File.ReadAllText(string.Format(@".../Cache/{0}.Cache", CacheInfo.Name));
-                var obj = Core.Cmn.Extensions.SerializationExtensions.DeSerializeJSONToObject<T>(text);
+                var binary = System.IO.File.ReadAllBytes(string.Format(@".../Cache/{0}.Cache", CacheInfo.Name));
+                var obj = Core.Cmn.Extensions.SerializationExtensions.DeSerializeBinaryToObject<T>(binary);
                 cacheData = obj;
                 return true;
             }

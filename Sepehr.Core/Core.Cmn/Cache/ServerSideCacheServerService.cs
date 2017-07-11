@@ -58,10 +58,6 @@ namespace Core.Cmn.Cache.Server
 
             if (cacheInfo.EnableCoreSerialization)
             {
-               // var result1 = Activator.CreateInstance(result.GetType());
-               // for (int i = 0; i < 3; i++)
-                //    ((IList)result1).Add(((IList)result).Cast<_EntityBase>().ToList()[i]);
-               // result = result1;
                 result = SerializeCacheData(result);
             }
             return result;
