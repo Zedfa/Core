@@ -11,5 +11,6 @@ namespace Core.Serialization
         }
 
         public Dictionary<Type, Dictionary<int, object>> ReferenceObjs { get; set; }
+        public object CurrentReferenceTypeObject { get; set; }
     }
 }

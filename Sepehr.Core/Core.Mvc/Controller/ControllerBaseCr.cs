@@ -21,13 +21,8 @@ namespace Core.Mvc.Controller
 
         protected override void OnException(System.Web.Mvc.ExceptionContext filterContext)
         {
-            //if (filterContext.HttpContext.Request.Headers["X-Requested-With"] != null)
-            //{
-            //    if (filterContext.HttpContext.Request.Headers["X-Requested-With"].Equals("XMLHttpRequest"))
-            //        filterContext.Result = new JsonResult { RecursionLimit = 3, JsonRequestBehavior = System.Web.Mvc.JsonRequestBehavior.DenyGet };
-            //}
-            //else
-
+            
+            //Core.Cmn.AppBase.TraceViewer.Failure(filterContext.Exception.InnerException + filterContext.Exception.StackTrace + filterContext.Exception.Message);
 
             ExceptionInfo excepInfo = new ExceptionInfo(filterContext.Exception, false);
 

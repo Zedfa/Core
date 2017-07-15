@@ -7,6 +7,7 @@ namespace Core.Serialization.BinaryConverters
 {
     public class DictionaryBinaryConverter : BinaryConverter<IDictionary>
     {
+        public ObjectMetaData EntityMetaData { get; private set; }
         public BinaryConverterBase KeyItem { get; private set; }
         public Type KeyType { get; private set; }
         public BinaryConverterBase ValueItem { get; private set; }
@@ -20,12 +21,19 @@ namespace Core.Serialization.BinaryConverters
             binaryConverter.ValueType = binaryConverter.CurrentType.GetGenericArguments().Last();
             binaryConverter.KeyItem = GetBinaryConverter(binaryConverter.KeyType);
             binaryConverter.ValueItem = GetBinaryConverter(binaryConverter.ValueType);
+            binaryConverter.EntityMetaData = ObjectMetaData.GetEntityMetaData(type);
             return binaryConverter;
+        }
+
+        public override IDictionary CreateInstanceBase(BinaryReader reader, Type objectType, DeserializationContext context)
+        {
+            var obj= (IDictionary)EntityMetaData.ReflectionEmitPropertyAccessor.EmittedObjectInstanceCreator();
+            context.CurrentReferenceTypeObject = obj;
+            return obj;
         }
         protected override IDictionary DeserializeBase(BinaryReader reader, Type objectType, DeserializationContext context)
         {
-            IDictionary result;
-            result = (IDictionary)Activator.CreateInstance(objectType);
+            IDictionary result = (IDictionary)context.CurrentReferenceTypeObject;
             var count = reader.ReadInt32();
             if (count > 0)
             {

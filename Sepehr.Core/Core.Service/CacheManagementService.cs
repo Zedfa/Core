@@ -16,7 +16,7 @@ namespace Core.Service
         {
 
         }
-        [Cacheable(ExpireCacheSecondTime = 60, EnableAutomaticallyAndPeriodicallyRefreshCache = true, EnableUseCacheServer = true)]
+        [Cacheable(EnableSaveCacheOnHDD = true, ExpireCacheSecondTime = 60, EnableAutomaticallyAndPeriodicallyRefreshCache = true, EnableUseCacheServer = true)]
         public static bool WriteToHardCaches()
         {
             var cacheList = CacheService.ObjectCache.ToList();
@@ -27,9 +27,9 @@ namespace Core.Service
                     try
                     {
                         var binary = Core.Cmn.Extensions.SerializationExtensions.SerializetoBinary(cache.Value.GetType().GetProperty("Data").GetValue(cache.Value));
-                        if (!System.IO.Directory.Exists(@".../Cache"))
-                            System.IO.Directory.CreateDirectory(@".../Cache");
-                        System.IO.File.WriteAllBytes(string.Format(@".../Cache/{0}.Cache", ci.Name), binary);
+                        if (!System.IO.Directory.Exists(System.AppDomain.CurrentDomain.BaseDirectory + @"/Cache"))
+                            System.IO.Directory.CreateDirectory(System.AppDomain.CurrentDomain.BaseDirectory + @"/Cache");
+                        System.IO.File.WriteAllBytes(string.Format(System.AppDomain.CurrentDomain.BaseDirectory + @"/Cache/{0}.Cache", ci.Name), binary);
                     }
                     catch (Exception ex)
                     {

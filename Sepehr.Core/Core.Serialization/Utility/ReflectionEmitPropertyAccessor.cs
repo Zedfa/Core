@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Reflection;
 using System.Reflection.Emit;
 using System.Runtime.Serialization;
+using System.Linq;
 
 namespace Core.Serialization
 {
@@ -23,20 +24,20 @@ namespace Core.Serialization
             get;
             private set;
         }
-
+        public Dictionary<string, Func<object, object>> EmittedAllPropertyGetters { get; private set; }
         public Func<object> EmittedObjectInstanceCreator
         {
             get;
             private set;
         }
 
-        public Func<object, object>[] EmittedPropertyGetters
+        public Func<object, object>[] EmittedWritablePropertyGetters
         {
             get;
             private set;
         }
 
-        public Action<object, object>[] EmittedPropertySetters
+        public Action<object, object>[] EmittedWritablePropertySetters
         {
             get;
             private set;
@@ -87,10 +88,11 @@ namespace Core.Serialization
             InitTypeOpCodes();
             EmittedObjectInstanceCreator = CreateInstanceMethodIL();
             CreateInstanceForISerialzableObject = InitCreateInstanceForISerialzableObject();
-            EmittedPropertyGetters = new Func<object, object>[ObjectMetaData.WritablePropertyList.Count];
-            EmittedPropertySetters = new Action<object, object>[ObjectMetaData.WritablePropertyList.Count];
-            var i = 0;
-            ObjectMetaData.WritablePropertyList.ForEach(prop =>
+            EmittedWritablePropertyGetters = new Func<object, object>[ObjectMetaData.WritablePropertyList.Count];
+            EmittedAllPropertyGetters = new Dictionary<string, Func<object, object>>();
+            EmittedWritablePropertySetters = new Action<object, object>[ObjectMetaData.WritablePropertyList.Count];
+
+            ObjectMetaData.Properties.Values.ToList().ForEach(prop =>
             {
                 var getParamTypes = new[] { typeof(object) };
                 var getReturnType = typeof(object);
@@ -124,66 +126,70 @@ namespace Core.Serialization
                 }
 
                 getIL.Emit(OpCodes.Ret);
+                var getFunc = (Func<object, object>)getMethod.CreateDelegate(typeof(Func<object, object>));
+                EmittedAllPropertyGetters[prop.Name] = getFunc;
 
-                EmittedPropertyGetters[i] = (Func<object, object>)getMethod.CreateDelegate(typeof(Func<object, object>));
-
-                var setParamTypes = new[] { typeof(object), typeof(object) };
-                const Type setReturnType = null;
-                var setMethod = new DynamicMethod("Set" + Guid.NewGuid(),
-                                        setReturnType,
-                                        setParamTypes, true);
-                var setIL = setMethod.GetILGenerator();
-                var targetSetMethod = prop.SetMethod;
-                if (targetSetMethod != null)
+                var i = 0;
+                if (ObjectMetaData.WritablePropertyNames.TryGetValue(prop.Name, out i))
                 {
-                    Type paramType = targetSetMethod.GetParameters()[0].ParameterType;
-                    setIL.DeclareLocal(paramType);
-                    setIL.Emit(OpCodes.Ldarg_0); //Load the first argument //(target object)
-                    if (TargetType.IsValueType)
+                    EmittedWritablePropertyGetters[i] = getFunc;
+                    var setParamTypes = new[] { typeof(object), typeof(object) };
+                    const Type setReturnType = null;
+                    var setMethod = new DynamicMethod("Set" + Guid.NewGuid(),
+                                            setReturnType,
+                                            setParamTypes, true);
+                    var setIL = setMethod.GetILGenerator();
+                    var targetSetMethod = prop.SetMethod;
+                    if (targetSetMethod != null)
                     {
-                        setIL.Emit(OpCodes.Unbox, TargetType);
-                    }
-                    else
-                    {
-                        setIL.Emit(OpCodes.Castclass, targetType); //Cast to the source type
-                    }
-
-                    setIL.Emit(OpCodes.Ldarg_1); //Load the second argument
-                                                 //(value object)
-                    if (paramType.IsValueType)
-                    {
-                        setIL.Emit(OpCodes.Unbox, paramType); //Unbox it
-                        if (typeOpCodes.ContainsKey(paramType)) //and load
+                        Type paramType = targetSetMethod.GetParameters()[0].ParameterType;
+                        setIL.DeclareLocal(paramType);
+                        setIL.Emit(OpCodes.Ldarg_0); //Load the first argument //(target object)
+                        if (TargetType.IsValueType)
                         {
-                            var load = typeOpCodes[paramType];
-                            setIL.Emit(load);
+                            setIL.Emit(OpCodes.Unbox, TargetType);
                         }
                         else
                         {
-                            setIL.Emit(OpCodes.Ldobj, paramType);
+                            setIL.Emit(OpCodes.Castclass, targetType); //Cast to the source type
+                        }
+
+                        setIL.Emit(OpCodes.Ldarg_1); //Load the second argument
+                                                     //(value object)
+                        if (paramType.IsValueType)
+                        {
+                            setIL.Emit(OpCodes.Unbox, paramType); //Unbox it
+                            if (typeOpCodes.ContainsKey(paramType)) //and load
+                            {
+                                var load = typeOpCodes[paramType];
+                                setIL.Emit(load);
+                            }
+                            else
+                            {
+                                setIL.Emit(OpCodes.Ldobj, paramType);
+                            }
+                        }
+                        else
+                        {
+                            setIL.Emit(OpCodes.Castclass, paramType); //Cast class
+                        }
+
+                        if (TargetType.IsValueType)
+                        {
+                            setIL.EmitCall(OpCodes.Call, targetSetMethod, null); //Set the property value
+                        }
+                        else
+                        {
+                            setIL.EmitCall(OpCodes.Callvirt, targetSetMethod, null); //Set the property value
                         }
                     }
                     else
                     {
-                        setIL.Emit(OpCodes.Castclass, paramType); //Cast class
+                        setIL.ThrowException(typeof(MissingMethodException));
                     }
-
-                    if (TargetType.IsValueType)
-                    {
-                        setIL.EmitCall(OpCodes.Call, targetSetMethod, null); //Set the property value
-                    }
-                    else
-                    {
-                        setIL.EmitCall(OpCodes.Callvirt, targetSetMethod, null); //Set the property value
-                    }
+                    setIL.Emit(OpCodes.Ret);
+                    EmittedWritablePropertySetters[i] = (Action<object, object>)setMethod.CreateDelegate(typeof(Action<object, object>));
                 }
-                else
-                {
-                    setIL.ThrowException(typeof(MissingMethodException));
-                }
-                setIL.Emit(OpCodes.Ret);
-                EmittedPropertySetters[i] = (Action<object, object>)setMethod.CreateDelegate(typeof(Action<object, object>));
-                i++;
             });
         }
 

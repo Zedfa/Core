@@ -42,7 +42,7 @@ namespace Core.Rep
         #endregion
 
         #region Methods
-        [Cacheable(ExpireCacheSecondTime = 60, EnableAutomaticallyAndPeriodicallyRefreshCache = true)]
+        [Cacheable(EnableSaveCacheOnHDD = true, ExpireCacheSecondTime = 60, EnableAutomaticallyAndPeriodicallyRefreshCache = true)]
         public static IQueryable<Constant> AllConstantCache(IQueryable<Constant> query)
         {
             return query.Include(item => item.ConstantCategory).AsNoTracking();

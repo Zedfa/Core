@@ -46,7 +46,7 @@ namespace Core.Rep
             // _dbContext = dbContextBase;
         }
 
-        [Cacheable(ExpireCacheSecondTime = 1, EnableToFetchOnlyChangedDataFromDB = true, EnableUseCacheServer = false, DisableToSyncDeletedRecord_JustIfEnableToFetchOnlyChangedDataFromDB = true)]
+        [Cacheable(EnableSaveCacheOnHDD = true, ExpireCacheSecondTime = 1, EnableToFetchOnlyChangedDataFromDB = true, EnableUseCacheServer = false, DisableToSyncDeletedRecord_JustIfEnableToFetchOnlyChangedDataFromDB = true)]
         public static IQueryable<DeletedCachedRecord> AllCache(IQueryable<DeletedCachedRecord> query)
         {
             return query.AsNoTracking();

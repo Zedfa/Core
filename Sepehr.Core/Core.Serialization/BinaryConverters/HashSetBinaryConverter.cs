@@ -11,18 +11,27 @@ namespace Core.Serialization.BinaryConverters
     {
         public BinaryConverterBase ElementItem { get; private set; }
         public Type ElementType { get; private set; }
+        public ObjectMetaData EntityMetaData { get; private set; }
+
         public override BinaryConverterBase Copy(Type type)
         {
             var binaryConverter = new HashSetBinaryConverter<T>();
             binaryConverter.Init(type);
             binaryConverter.ElementType = type.GetGenericArguments().First();
             binaryConverter.ElementItem = GetBinaryConverter(binaryConverter.ElementType);
+            binaryConverter.EntityMetaData = ObjectMetaData.GetEntityMetaData(type);
             return binaryConverter;
+        }
+
+        public override HashSet<T> CreateInstanceBase(BinaryReader reader, Type objectType, DeserializationContext context)
+        {
+            var obj = EntityMetaData.ReflectionEmitPropertyAccessor.EmittedObjectInstanceCreator();
+            context.CurrentReferenceTypeObject = obj;
+            return (HashSet<T>)obj;
         }
         protected override HashSet<T> DeserializeBase(BinaryReader reader, Type objectType, DeserializationContext context)
         {
-            HashSet<T> result;
-            result = (HashSet<T>)Activator.CreateInstance(objectType);
+            var result = (HashSet<T>)context.CurrentReferenceTypeObject;
             var count = reader.ReadInt32();
             if (count > 0)
             {

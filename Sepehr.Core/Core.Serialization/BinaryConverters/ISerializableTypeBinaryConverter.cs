@@ -1,5 +1,6 @@
 ﻿using System;
 using System.IO;
+using System.Reflection;
 using System.Runtime.Serialization;
 
 namespace Core.Serialization.BinaryConverters
@@ -11,7 +12,7 @@ namespace Core.Serialization.BinaryConverters
         public ObjectMetaData EntityMetaData { get; private set; }
 
         public Type ObjectType { get; private set; }
-
+        public ConstructorInfo TargetCreateInstanceMethod { get; private set; }
         public object UserDefinedObject { get; private set; }
 
         protected BinaryConverterBase[] BinaryConverters { get; private set; }
@@ -24,6 +25,18 @@ namespace Core.Serialization.BinaryConverters
             var binaryConverter = new ISerializableTypeBinaryConverter();
             binaryConverter.ObjectType = type;
             binaryConverter.Init(type);
+            var createInstanceReturnType = typeof(object);
+            var createInstanceParamsTypes = new[] { typeof(SerializationInfo), typeof(StreamingContext) };
+            binaryConverter.TargetCreateInstanceMethod = binaryConverter.CurrentType.GetConstructor(createInstanceParamsTypes);
+            if (binaryConverter.TargetCreateInstanceMethod == null)
+            {
+                binaryConverter.TargetCreateInstanceMethod = binaryConverter.CurrentType.GetConstructor(
+BindingFlags.NonPublic | BindingFlags.CreateInstance | BindingFlags.Instance,
+null,
+createInstanceParamsTypes,
+null
+);
+            }
             binaryConverter.EntityMetaData = ObjectMetaData.GetEntityMetaData(type);
             binaryConverter.UserDefinedObject = Activator.CreateInstance(type);
             SerializationInfo serializationInfo = new SerializationInfo(type, new FormatterConverter());
@@ -42,9 +55,16 @@ namespace Core.Serialization.BinaryConverters
             return binaryConverter;
         }
 
+
+        public override object CreateInstance(BinaryReader reader, Type objectType, DeserializationContext context)
+        {
+            var obj = EntityMetaData.ReflectionEmitPropertyAccessor.EmittedObjectInstanceCreator();
+            context.CurrentReferenceTypeObject = obj;
+            return obj;
+        }
         protected override ISerializable DeserializeBase(BinaryReader reader, Type objectType, DeserializationContext context)
         {
-            ISerializable result;
+            ISerializable result = (ISerializable)context.CurrentReferenceTypeObject;
             if (!FullyTrusted)
             {
                 string message = $@"Type '{CurrentType}' implements ISerializable but cannot be serialized using the ISerializable interface because the current application is not fully trusted and ISerializable can expose secure data." + Environment.NewLine +
@@ -61,7 +81,8 @@ namespace Core.Serialization.BinaryConverters
                 serializationInfo.AddValue(ItemNamesForISerializable[i], value, BinaryConverterTypesForISerializable[i]);
             }
 
-            result = (ISerializable)EntityMetaData.ReflectionEmitPropertyAccessor.CreateInstanceForISerialzableObject(serializationInfo, _context);
+            TargetCreateInstanceMethod.Invoke(result, new object[] { serializationInfo, _context });
+            //result = (ISerializable)EntityMetaData.ReflectionEmitPropertyAccessor.CreateInstanceForISerialzableObject(serializationInfo, _context);
             return result;
         }
 

@@ -18,7 +18,7 @@ namespace Core.Rep
 
         }
         
-        [Cacheable(EnableUseCacheServer = false, ExpireCacheSecondTime = 300)]
+        [Cacheable(EnableSaveCacheOnHDD = true, EnableUseCacheServer = false, ExpireCacheSecondTime = 300)]
         public static IQueryable<RouteMapConfig> AllRouteMapConfigs(IQueryable<RouteMapConfig> query)
         {
             return query.AsNoTracking();

@@ -11,6 +11,7 @@ namespace Core.Serialization
         }
 
         public int CurrentReferenceId { get; set; }
+        public bool IsFirstItem { get; internal set; }
         public Dictionary<Type, Dictionary<object, int>> ReferenceIds { get; set; }
     }
 }

@@ -13,9 +13,8 @@ namespace Core.Serialization.BinaryConverters
 
         private static Dictionary<Type, BinaryConverterBase> _serializeItemsCachedByEveryType;
 
-        private static List<BinaryConverterBase> _serializeItemsForAllTypes;
         private static Dictionary<string, BinaryConverterBase> _serializeItemsCachedByEveryTypeName;
-
+        private static List<BinaryConverterBase> _serializeItemsForAllTypes;
         static BinaryConverterBase()
         {
             GenericTypeDefinitionForConverters = new ConcurrentDictionary<Type, Type>();
@@ -45,23 +44,32 @@ namespace Core.Serialization.BinaryConverters
             BinaryConvertersForAllTypes = BinaryConvertersForAllTypes.OrderBy(item => item.SortOrder).ToList();
         }
 
+        public static List<Type> AllBinaryConverterTypes { get; private set; }
+
+        public static List<Type> AllGenericBinaryConverterTypes { get; private set; }
+
         public static Dictionary<Type, BinaryConverterBase> BinaryConvertersCachedByEveryType
         {
             get { return _serializeItemsCachedByEveryType; }
             private set { _serializeItemsCachedByEveryType = value; }
         }
+
+        public static Dictionary<Type, BinaryConverterBase> BinaryConvertersCachedByEveryType_Copy { get; private set; }
+
         public static Dictionary<string, BinaryConverterBase> BinaryConvertersCachedByEveryTypeName
         {
             get { return _serializeItemsCachedByEveryTypeName; }
             private set { _serializeItemsCachedByEveryTypeName = value; }
         }
-        public static Dictionary<Type, BinaryConverterBase> BinaryConvertersCachedByEveryType_Copy { get; private set; }
+
         public static Dictionary<string, BinaryConverterBase> BinaryConvertersCachedByEveryTypeName_Copy { get; private set; }
+
         public static List<BinaryConverterBase> BinaryConvertersForAllTypes
         {
             get { return _serializeItemsForAllTypes; }
             private set { _serializeItemsForAllTypes = value; }
         }
+
         public static bool FullyTrusted
         {
             get
@@ -84,19 +92,25 @@ namespace Core.Serialization.BinaryConverters
                 return _fullyTrusted.GetValueOrDefault();
             }
         }
+
+        public static ConcurrentDictionary<Type, Type> GenericTypeDefinitionForConverters { get; private set; }
+
         public Type CurrentType
         {
             get;
             protected set;
         }
-        public bool IsInherritable { get; private set; }
+
+        public bool IsInherritable { get; protected set; }
+
+        public bool IsNullableType { get; protected set; }
+
+        public bool IsSimpleOrStructureType { get; protected set; }
+
         public abstract Type ItemType { get; }
-        public bool IsNullableType { get; private set; }
-        public bool IsSimpleOrStructureType { get; private set; }
+
         public int SortOrder { get; set; }
-        public static List<Type> AllBinaryConverterTypes { get; private set; }
-        public static List<Type> AllGenericBinaryConverterTypes { get; private set; }
-        public static ConcurrentDictionary<Type, Type> GenericTypeDefinitionForConverters { get; private set; }
+
         public static BinaryConverterBase GetBinaryConverter(Type typeToSerialize)
         {
             BinaryConverterBase result;
@@ -143,6 +157,7 @@ namespace Core.Serialization.BinaryConverters
 
             return result;
         }
+
         public static BinaryConverterBase GetBinaryConverter(string fullTypeNameToSerialize)
         {
             BinaryConverterBase result;
@@ -156,7 +171,18 @@ namespace Core.Serialization.BinaryConverters
                 result = BinaryConvertersForAllTypes.FirstOrDefault(item => item.ItemType == typeToFineConverter);
                 if (result == null)
                 {
-                    result = BinaryConvertersForAllTypes.FirstOrDefault(item => item.ItemType.IsAssignableFrom(typeToFineConverter));
+                    if (typeToSerialize.IsGenericType)
+                    {
+                        Type definitionGenericType;
+                        GenericTypeDefinitionForConverters.TryGetValue(typeToSerialize.GetGenericTypeDefinition(), out definitionGenericType);
+                        if (definitionGenericType != null)
+                        {
+                            result = (BinaryConverterBase)Activator.CreateInstance(definitionGenericType.MakeGenericType(typeToSerialize.GetGenericArguments()));
+                        }
+                    }
+
+                    if (result == null)
+                        result = BinaryConvertersForAllTypes.FirstOrDefault(item => item.ItemType.IsAssignableFrom(typeToFineConverter));
                 }
                 if (result == null)
                     throw new ArgumentException($"The type '{typeToSerialize}' not found in implemented BinaryConverters for serializing! you should impelement a custom BinaryConverter for this Type in Core.Serialization.");
@@ -179,20 +205,17 @@ namespace Core.Serialization.BinaryConverters
 
             return result;
         }
-        protected BinaryConverterBase Init(Type type)
-        {
-            CurrentType = type;
-            IsInherritable = type.IsInheritable();
-            IsNullableType = type.IsNullable();
-            IsSimpleOrStructureType = ItemType.IsSimple() || ItemType.IsValueType;
-            return this;
-        }
+
         public abstract BinaryConverterBase Copy(Type objectType);
 
         public abstract object Deserialize(BinaryReader reader, Type objectType, DeserializationContext context);
 
+        public abstract object DeserializeBaseCaller(BinaryReader reader, Type objectType, DeserializationContext context);
+
         public abstract void Serialize(object obj, BinaryWriter writer, SerializationContext context);
 
+        public abstract void SerializeBaseCaller(object objectItem, BinaryWriter writer, SerializationContext context);
+        public abstract object CreateInstance(BinaryReader reader, Type objectType, DeserializationContext context);
         public void SerializeChildItem(BinaryConverterBase serializeItem, object obj, BinaryWriter writer, SerializationContext context)
         {
             serializeItem.Serialize(obj, writer, context);
@@ -201,6 +224,15 @@ namespace Core.Serialization.BinaryConverters
         protected static BinaryConverterBase GetBinaryConverter(Type objectType, int i)
         {
             return ObjectMetaData.GetEntityMetaData(objectType).BinaryConverterList[i];
+        }
+
+        protected virtual BinaryConverterBase Init(Type type)
+        {
+            CurrentType = type;
+            IsInherritable = type.IsInheritable();
+            IsNullableType = type.IsNullable();
+            IsSimpleOrStructureType = CurrentType.IsSimple() || CurrentType.IsValueType;
+            return this;
         }
     }
 }

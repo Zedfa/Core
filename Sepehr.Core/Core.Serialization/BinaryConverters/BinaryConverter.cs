@@ -42,16 +42,19 @@ namespace Core.Serialization.BinaryConverters
                                         var objTypeString = reader.ReadString();
                                         var currentBinaryConverter = GetBinaryConverter(objTypeString);
                                         var dynamicGivenType = currentBinaryConverter.CurrentType;
-                                        referenceIds[currentReferenceId] = obj = ((BinaryConverter<T>)currentBinaryConverter).DeserializeBase(reader, dynamicGivenType, context);
+                                        referenceIds[currentReferenceId] = currentBinaryConverter.CreateInstance(reader, dynamicGivenType, context);
+                                        obj = currentBinaryConverter.DeserializeBaseCaller(reader, dynamicGivenType, context);
                                     }
                                     else
                                     {
-                                        referenceIds[currentReferenceId] = obj = DeserializeBase(reader, objectType, context);
+                                        referenceIds[currentReferenceId] = CreateInstance(reader, objectType, context);
+                                        obj = DeserializeBase(reader, objectType, context);
                                     }
                                 }
                                 else
                                 {
-                                    referenceIds[currentReferenceId] = obj = DeserializeBase(reader, objectType, context);
+                                    referenceIds[currentReferenceId] = CreateInstance(reader, objectType, context);
+                                    obj = DeserializeBase(reader, objectType, context);
                                 }
                             }
                         }
@@ -66,16 +69,19 @@ namespace Core.Serialization.BinaryConverters
                                     var objTypeString = reader.ReadString();
                                     var currentBinaryConverter = GetBinaryConverter(objTypeString);
                                     var dynamicGivenType = currentBinaryConverter.CurrentType;
-                                    referenceIds[currentReferenceId] = obj = ((BinaryConverter<T>)currentBinaryConverter).DeserializeBase(reader, dynamicGivenType, context);
+                                    referenceIds[currentReferenceId] = currentBinaryConverter.CreateInstance(reader, objectType, context);
+                                    obj = currentBinaryConverter.DeserializeBaseCaller(reader, dynamicGivenType, context);
                                 }
                                 else
                                 {
-                                    referenceIds[currentReferenceId] = obj = DeserializeBase(reader, objectType, context);
+                                    referenceIds[currentReferenceId] = CreateInstance(reader, objectType, context);
+                                    obj = DeserializeBase(reader, objectType, context);
                                 }
                             }
                             else
                             {
-                                referenceIds[currentReferenceId] = obj = DeserializeBase(reader, objectType, context);
+                                referenceIds[currentReferenceId] = CreateInstance(reader, objectType, context);
+                                obj = DeserializeBase(reader, objectType, context);
                             }
                         }
                     }
@@ -95,6 +101,8 @@ namespace Core.Serialization.BinaryConverters
 
         public override void Serialize(object obj, BinaryWriter writer, SerializationContext context)
         {
+            var isFirstItem = context.IsFirstItem;
+            context.IsFirstItem = false;
             var isNull = obj == null;
             if (isNull)
             {
@@ -137,12 +145,12 @@ namespace Core.Serialization.BinaryConverters
                             if (IsInherritable)
                             {
                                 Type objType = obj.GetType();
-                                if (CurrentType != objType)
+                                if (CurrentType != objType || isFirstItem)
                                 {
                                     writer.Write(/*Is FullTypeName Written*/true);
                                     writer.Write(/*Is FullTypeName Written*/objType.FullName + "," + objType.Assembly.FullName);
                                     var currentBinaryConverter = GetBinaryConverter(objType);
-                                    (currentBinaryConverter as BinaryConverter<T>).SerializeBase(castedObject, writer, context);
+                                    currentBinaryConverter.SerializeBaseCaller(castedObject, writer, context);
                                 }
                                 else
                                 {
@@ -170,6 +178,16 @@ namespace Core.Serialization.BinaryConverters
 
         protected abstract T DeserializeBase(BinaryReader reader, Type objectType, DeserializationContext context);
         protected abstract void SerializeBase(T objectItem, BinaryWriter writer, SerializationContext context);
+
+        public override object DeserializeBaseCaller(BinaryReader reader, Type objectType, DeserializationContext context)
+        {
+            return DeserializeBase(reader, objectType, context);
+        }
+
+        public override void SerializeBaseCaller(object objectItem, BinaryWriter writer, SerializationContext context)
+        {
+            SerializeBase((T)objectItem, writer, context);
+        }
         protected virtual void UpdateDeserializeContext(BinaryReader reader, Type objectType, DeserializationContext context)
         {
             //if (IsNullableType)
@@ -199,5 +217,19 @@ namespace Core.Serialization.BinaryConverters
             //    context.SerializationPlan = context.SerializationPlan.NextSerializationPlan;
             //}
         }
+        /// <summary>
+        ///It must be implemented and called just for reference Types.
+        /// </summary>
+        public virtual T CreateInstanceBase(BinaryReader reader, Type objectType, DeserializationContext context)
+        {
+            throw new NotImplementedException("It must be implemented and called just for reference Types.");
+        }
+
+        public override object CreateInstance(BinaryReader reader, Type objectType, DeserializationContext context)
+        {
+            return CreateInstanceBase(reader, objectType, context);
+        }
+
+
     }
 }

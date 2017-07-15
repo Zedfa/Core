@@ -242,10 +242,7 @@ begin
 INSERT [core].[Constants] ( [ConstantCategoryID], [Value], [Key], [Culture]) VALUES ( @GeneralConfigId, '0.020833333333333332', N'AuthCookieExpireDays', N'en-US')
 end
 
-IF NOT Exists (select * from core.Constants where [Key]= N'TraceSepehr360' and [Culture]= N'fa-IR' )
-begin
-INSERT [core].[Constants] ( [ConstantCategoryID], [Value], [Key], [Culture]) VALUES ( @TraceConfigId, 'true', N'TraceSepehr360', N'fa-IR')
-end
+
 
 
 END TRY

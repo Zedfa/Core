@@ -36,7 +36,7 @@ namespace Core.Serialization
         {
             //  Core.Serialization.Utility.Debuging.WriteLine($"Start Binary Serializaing at {DateTime.Now} ...");
             //   Console.WriteLine($"Start Binary Serializaing at {DateTime.Now} ...");
-            var context = new SerializationContext();
+            var context = new SerializationContext() { IsFirstItem = true };
             using (var memoryStream = new MemoryStream())
             {
                 using (var writer = new BinaryWriterCore(memoryStream))

@@ -18,7 +18,7 @@ namespace Core.Rep
         {
         }
 
-        [Cacheable(EnableUseCacheServer = true, ExpireCacheSecondTime = 5, EnableAutomaticallyAndPeriodicallyRefreshCache = true, EnableToFetchOnlyChangedDataFromDB = true,
+        [Cacheable(EnableSaveCacheOnHDD = true, EnableUseCacheServer = true, ExpireCacheSecondTime = 5, EnableAutomaticallyAndPeriodicallyRefreshCache = true, EnableToFetchOnlyChangedDataFromDB = true,
             NameOfNavigationPropsForFetchingOnlyChangedDataFromDB = "User")]
         public static IQueryable<UserProfile> AllUserProfileCache(IQueryable<UserProfile> query)
         {

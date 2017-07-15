@@ -9,18 +9,27 @@ namespace Core.Serialization.BinaryConverters
     {
         public BinaryConverterBase ElementItem { get; private set; }
         public Type ElementType { get; private set; }
+        public ObjectMetaData EntityMetaData { get; private set; }
+
         public override BinaryConverterBase Copy(Type type)
         {
             var binaryConverter = new ListBinaryConverter();
             binaryConverter.Init(type);
             binaryConverter.ElementType = type.GetGenericArguments().First();
             binaryConverter.ElementItem = GetBinaryConverter(binaryConverter.ElementType);
+            binaryConverter.EntityMetaData = ObjectMetaData.GetEntityMetaData(type);
             return binaryConverter;
+        }
+
+        public override IList CreateInstanceBase(BinaryReader reader, Type objectType, DeserializationContext context)
+        {
+            var obj = EntityMetaData.ReflectionEmitPropertyAccessor.EmittedObjectInstanceCreator();
+            context.CurrentReferenceTypeObject = obj;
+            return (IList)obj;
         }
         protected override IList DeserializeBase(BinaryReader reader, Type objectType, DeserializationContext context)
         {
-            IList result;
-            result = (IList)Activator.CreateInstance(objectType);
+            IList result = (IList)context.CurrentReferenceTypeObject;
             var count = reader.ReadInt32();
             if (count > 0)
             {
@@ -38,7 +47,7 @@ namespace Core.Serialization.BinaryConverters
         {
             writer.Write(objectItem.Count);
             foreach (var item in objectItem)
-            {                
+            {
                 SerializeChildItem(ElementItem, item, writer, context);
             }
         }

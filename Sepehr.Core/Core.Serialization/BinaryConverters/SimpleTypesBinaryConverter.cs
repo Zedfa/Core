@@ -29,6 +29,14 @@ namespace Core.Serialization.BinaryConverters
             return new ByteArrayBinaryConverter().Init(type);
         }
 
+        protected override BinaryConverterBase Init(Type type)
+        {
+            CurrentType = type;
+            IsInherritable = type.IsInheritable();
+            IsNullableType = type.IsNullable();
+            IsSimpleOrStructureType = true;
+            return this;
+        }
         protected override byte[] DeserializeBase(BinaryReader reader, Type objectType, DeserializationContext context)
         {
             var count = reader.ReadInt32();

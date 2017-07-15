@@ -158,19 +158,20 @@ namespace Core.Cmn
         {
             get
             {
-                //SetEntityInfo();
-                if (EntityInfo().Properties.ContainsKey(propertyName))
+                Func<object, object> getPropertyFunc;
+                if (ObjectMetaData.ReflectionEmitPropertyAccessor.EmittedAllPropertyGetters.TryGetValue(propertyName, out getPropertyFunc))
                 {
-                    return EntityInfo().Properties[propertyName].GetValue(this); ;
+                    return getPropertyFunc(this);
                 }
                 else
                     throw new ArgumentException("PropertyName Is not exist!");
             }
             set
             {
-                if (EntityInfo().Properties.ContainsKey(propertyName))
+                int setterFuncIndex;
+                if (ObjectMetaData.WritablePropertyNames.TryGetValue(propertyName, out setterFuncIndex))
                 {
-                    var propValue = this[propertyName];
+                    var propValue = ObjectMetaData.ReflectionEmitPropertyAccessor.EmittedWritablePropertySetters[setterFuncIndex];
                     if (
                         (propValue != null && !propValue.Equals(value))
                         ||
@@ -183,6 +184,17 @@ namespace Core.Cmn
                 }
                 else
                     throw new ArgumentException("PropertyName Is not exist!");
+            }
+        }
+
+        private ObjectMetaData _objectMetaData;
+        public ObjectMetaData ObjectMetaData
+        {
+            get
+            {
+                if (_objectMetaData == null)
+                    _objectMetaData = Core.Serialization.ObjectMetaData.GetEntityMetaData(this.GetType());
+                return _objectMetaData;
             }
         }
 

@@ -92,7 +92,7 @@ namespace Core.Service
 
 
 
-        [Cacheable(ExpireCacheSecondTime = 1800 /* 30 min*/, EnableAutomaticallyAndPeriodicallyRefreshCache = true, EnableUseCacheServer = true)]
+        [Cacheable(EnableSaveCacheOnHDD = true, ExpireCacheSecondTime = 1800 /* 30 min*/, EnableAutomaticallyAndPeriodicallyRefreshCache = true, EnableUseCacheServer = true)]
         public static bool UpdateDCUser()
         {
             var userProfileService = DependencyInjectionFactory.CreateInjectionInstance<IUserProfileService>();

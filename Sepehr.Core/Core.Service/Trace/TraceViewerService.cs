@@ -5,7 +5,7 @@ using Microsoft.Diagnostics.Tracing;
 using System.Linq;
 
 
-namespace Core.Service
+namespace Core.Service.Trace
 {
     [EventSource(Name = "TraceViewerService")]
     [Injectable(InterfaceType = typeof(ITraceViewer), DomainName = "Core", LifeTime = LifetimeManagement.ContainerControlledLifetime)]
@@ -13,6 +13,7 @@ namespace Core.Service
     {
         private static object _justForLock = new object();
         private static int _countOfInstances;
+        private IConstantService _constanService;
 
         string ITraceViewer.Name
         {
@@ -35,36 +36,45 @@ namespace Core.Service
                 else
                 {
                     _countOfInstances++;
+                    _constanService = ServiceBase.DependencyInjectionFactory.CreateInjectionInstance<IConstantService>();
+               
                 }
             }
         }
-        private string CreateTraceKey(string key)
+    
+        private bool IsTraceEnabled(string traceKey)
         {
-            return $"{Core.Cmn.GeneralConstant.PayLoadKey}_{key}";
-        }
 
-        [Event(1, Keywords = Keywords.Requests, Message = "Start processing request\n\t*** {0} ***\nfor URL\n\t=== {1} ===", Channel = EventChannel.Admin, Task = Tasks.Request, Opcode = EventOpcode.Start)]
-        public void RequestStart( int RequestID, string Url, string traceKey = "")
-        {
-            WriteEvent(1, RequestID, Url, CreateTraceKey(traceKey));
-        }
-        [Event(2 , Keywords = Keywords.Requests, Channel = EventChannel.Analytic, Message = "Entering Phase {1} for request {0}", Task = Tasks.Request, Opcode = EventOpcode.Info, Level = EventLevel.Verbose)]
-        public void RequestPhase( int RequestID, string PhaseName, string traceKey = "")
-        {
-            WriteEvent(2, RequestID, PhaseName, CreateTraceKey(traceKey));
+            return !string.IsNullOrEmpty(traceKey) ? _constanService.GetValueByCategory<bool>(traceKey, Core.Cmn.GeneralConstant.TraceConfig) : true;
 
         }
-        [Event(3, Keywords = Keywords.Requests, Message = "Stop processing request\n\t*** {0} ***", Channel = EventChannel.Admin, Task = Tasks.Request, Opcode = EventOpcode.Stop)]
-        public void RequestStop( int RequestID, string traceKey = "")
+
+
+        [Event(1, Message = "Application Failure: {0}", Level = EventLevel.Error, Keywords = Keywords.Debug, Channel = EventChannel.Admin)]
+        public void Failure(string message, string traceKey = "")
         {
-            WriteEvent(3, RequestID, CreateTraceKey(traceKey));
-        }
-        [Event(4, Message = "{0}", Keywords = Keywords.Debug, Channel = EventChannel.Debug)]
-        public void DebugTrace( string message, string traceKey = "", EventLogEntryType level = EventLogEntryType.Information)
-        {
-            WriteEvent(4, message, CreateTraceKey(traceKey), level);
+            
+            if (IsTraceEnabled(traceKey))
+                WriteEvent(1, message, traceKey);
         }
 
+        [Event(2, Message = "Information: {0}", Level = EventLevel.Informational, Keywords = Keywords.Debug, Channel = EventChannel.Admin)]
+        public void Inform(string message, string traceKey = "")
+        {
+
+            if (IsTraceEnabled(traceKey))
+                WriteEvent(2, message, traceKey);
+        }
+
+        [Event(3, Message = "warning: {0}", Level = EventLevel.Warning, Keywords = Keywords.Debug, Channel = EventChannel.Admin)]
+        public void Attention(string message, string traceKey = "")
+        {
+
+            if (IsTraceEnabled(traceKey))
+                WriteEvent(3, message, traceKey);
+        }
+
+      
 
         #region Keywords / Tasks / Opcodes
 
@@ -89,78 +99,6 @@ namespace Core.Service
 
     }
 
-    public class TraceViewerEventListener : EventListener
-    {
-        private IConstantService _constanService;
-        public TraceViewerEventListener()
-        {
-            _constanService = ServiceBase.DependencyInjectionFactory.CreateInjectionInstance<IConstantService>();
-        }
-
-        protected override void OnEventSourceCreated(EventSource eventSource)
-        {
-            // For any EventSource, turn it on.   
-            EnableEvents(eventSource, EventLevel.LogAlways, EventKeywords.All);
-
-        }
-
-        protected override void OnEventWritten(EventWrittenEventArgs eventData)
-        {
-
-            string constantValueStr = eventData.Payload.FirstOrDefault(payload => payload.ToString().StartsWith(Core.Cmn.GeneralConstant.PayLoadKey))?.ToString();
-            string constantValue = !string.IsNullOrEmpty(constantValueStr) ? constantValueStr.Replace(Core.Cmn.GeneralConstant.PayLoadKey + "_", "") : "";
-            bool isTraceEnabled = !string.IsNullOrEmpty(constantValue) ? _constanService.GetValueByCategory<bool>(constantValue, Core.Cmn.GeneralConstant.TraceConfig) : true;
-
-            if (isTraceEnabled)
-            {
-                string eventLogName = System.Diagnostics.EventLog.LogNameFromSourceName(eventData.EventSource.Name, ".");
-                if (string.IsNullOrEmpty(eventLogName))
-                    throw new Exception("you must add eventlog first by run Core.TraceViewer.exe, then use Trace feature");
-
-                System.Diagnostics.EventLog eventLog = new System.Diagnostics.EventLog(eventLogName);
-
-                eventLog.Source = eventData.EventSource.Name;
-
-                string[] args = eventData.Payload != null ? eventData.Payload.Where(payload => payload.ToString() != constantValueStr)
-                    .Select(payload => payload.ToString()).ToArray()
-                      : null;
-                var message = string.Format(eventData.Message, args);
-
-                System.Diagnostics.EventLogEntryType level = System.Diagnostics.EventLogEntryType.Information;
-
-                if (eventData.PayloadNames.ToList().Contains("level"))
-                {
-                    var customLevel = (EventLogEntryType)Enum.Parse(typeof(EventLogEntryType), eventData.Payload.ElementAt(eventData.PayloadNames.ToList().IndexOf("level")).ToString());
-                    switch (customLevel)
-                    {
-                        case EventLogEntryType.Error:
-                            level = System.Diagnostics.EventLogEntryType.Error;
-                            break;
-                        case EventLogEntryType.Warning:
-                            level = System.Diagnostics.EventLogEntryType.Warning;
-                            break;
-                        case EventLogEntryType.Information:
-                            level = System.Diagnostics.EventLogEntryType.Information;
-                            break;
-                        case EventLogEntryType.SuccessAudit:
-                            level = System.Diagnostics.EventLogEntryType.SuccessAudit;
-                            break;
-                        case EventLogEntryType.FailureAudit:
-                            level = System.Diagnostics.EventLogEntryType.FailureAudit;
-
-                            break;
-                        default:
-                            break;
-                    }
-
-                }
-                eventLog.WriteEntry(message, level, eventData.EventId);
-
-                eventLog.Close();
-            }
-
-        }
-    }
 
 }
 

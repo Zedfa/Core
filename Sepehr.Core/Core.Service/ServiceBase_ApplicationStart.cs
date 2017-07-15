@@ -67,9 +67,7 @@ namespace Core.Service
         public override void OnApplicationStart()
         {
             Core.Cmn.AppBase.TraceViewer = ServiceBase.DependencyInjectionFactory.CreateInjectionInstance<ITraceViewer>();
-
-            var eventListener = new TraceViewerEventListener();
-
+           // var eventListener = new TraceViewerEventListener();
         }
         public override Enum ExecutionPriorityOnApplicationStart
         {

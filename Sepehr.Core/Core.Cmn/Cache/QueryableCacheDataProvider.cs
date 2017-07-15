@@ -388,12 +388,18 @@ namespace Core.Cmn.Cache
         {
             try
             {
-                var binary = System.IO.File.ReadAllBytes(string.Format(@".../Cache/{0}.Cache", CacheInfo.Name));
-                var obj = Core.Cmn.Extensions.SerializationExtensions.DeSerializeBinaryToObject<T>(binary);
-                cacheData = obj;
-                return true;
+                var cacheFilePath = string.Format(System.AppDomain.CurrentDomain.BaseDirectory + @"/Cache/{0}.Cache", CacheInfo.Name);
+                if (System.IO.File.Exists(cacheFilePath))
+                {
+                    var text = System.IO.File.ReadAllBytes(cacheFilePath);
+                    var obj = Core.Cmn.Extensions.SerializationExtensions.DeSerializeBinaryToObject<T>(text);
+                    cacheData = obj;
+                    return true;
+                }
+                cacheData = default(T);
+                return false;
             }
-            catch
+            catch (Exception ex)
             {
                 cacheData = default(T);
                 return false;

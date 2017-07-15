@@ -1,5 +1,6 @@
 ﻿using System;
 using System.IO;
+using System.Threading;
 
 namespace Core.Serialization.BinaryConverters
 {
@@ -8,6 +9,7 @@ namespace Core.Serialization.BinaryConverters
         public BinaryConverterBase ElementItem { get; private set; }
 
         public Type ElementType { get; private set; }
+        public ObjectMetaData EntityMetaData { get; private set; }
 
         public override Type ItemType
         {
@@ -23,17 +25,24 @@ namespace Core.Serialization.BinaryConverters
             binaryConverter.Init(type);
             binaryConverter.ElementType = binaryConverter.CurrentType.GetElementType();
             binaryConverter.ElementItem = GetBinaryConverter(binaryConverter.ElementType);
+            binaryConverter.EntityMetaData = ObjectMetaData.GetEntityMetaData(type);
+            // ObjectCreatorFunc = EntityMetaData.ReflectionEmitPropertyAccessor.EmittedObjectInstanceCreator;           
             return binaryConverter;
         }
 
+        public override Array CreateInstanceBase(BinaryReader reader, Type objectType, DeserializationContext context)
+        {
+            var count = reader.ReadInt32();
+            var obj = (Array)Activator.CreateInstance(CurrentType, count);
+            context.CurrentReferenceTypeObject = obj;
+            return obj;
+        }
         protected override Array DeserializeBase(BinaryReader reader, Type objectType, DeserializationContext context)
         {
-            Array result;
-            var count = reader.ReadInt32();
-            result = Activator.CreateInstance(objectType, count) as Array;
-            if (count > 0)
+            Array result = (Array)context.CurrentReferenceTypeObject;
+            if (result.Length > 0)
             {
-                for (int i = 0; i < count; i++)
+                for (int i = 0; i < result.Length; i++)
                 {
                     var value = ElementItem.Deserialize(reader, ElementType, context);
                     result.SetValue(value, i);

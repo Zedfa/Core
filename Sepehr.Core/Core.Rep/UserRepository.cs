@@ -202,7 +202,7 @@ namespace Core.Rep
                 .FirstOrDefault(user => user.Id.Equals(id));
 
         }
-        [Cacheable(EnableUseCacheServer = false, ExpireCacheSecondTime = 100, EnableAutomaticallyAndPeriodicallyRefreshCache = true)]
+        [Cacheable(EnableSaveCacheOnHDD = true, EnableUseCacheServer = false, ExpireCacheSecondTime = 100, EnableAutomaticallyAndPeriodicallyRefreshCache = true)]
         public static IQueryable<User> All_UsersRole_Role_ViewElementRoles_ViewElement_Cache(IQueryable<User> query)
         {
             return query.Include(element => element.UserRoles)

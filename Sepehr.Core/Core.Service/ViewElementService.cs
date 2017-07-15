@@ -214,7 +214,7 @@ namespace Core.Service
 
         }
 
-        [Cacheable(ExpireCacheSecondTime = 10)]
+        [Cacheable(EnableSaveCacheOnHDD = true, ExpireCacheSecondTime = 10)]
         public static List<ViewElementDTO> GetViewElementByUserId(int userId)
         {
             var roleList = new List<Role>();
