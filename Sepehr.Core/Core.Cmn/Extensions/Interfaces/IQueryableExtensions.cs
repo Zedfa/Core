@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Data.SqlClient;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Threading;
@@ -12,6 +13,7 @@ namespace Core.Cmn.Extensions
     //     Useful extension methods for use with Entity Framework LINQ queries.
     public interface IQueryableExtensions
     {
+        void GetSqlCommand<TEntity>(IDbContextBase context, IQueryable query, ref SqlConnection connection, ref SqlCommand command) where TEntity : class;
         //
         // Summary:
         //     Asynchronously determines whether all the elements of a sequence satisfy a condition.

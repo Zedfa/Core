@@ -1266,9 +1266,9 @@
   <Import Project="$(VSToolsPath)\WebApplications\Microsoft.WebApplication.targets" Condition="'$(VSToolsPath)' != ''" />
   <Import Project="$(MSBuildExtensionsPath32)\Microsoft\VisualStudio\v10.0\WebApplications\Microsoft.WebApplication.targets" Condition="false" />
   <ItemGroup>
-    <Mvc3References Include="..\..\references\mvc3\*.dll">
+    <Mvc5References Include="..\..\references\mvc5\*.dll">
       <Visible>false</Visible>
-    </Mvc3References>
+    </Mvc5References>
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Core.Cmn\Core.Cmn.csproj">

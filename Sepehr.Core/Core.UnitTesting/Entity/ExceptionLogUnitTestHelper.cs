@@ -38,7 +38,7 @@ namespace Core.UnitTesting.Entity
 
         public override Expression<Func<ExceptionLog, bool>> GetFindByIdPredicate(ExceptionLog entity)
         {
-            return e => e.ID == entity.ID;
+            return e => e.Id == entity.Id;
         }
 
         public override ExpressionInfo GetFilterExpressionInfo(ExceptionLog entity)
@@ -47,7 +47,7 @@ namespace Core.UnitTesting.Entity
             {
                 CurrentPage = 0,
                 PageSize = 10,
-                Expression = new KeyValuePair<string, string>("ID", entity.ID.ToString())
+                Expression = new KeyValuePair<string, string>("ID", entity.Id.ToString())
             };
         }
 
@@ -76,7 +76,7 @@ namespace Core.UnitTesting.Entity
             IList<ExceptionLog> createdList = CreateSampleEntityList(10, 100);
             for (int i = 0; i < createdList.Count; i++)
             {
-                createdList[i].ID = Guid.NewGuid();
+               
                 mockEntityList.Add(createdList[i]);
             }
         }

@@ -41,12 +41,13 @@ namespace Core.Cmn
                     {
                         if (_properties == null)
                         {
-                            _properties = new Dictionary<string, PropertyInfo>();
+                            var properties = new Dictionary<string, PropertyInfo>();
                             foreach (PropertyInfo propInfo in EntityType.GetProperties())
                             {
                                 if (propInfo.Name != "CustomIndexerProperty")
-                                    _properties.Add(propInfo.Name, propInfo);
+                                    properties.Add(propInfo.Name, propInfo);
                             }
+                            _properties = properties;
                         }
                     }
                 }
@@ -66,14 +67,16 @@ namespace Core.Cmn
                     {
                         if (_writableMappedProperties == null)
                         {
-                            _writableMappedProperties = new Dictionary<string, PropertyInfo>();
+                            var writableMappedProperties = new Dictionary<string, PropertyInfo>();
                             WritableProperties.Where(prop => prop.Value.CanWrite).ToList().ForEach(item =>
                             {
                                 var notMappedAttribute = Attribute.GetCustomAttribute(item.Value, typeof(NotMappedAttribute));
                                 var fillNavigationProperyByCache = Attribute.GetCustomAttribute(item.Value, typeof(FillNavigationProperyByCacheAttribute));
                                 if (notMappedAttribute == null && fillNavigationProperyByCache == null)
-                                    _writableMappedProperties.Add(item.Key, item.Value);
+                                    writableMappedProperties.Add(item.Key, item.Value);
                             });
+
+                            _writableMappedProperties = writableMappedProperties;
                         }
                     }
                 }
@@ -91,11 +94,12 @@ namespace Core.Cmn
                     {
                         if (_writableProperties == null)
                         {
-                            _writableProperties = new Dictionary<string, PropertyInfo>();
+                            var writableProperties = new Dictionary<string, PropertyInfo>();
                             Properties.Where(prop => prop.Value.CanWrite).ToList().ForEach(item =>
                             {
-                                _writableProperties.Add(item.Key, item.Value);
+                                writableProperties.Add(item.Key, item.Value);
                             });
+                            _writableProperties = writableProperties;
                         }
                     }
                 }
@@ -114,19 +118,20 @@ namespace Core.Cmn
                     {
                         if (_keyColumns == null)
                         {
-                            _keyColumns = new Dictionary<string, PropertyInfo>();
+                            var keyColumns = new Dictionary<string, PropertyInfo>();
                             Properties.ToList().ForEach(propInfo =>
                            {
                                var keyAtt = Attribute.GetCustomAttribute(propInfo.Value, typeof(KeyAttribute));
 
                                if (keyAtt != null)
-                                   _keyColumns.Add(propInfo.Value.Name, propInfo.Value);
+                                   keyColumns.Add(propInfo.Value.Name, propInfo.Value);
                                else
                                {
                                    if (propInfo.Value.Name.ToLower().Equals("id"))
-                                       _keyColumns.Add(propInfo.Value.Name, propInfo.Value);
+                                       keyColumns.Add(propInfo.Value.Name, propInfo.Value);
                                }
                            });
+                            _keyColumns = keyColumns;
                         }
                     }
                 }
@@ -157,7 +162,7 @@ namespace Core.Cmn
                     {
                         if (_infoForFillingNavigationPropertyDic == null)
                         {
-                            _infoForFillingNavigationPropertyDic = new Dictionary<string, InfoForFillingNavigationProperty>();
+                            var infoForFillingNavigationPropertyDic = new Dictionary<string, InfoForFillingNavigationProperty>();
                             Properties.ToList().ForEach(propInfo =>
                             {
                                 var fillNavigationProperyByCacheAttribute =
@@ -165,7 +170,7 @@ namespace Core.Cmn
                                   FillNavigationProperyByCacheAttribute;
                                 if (fillNavigationProperyByCacheAttribute != null)
                                 {
-                                    _infoForFillingNavigationPropertyDic.Add(propInfo.Value.Name,
+                                    infoForFillingNavigationPropertyDic.Add(propInfo.Value.Name,
                                         new Cache.InfoForFillingNavigationProperty
                                         {
                                             PropertyInfo = propInfo.Value,
@@ -181,6 +186,8 @@ namespace Core.Cmn
                                         });
                                 }
                             });
+
+                            _infoForFillingNavigationPropertyDic = infoForFillingNavigationPropertyDic;
                         }
                     }
                 }

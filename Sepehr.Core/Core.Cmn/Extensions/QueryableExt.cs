@@ -1,5 +1,6 @@
 ﻿
 using System;
+using System.Data.SqlClient;
 using System.Linq;
 using System.Linq.Expressions;
 
@@ -33,8 +34,12 @@ namespace Core.Cmn.Extensions
                 return _batchExtensions;
             }
         }
-      
-       
+
+        public static void GetSqlCommand<TEntity>(IDbContextBase context, IQueryable query, ref SqlConnection connection, ref SqlCommand command) where TEntity : class
+        {
+            QueryExtensions.GetSqlCommand<TEntity>(context, query, ref connection, ref command);
+        }
+
         public static IQueryable<T> AsNoTracking<T>(this IQueryable<T> source) where T : class
         {
             return QueryExtensions.AsNoTracking<T>(source);
@@ -65,6 +70,6 @@ namespace Core.Cmn.Extensions
         {
             return BatchExtensions.Update<T>(source, updateExpression);
         }
-       
+
     }
 }

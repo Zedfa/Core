@@ -31,7 +31,7 @@ namespace Core.UnitTesting.Mock
             return 0;
         }
 
-        public IEnumerable<T> SqlQuery<T>(string sql, params object[] parameters) where T : _EntityBase
+        public IEnumerable<T> SqlQuery<T>(string sql, params object[] parameters) 
         {
             return null;
         }
@@ -44,6 +44,11 @@ namespace Core.UnitTesting.Mock
         public IDbContextTransactionBase BeginTransaction()
         {
             return null;
+        }
+
+        public T SqlQueryForSingleResult<T>(string sql, params object[] parameters)
+        {
+            throw new NotImplementedException();
         }
     }
 }

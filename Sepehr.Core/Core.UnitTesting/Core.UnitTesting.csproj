@@ -33,9 +33,9 @@
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <DebugType>pdbonly</DebugType>
-    <Optimize>true</Optimize>
+    <Optimize>false</Optimize>
     <OutputPath>bin\Release\</OutputPath>
-    <DefineConstants>TRACE</DefineConstants>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
@@ -60,10 +60,6 @@
     <Reference Include="System.Drawing" />
     <Reference Include="System.Runtime.Serialization" />
     <Reference Include="System.Web.Extensions" />
-    <Reference Include="System.Web.Helpers, Version=3.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
-      <HintPath>..\..\..\Sepehr360\Sepehr360_Main\packages\Microsoft.AspNet.WebPages.3.2.2\lib\net45\System.Web.Helpers.dll</HintPath>
-      <Private>True</Private>
-    </Reference>
     <Reference Include="System.Web.Mvc, Version=5.2.2.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
       <HintPath>..\..\..\Sepehr360\Sepehr360_Main\packages\Microsoft.AspNet.Mvc.5.2.2\lib\net45\System.Web.Mvc.dll</HintPath>
       <Private>True</Private>
@@ -103,6 +99,7 @@
     <Compile Include="Cmn\EntityInfoTests.cs" />
     <Compile Include="Cmn\StringExtTests.cs" />
     <Compile Include="Cmn\TypeExtTests.cs" />
+    <Compile Include="Cmn\Watch_tests.cs" />
     <Compile Include="Entity\LogUnitTestHelper.cs" />
     <Compile Include="Entity\ExceptionLogUnitTestHelper.cs" />
     <Compile Include="Entity\CompanyChartUnitTestHelper.cs" />
@@ -110,6 +107,8 @@
     <Compile Include="Entity\ConstantCategoryUnitTestHelper.cs" />
     <Compile Include="Entity\ConstantUnitTestHelper.cs" />
     <Compile Include="Entity\EntityUnitTestHelperBase.cs" />
+    <Compile Include="Mock\Core.Ef\MockBatchExtensions.cs" />
+    <Compile Include="Mock\MockIDbContextBaseExtentionsForUnitTest.cs" />
     <Compile Include="Mock\MockDbPropertyValues.cs" />
     <Compile Include="Mock\MockDbEntityEntry.cs" />
     <Compile Include="Mock\MockDbChangeTracker.cs" />
@@ -118,6 +117,7 @@
     <Compile Include="Mock\MockHelperBase.cs" />
     <Compile Include="Mock\MockDbContextBase.cs" />
     <Compile Include="Mock\MockDbSet.cs" />
+    <Compile Include="Mock\MockImmediateSqlNotificationRegister.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Repository\LogRepositoryTests.cs" />
     <Compile Include="Repository\ExceptionLogRepositoryTests.cs" />
@@ -130,6 +130,7 @@
     <Compile Include="Service\CompanyServiceUnitTest.cs" />
     <Compile Include="Service\ConstantCategoryServiceUnitTest.cs" />
     <Compile Include="Service\ConstantServiceUnitTest.cs" />
+    <Compile Include="Service\LogServiceUnitTest.cs" />
     <Compile Include="Service\ServiceUnitTestBase.cs" />
   </ItemGroup>
   <ItemGroup>

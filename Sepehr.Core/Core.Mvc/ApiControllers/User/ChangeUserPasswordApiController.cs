@@ -7,15 +7,14 @@ namespace Core.Mvc.ApiControllers
 
     public class ChangeUserPasswordApiController : Core.Mvc.Controller.ApiControllerBase
     {
-        //
+      
         private IUserService _userService;
         private IConstantService _constantService;
-
         
         public ChangeUserPasswordApiController(IUserService userService,IConstantService constantService)
         {
             _userService = userService;
-
+            _constantService = constantService;
         }
 
         public void PutEntity(ChangeUserPasswordViewModel changeUserPasswordViewModel)

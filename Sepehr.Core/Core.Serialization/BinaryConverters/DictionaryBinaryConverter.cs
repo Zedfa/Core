@@ -7,10 +7,29 @@ namespace Core.Serialization.BinaryConverters
 {
     public class DictionaryBinaryConverter : BinaryConverter<IDictionary>
     {
+        private BinaryConverterBase _keyItem;
+        private BinaryConverterBase _valueItem;
+
         public ObjectMetaData EntityMetaData { get; private set; }
-        public BinaryConverterBase KeyItem { get; private set; }
+        public BinaryConverterBase KeyItem
+        {
+            get
+            {
+                if (_keyItem == null)
+                    _keyItem = GetBinaryConverter(KeyType);
+                return _keyItem;
+            }
+        }
         public Type KeyType { get; private set; }
-        public BinaryConverterBase ValueItem { get; private set; }
+        public BinaryConverterBase ValueItem
+        {
+            get
+            {
+                if (_valueItem == null)
+                    _valueItem = GetBinaryConverter(ValueType);
+                return _valueItem;
+            }
+        }
         public Type ValueType { get; private set; }
 
         public override BinaryConverterBase Copy(Type type)
@@ -19,15 +38,13 @@ namespace Core.Serialization.BinaryConverters
             binaryConverter.Init(type);
             binaryConverter.KeyType = binaryConverter.CurrentType.GetGenericArguments().First();
             binaryConverter.ValueType = binaryConverter.CurrentType.GetGenericArguments().Last();
-            binaryConverter.KeyItem = GetBinaryConverter(binaryConverter.KeyType);
-            binaryConverter.ValueItem = GetBinaryConverter(binaryConverter.ValueType);
             binaryConverter.EntityMetaData = ObjectMetaData.GetEntityMetaData(type);
             return binaryConverter;
         }
 
         public override IDictionary CreateInstanceBase(BinaryReader reader, Type objectType, DeserializationContext context)
         {
-            var obj= (IDictionary)EntityMetaData.ReflectionEmitPropertyAccessor.EmittedObjectInstanceCreator();
+            var obj = (IDictionary)EntityMetaData.ReflectionEmitPropertyAccessor.EmittedObjectInstanceCreator();
             context.CurrentReferenceTypeObject = obj;
             return obj;
         }

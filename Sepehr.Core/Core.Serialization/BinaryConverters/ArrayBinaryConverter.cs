@@ -6,7 +6,17 @@ namespace Core.Serialization.BinaryConverters
 {
     public class ArrayBinaryConverter : BinaryConverter<Array>
     {
-        public BinaryConverterBase ElementItem { get; private set; }
+        private BinaryConverterBase _elementItem;
+
+        public BinaryConverterBase ElementItem
+        {
+            get
+            {
+                if (_elementItem == null)
+                    _elementItem = GetBinaryConverter(ElementType);
+                return _elementItem;
+            }
+        }
 
         public Type ElementType { get; private set; }
         public ObjectMetaData EntityMetaData { get; private set; }
@@ -24,9 +34,7 @@ namespace Core.Serialization.BinaryConverters
             var binaryConverter = new ArrayBinaryConverter();
             binaryConverter.Init(type);
             binaryConverter.ElementType = binaryConverter.CurrentType.GetElementType();
-            binaryConverter.ElementItem = GetBinaryConverter(binaryConverter.ElementType);
-            binaryConverter.EntityMetaData = ObjectMetaData.GetEntityMetaData(type);
-            // ObjectCreatorFunc = EntityMetaData.ReflectionEmitPropertyAccessor.EmittedObjectInstanceCreator;           
+            binaryConverter.EntityMetaData = ObjectMetaData.GetEntityMetaData(type);        
             return binaryConverter;
         }
 

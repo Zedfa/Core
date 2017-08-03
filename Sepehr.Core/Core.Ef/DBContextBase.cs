@@ -38,7 +38,7 @@ namespace Core.Ef
 
         //}
         public DbContextBase()
-            : base("Name=CoreDbContext")
+            : base("Name=Sepehr360Context")
         {
 
         }
@@ -172,13 +172,14 @@ namespace Core.Ef
                                     // Constraint violation exception
                             {
                                 ILogService _logService = Core.Cmn.AppBase.LogService;
-                                var eLog = _logService.GetEventLogObj();
-                                eLog.OccuredException = dbUpdateEx;
-                                eLog.UserId = "SaveChanges()!";
-                                eLog.CustomMessage = "An Constraint violation exception ocuured during saving changes.";
-                                eLog.LogFileName = "DbContextBase";
-                                _logService.Handle(eLog);
-                                throw dbUpdateEx;
+                                // var eLog = _logService.GetEventLogObj();
+                                // eLog.OccuredException = dbUpdateEx;
+                                // eLog.UserId = "SaveChanges()!";
+                                // eLog.CustomMessage = "An Constraint violation exception ocuured during saving changes.";
+                                //// eLog.LogFileName = "DbContextBase";
+                                // _logService.Handle(eLog);
+                                // throw dbUpdateEx;
+                                throw _logService.Handle(dbUpdateEx, customMessage: "An Constraint violation exception ocuured during saving changes.", source: "SaveChanges()!");
                             }
                     }
                 }
@@ -349,12 +350,14 @@ namespace Core.Ef
                 if (!DisableExceptionLogger)
                 {
                     ILogService _logService = Core.Cmn.AppBase.LogService;
-                    var eLog = _logService.GetEventLogObj();
-                    eLog.OccuredException = ex;
-                    eLog.UserId = "SaveChanges()!";
-                    eLog.CustomMessage = "An exception ocuured during saving changes.";
-                    eLog.LogFileName = "DbContextBase";
-                    _logService.Handle(eLog);
+                    //var eLog = _logService.GetEventLogObj();
+                    //eLog.OccuredException = ex;
+                    //eLog.UserId = "SaveChanges()!";
+                    //eLog.CustomMessage = "An exception ocuured during saving changes.";
+                    ////eLog.LogFileName = "DbContextBase";
+                    //_logService.Handle(eLog);
+                    _logService.Handle(ex, customMessage: "An exception ocuured during saving changes.", source: "SaveChanges()!");
+
                 }
                 throw ex;
             }
@@ -395,11 +398,13 @@ namespace Core.Ef
                             {
                                 if (!DisableExceptionLogger)
                                 {
-                                    var eLog = Core.Cmn.AppBase.LogService.GetEventLogObj();
-                                    eLog.OccuredException = ex;
-                                    eLog.UserId = "SaveChanges()!";
-                                    eLog.CustomMessage = "An exception for saving changes has ocuured.";
-                                    Core.Cmn.AppBase.LogService.Handle(eLog);
+                                    //var eLog = Core.Cmn.AppBase.LogService.GetEventLogObj();
+                                    //eLog.OccuredException = ex;
+                                    //eLog.UserId = "SaveChanges()!";
+                                    //eLog.CustomMessage = "An exception for saving changes has ocuured.";
+                                    //Core.Cmn.AppBase.LogService.Handle(eLog);
+                                    Core.Cmn.AppBase.LogService.Handle(ex, customMessage: "An exception ocuured during saving changes.", source: "SaveChanges()!");
+
                                 }
                                 throw ex;
                             }

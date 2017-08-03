@@ -28,7 +28,7 @@ namespace Core.TraceViewer
         {
             try
             {
-                RegisterEventSourceWithOperatingSystem.SimulateInstall(DeploymentFolder);
+                RegisterEventLogSourceWithOperatingSystem.SimulateInstall(DeploymentFolder);
                 MessageBox.Show("عملیات با موفقیت انجام شد", "Success", MessageBoxButtons.OK, MessageBoxIcon.Information);
 
             }
@@ -49,7 +49,7 @@ namespace Core.TraceViewer
             {
                 try
                 {
-                    RegisterEventSourceWithOperatingSystem.SimulateUninstall(DeploymentFolder);
+                    RegisterEventLogSourceWithOperatingSystem.SimulateUninstall(DeploymentFolder);
                     MessageBox.Show("عملیات با موفقیت انجام شد", "Success", MessageBoxButtons.OK, MessageBoxIcon.Information);
 
                 }

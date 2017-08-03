@@ -32,7 +32,7 @@ namespace Core.Mvc.Helpers.CustomWrapper.DataSource
             Create.Type = "Post";
         }
 
-        public new string Prefix { get; set; }
+        public string Prefix { get; set; }
 
         
         protected override void Serialize(IDictionary<string, object> json)
@@ -83,13 +83,13 @@ namespace Core.Mvc.Helpers.CustomWrapper.DataSource
             //}
         }
 
-        public new OperationBase Read { get; private set; }
+        public  OperationBase Read { get; private set; }
 
-        public new OperationBase Update { get; private set; }
+        public  OperationBase Update { get; private set; }
 
-        public new OperationBase Create { get; private set; }
+        public  OperationBase Create { get; private set; }
 
-        public new OperationBase Destroy { get; private set; }
+        public  OperationBase Destroy { get; private set; }
 
         public string EntityKeyName { get; set; }
 

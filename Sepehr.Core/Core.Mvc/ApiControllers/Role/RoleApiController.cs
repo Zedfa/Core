@@ -92,7 +92,7 @@ namespace Core.Mvc.ApiControllers
 
 
                 }
-                catch (Exception ex)
+                catch 
                 {
                     //MessageStrore.Add(new Message { text = "dd", type = MessageType.error });
                     //return Request.CreateErrorResponse(HttpStatusCode.NotFound,ex);

@@ -33,7 +33,8 @@ namespace Core.Service
                     }
                     catch (Exception ex)
                     {
-                        Core.Cmn.AppBase.LogService.Handle(ex, "", string.Format("error in write cache in HDD = {0}", ci.Name));
+                        //  Core.Cmn.AppBase.LogService.Handle(ex, "", string.Format("error in write cache in HDD = {0}", ci.Name));
+                        Core.Cmn.AppBase.LogService.Handle(ex, string.Format("error in write cache in HDD = {0}", ci.Name));
                     }
                 });
             });

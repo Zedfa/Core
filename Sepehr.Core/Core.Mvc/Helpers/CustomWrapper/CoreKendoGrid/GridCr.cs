@@ -49,7 +49,7 @@ namespace Core.Mvc.Helpers.CoreKendoGrid
         private string _addEditTemplate;
         //private HtmlHelper _helper;
         private ModelMetadata _modelMetaData;
-        private string _removableStr;
+        private string _removableStr = string.Empty;
         private string _width;
         private string _height;
         private List<GridCommandCr> commandsAdded;

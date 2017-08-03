@@ -7,7 +7,18 @@ namespace Core.Serialization.BinaryConverters
 {
     public class ListBinaryConverter : BinaryConverter<IList>
     {
-        public BinaryConverterBase ElementItem { get; private set; }
+        private BinaryConverterBase _elementItem;
+        public BinaryConverterBase ElementItem
+        {
+            get
+            {
+                if (_elementItem == null)
+                {
+                    _elementItem = GetBinaryConverter(ElementType);
+                }
+                return _elementItem;
+            }
+        }
         public Type ElementType { get; private set; }
         public ObjectMetaData EntityMetaData { get; private set; }
 
@@ -16,7 +27,6 @@ namespace Core.Serialization.BinaryConverters
             var binaryConverter = new ListBinaryConverter();
             binaryConverter.Init(type);
             binaryConverter.ElementType = type.GetGenericArguments().First();
-            binaryConverter.ElementItem = GetBinaryConverter(binaryConverter.ElementType);
             binaryConverter.EntityMetaData = ObjectMetaData.GetEntityMetaData(type);
             return binaryConverter;
         }

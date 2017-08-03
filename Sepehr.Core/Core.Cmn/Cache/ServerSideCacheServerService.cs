@@ -20,20 +20,20 @@ namespace Core.Cmn.Cache.Server
     {
         public object GetCacheDataViaWcf(ICacheDataProvider cacheDataProvider)
         {
-            var cacheDataProvider1 = cacheDataProvider as CacheDataProvider;
-            var cacheInfo = CacheConfig.CacheInfoDic.Values.First(item => item.UniqueKeyInServerLevel == cacheDataProvider1.CacheInfo.UniqueKeyInServerLevel);
-            cacheDataProvider1.SetFunc(cacheInfo.Func);
-            var c = cacheDataProvider1.CacheInfo;
-            cacheDataProvider1.CacheInfo = cacheInfo;
-            var cacheKey = cacheDataProvider1.GenerateCacheKey();
-            Type genericType = cacheInfo.MethodInfo.ReturnType;
-            if (typeof(IQueryable).IsAssignableFrom(cacheInfo.MethodInfo.ReturnType))
-                genericType = typeof(List<>).MakeGenericType(cacheInfo.MethodInfo.ReturnType.GenericTypeArguments[0]);
+            var clientCacheDataProvider = cacheDataProvider as CacheDataProvider;
+            var serverCacheInfo = CacheConfig.CacheInfoDic.Values.First(item => item.UniqueKeyInServerLevel == clientCacheDataProvider.CacheInfo.UniqueKeyInServerLevel);
+            clientCacheDataProvider.SetFunc(serverCacheInfo.Func);
+            var c = clientCacheDataProvider.CacheInfo;
+            clientCacheDataProvider.CacheInfo = serverCacheInfo;
+            var cacheKey = clientCacheDataProvider.GenerateCacheKey();
+            Type genericType = serverCacheInfo.MethodInfo.ReturnType;
+            if (typeof(IQueryable).IsAssignableFrom(serverCacheInfo.MethodInfo.ReturnType))
+                genericType = typeof(List<>).MakeGenericType(serverCacheInfo.MethodInfo.ReturnType.GenericTypeArguments[0]);
             else
-                genericType = cacheInfo.MethodInfo.ReturnType;
+                genericType = serverCacheInfo.MethodInfo.ReturnType;
 
-            var result = (typeof(CacheBase)).GetMethod("Cache").MakeGenericMethod(genericType).Invoke(null, new object[] { cacheDataProvider, cacheInfo, cacheInfo.ExpireCacheSecondTime, cacheKey, true });
-            if (cacheDataProvider1.CacheInfo.EnableToFetchOnlyChangedDataFromDB)
+            var result = (typeof(CacheBase)).GetMethod("Cache").MakeGenericMethod(genericType).Invoke(null, new object[] { cacheDataProvider, serverCacheInfo, serverCacheInfo.RefreshCacheTimeSeconds, cacheKey, true });
+            if (clientCacheDataProvider.CacheInfo.EnableToFetchOnlyChangedDataFromDB)
             {
                 var resultlist = (result as IList);
                 var resultQueryable = QueryableCacheDataProvider<string>.MakeQueryableForFetchingOnleyChangedDataFromDB(resultlist.AsQueryable(), c, false);
@@ -56,7 +56,7 @@ namespace Core.Cmn.Cache.Server
                 result = newlst;
             }
 
-            if (cacheInfo.EnableCoreSerialization)
+            if (serverCacheInfo.EnableCoreSerialization)
             {
                 result = SerializeCacheData(result);
             }

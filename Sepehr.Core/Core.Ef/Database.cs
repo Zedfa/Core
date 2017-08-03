@@ -1,5 +1,5 @@
 ﻿using Core.Cmn;
-
+using System.Linq;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -505,7 +505,7 @@ namespace Core.Ef
         //     If set to true the initializer is run even if it has already been run.
         public void Initialize(bool force) { throw new NotImplementedException(); }
 
-        public IEnumerable<T> SqlQuery<T>(string sql, params object[] parameters) where T : _EntityBase
+        public IEnumerable<T> SqlQuery<T>(string sql, params object[] parameters)
         {
             foreach (var item in _database.SqlQuery<T>(sql, parameters))
             {
@@ -542,6 +542,12 @@ namespace Core.Ef
         //     Thrown if the connection associated with the transaction does not match the Entity
         //     Framework's connection
         public void UseTransaction(DbTransaction transaction) { throw new NotImplementedException(); }
+
+        public T SqlQueryForSingleResult<T>(string sql, params object[] parameters)
+        {
+            var result = _database.SqlQuery<T>(sql, parameters).SingleOrDefault();
+            return result;
+        }
     }
 }
 

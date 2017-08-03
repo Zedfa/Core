@@ -42,7 +42,7 @@ namespace Core.Service
 
         }
 
-        public IQueryable<UserRole> All(bool canUseCacheIfPossible = true)
+        public override IQueryable<UserRole> All(bool canUseCacheIfPossible = true)
         {
             return _userRoleRepository.All();
         }

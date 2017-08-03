@@ -79,7 +79,7 @@ namespace Core.Mvc.ApiControllers
 
 
                 }
-                catch (Exception ex)
+                catch
                 {
                     return Request.CreateResponse("این رکورد مورد استفاده است.");
                 }

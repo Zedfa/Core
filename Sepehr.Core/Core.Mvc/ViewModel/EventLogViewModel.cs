@@ -32,7 +32,7 @@ namespace Core.Mvc.ViewModel
         }
 
         [DataMember]
-        public System.Guid Id
+        public int Id
         {
             get
             {
@@ -49,11 +49,11 @@ namespace Core.Mvc.ViewModel
         {
             get
             {
-                return Model.UserId;
+                return Model.Source;
             }
             set
             {
-                Model.UserId = value;
+                Model.Source = value;
             }
         }
 
@@ -89,11 +89,11 @@ namespace Core.Mvc.ViewModel
         {
             get
             {
-                return Model.LogType;
+                return Model.ApplicationName;
             }
             set
             {
-                Model.LogType = value;
+                Model.ApplicationName = value;
             }
         }
 

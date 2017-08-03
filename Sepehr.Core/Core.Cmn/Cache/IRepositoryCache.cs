@@ -10,7 +10,7 @@ namespace Core.Cmn
         //object BuildCache(IDbContextBase db, string cacheKey);
         //object BuildCache<TParam1>(IDbContextBase db, string cacheKey, TParam1 param1);
         //object BuildCache<TParam1, TParam2>(IDbContextBase db, string cacheKey, TParam1 param1, TParam2 param2);
-        IQueryable GetQueryableForCahce();
+        IQueryable GetQueryableForCahce(IDbContextBase dbContext);
         Type GetDomainModelType();
         string TableName { get; }
         string Schema { get; }

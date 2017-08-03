@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
+using System;
 using System.Linq;
 using System.Reflection;
 
@@ -72,6 +73,12 @@ namespace Core.Cmn.UnitTesting
                 result = GetRandomShort();
             }
             return result;
+        }
+
+        [ClassInitialize]
+        public virtual void Initialize(TestContext testContext)
+        {
+            Core.Cmn.AppBase.StartApplication();
         }
 
         protected int GetRandomInt(int min = 1, int max = int.MaxValue)

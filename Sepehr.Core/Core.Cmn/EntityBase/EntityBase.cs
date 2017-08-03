@@ -47,7 +47,6 @@ namespace Core.Cmn
         //    return func(this).GetHashCode();
         //}
 
-        Func<object, object> func;
         static Random rnd = new Random();
         protected _EntityBase()
         {
@@ -90,26 +89,25 @@ namespace Core.Cmn
             }
         }
 
-        private long _longId;
+        private int _cacheId;
         [NotMapped]
         //[NonSerialized]
         [IgnoreDataMember]
         [ScriptIgnore]
         [JsonIgnore]
-        public virtual long LongId
+        public virtual int CacheId
         {
             get
             {
-                if (_longId == default(long))
+                if (_cacheId == default(int))
                 {
                     var keyColumnName = EntityInfo().KeyColumns.Keys.FirstOrDefault();
                     if (keyColumnName != null)
                     {
-                        var id = this[keyColumnName];
-                        long.TryParse(id.ToString(), out _longId);
+                        _cacheId = (int)this[keyColumnName];
                     }
                 }
-                return _longId;
+                return _cacheId;
             }
         }
 
@@ -188,7 +186,8 @@ namespace Core.Cmn
         }
 
         private ObjectMetaData _objectMetaData;
-        public ObjectMetaData ObjectMetaData
+        [IgnoreDataMember]
+        internal ObjectMetaData ObjectMetaData
         {
             get
             {
@@ -259,7 +258,7 @@ namespace Core.Cmn
                                 if (cacheInfo.DisableCache)
                                 {
                                     _EntityBase resultItem;
-                                    result = (cacheInfo.MethodInfo.Invoke(null, new object[] { cacheInfo.Repository.GetQueryableForCahce() }) as IQueryable<T>)
+                                    result = (cacheInfo.MethodInfo.Invoke(null, new object[] { cacheInfo.Repository.GetQueryableForCahce(AppBase.DependencyInjectionFactory.CreateContextInstance()) }) as IQueryable<T>)
                                             .Where(string.Format("{0} == {1}", infoForFillingNavigationProperty.OtherEntityRefrencePropertyName, thisPropertyValue));
                                     resultItem = result.FirstOrDefault() as _EntityBase;
                                     if (resultItem != null)
@@ -270,7 +269,7 @@ namespace Core.Cmn
                                 {
                                     var queryableCacheExecution = new QueryableCacheDataProvider<T>(cacheInfo);
                                     //  _stopwatch.Restart();
-                                    result = queryableCacheExecution.Cache<List<T>>(cacheInfo, cacheInfo.ExpireCacheSecondTime, cacheInfo.BasicKey.ToString(), true).
+                                    result = queryableCacheExecution.Cache<List<T>>(cacheInfo, cacheInfo.RefreshCacheTimeSeconds, cacheInfo.BasicKey.ToString(), true).
                                         Where(item =>
                                             {
                                                 var otherPropertyValue = item[infoForFillingNavigationProperty.OtherEntityRefrencePropertyName];
@@ -288,7 +287,7 @@ namespace Core.Cmn
                                     if (result.Count() == 0 && !string.IsNullOrEmpty(infoForFillingNavigationProperty.SecondLevelDataSourceName))
                                     {
                                         var dataSourceInfo = CacheConfig.CacheInfoDic.First(ci => ci.Value.Name == infoForFillingNavigationProperty.SecondLevelDataSourceName).Value;
-                                        resultForSecondLevelDataSource = ((dataSourceInfo.MethodInfo.Invoke(null, new object[] { dataSourceInfo.Repository.GetQueryableForCahce() }) as IQueryable)
+                                        resultForSecondLevelDataSource = ((dataSourceInfo.MethodInfo.Invoke(null, new object[] { dataSourceInfo.Repository.GetQueryableForCahce(AppBase.DependencyInjectionFactory.CreateContextInstance()) }) as IQueryable)
                                            .Where(string.Format("{0} == {1}", infoForFillingNavigationProperty.OtherEntityRefrencePropertyName, thisPropertyValue)) as IEnumerable).Cast<IEntity>().FirstOrDefault();
                                         if (resultForSecondLevelDataSource != null)
                                             ((_EntityBase)resultForSecondLevelDataSource).EnableFillNavigationProperyByCache();
@@ -297,7 +296,7 @@ namespace Core.Cmn
                                     _EntityBase resultItem;
                                     if (!cacheInfo.DisableCache && result.Count() == 0)
                                     {
-                                        result = (cacheInfo.MethodInfo.Invoke(null, new object[] { cacheInfo.Repository.GetQueryableForCahce() }) as IQueryable<T>)
+                                        result = (cacheInfo.MethodInfo.Invoke(null, new object[] { cacheInfo.Repository.GetQueryableForCahce(AppBase.DependencyInjectionFactory.CreateContextInstance()) }) as IQueryable<T>)
                                             .Where(string.Format("{0} == {1}", infoForFillingNavigationProperty.OtherEntityRefrencePropertyName, thisPropertyValue));
                                         resultItem = result.FirstOrDefault() as _EntityBase;
                                         if (resultItem != null)
@@ -474,7 +473,7 @@ namespace Core.Cmn
 
         public void CallNavigationPropertyChangedByCache(_EntityBase sender, string propertyName)
         {
-            var propertyChangedByCache = NavigationPropertyCahngedByCache;
+            var propertyChangedByCache = NavigationPropertyChangedByCache;
             if (propertyChangedByCache != null)
             {
                 propertyChangedByCache(sender, new PropertyChangedEventArgs(propertyName));
@@ -524,7 +523,7 @@ namespace Core.Cmn
             }
         }
 
-        public event PropertyChangedEventHandler NavigationPropertyCahngedByCache;
+        public event PropertyChangedEventHandler NavigationPropertyChangedByCache;
 
         private bool _isDeletedForCache;
 

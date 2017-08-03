@@ -1,21 +1,24 @@
 ﻿using Core.Cmn;
-using Core.Entity;
-
-using Core.UnitTesting.Entity;
-
-using System.Collections.Generic;
-
-using System.Linq;
-using System;
+using Core.Cmn.Attributes;
 using Core.Ef;
+using Core.Entity;
+using Core.UnitTesting.Entity;
+using System;
+using System.Collections.Generic;
+using System.Linq;
 using System.Reflection;
 
 namespace Core.UnitTesting.Mock
 {
+    [Injectable(InterfaceType = typeof(IDbContextBase), Version = 1000)]
     public class MockDbContextBase : IDbContextBase
     {
+        private static IDictionary<Type, string> _entityIdPropertyNameMap;
+
+        private static IDictionary<object, EntityState> _stateMap = new Dictionary<object, EntityState>();
+
         private static Type[] ENTITY_TYPES =
-        {
+                        {
             typeof(Company),
             typeof(CompanyChart),
             typeof(Constant),
@@ -23,19 +26,51 @@ namespace Core.UnitTesting.Mock
             typeof(ExceptionLog),
             typeof(Log),
         };
+        private MethodInfo _addEntityMethod;
+        private IDbContextConfigurationBase _configuration;
+        private IDatabase _database;
+        private MethodInfo _deleteEntityMethod;
+        private MethodInfo _updateEntityMethod;
+        public MockDbContextBase()
+        {
+            DisableExceptionLogger = true;
+        }
 
-        private static IDictionary<object, EntityState> _stateMap = new Dictionary<object, EntityState>();
-        public IDictionary<object, EntityState> StateMap { get { return _stateMap; } }
-
-
-        private static IDictionary<Type, string> _entityIdPropertyNameMap;
         public static IDictionary<Type, string> EntityIdPropertyNameMap
         {
             get { return _entityIdPropertyNameMap ?? (_entityIdPropertyNameMap = new Dictionary<Type, string>()); }
         }
 
+        public IDbChangeTrackerBase ChangeTracker
+        {
+            get
+            {
+                return null;
+            }
+        }
 
-        private MethodInfo _addEntityMethod;
+        public IDbContextConfigurationBase Configuration
+        {
+            get
+            {
+                return _configuration ?? (_configuration = MockHelperBase.BuildMockDbContextConfiguration());
+            }
+        }
+
+        public IDatabase Database
+        {
+            get
+            {
+                return _database ?? (_database = MockHelperBase.BuildMockDatabase());
+            }
+        }
+
+        public bool DisableExceptionLogger
+        {
+            get; set;
+        }
+
+        public IDictionary<object, EntityState> StateMap { get { return _stateMap; } }
         protected MethodInfo AddEntityMethod
         {
             get
@@ -43,17 +78,6 @@ namespace Core.UnitTesting.Mock
                 return _addEntityMethod ?? (_addEntityMethod = typeof(MockDbContextBase).GetMethod("AddEntity", BindingFlags.Instance | BindingFlags.NonPublic));
             }
         }
-
-        private MethodInfo _updateEntityMethod;
-        protected MethodInfo UpdateEntityMethod
-        {
-            get
-            {
-                return _updateEntityMethod ?? (_updateEntityMethod = typeof(MockDbContextBase).GetMethod("UpdateEntity", BindingFlags.Instance | BindingFlags.NonPublic));
-            }
-        }
-
-        private MethodInfo _deleteEntityMethod;
         protected MethodInfo DeleteEntityMethod
         {
             get
@@ -62,18 +86,78 @@ namespace Core.UnitTesting.Mock
             }
         }
 
-
-        private PropertyInfo GetIdProperty(Type entityType)
+        protected MethodInfo UpdateEntityMethod
         {
-            string idPropertyName = EntityIdPropertyNameMap.ContainsKey(entityType) ? EntityIdPropertyNameMap[entityType] : null;
-            return !string.IsNullOrEmpty(idPropertyName) ? entityType.GetProperty(idPropertyName) : (entityType.GetProperty("ID") ?? entityType.GetProperty("Id"));
+            get
+            {
+                return _updateEntityMethod ?? (_updateEntityMethod = typeof(MockDbContextBase).GetMethod("UpdateEntity", BindingFlags.Instance | BindingFlags.NonPublic));
+            }
+        }
+        public void Dispose()
+        {
+        }
+
+        public DbEntityEntryBase<TEntity> Entry<TEntity>(TEntity entity) where TEntity : _EntityBase
+        {
+            return null;
+        }
+
+        public int SaveChanges()
+        {
+            int count = 0;
+            foreach (object obj in _stateMap.Keys)
+            {
+                switch (_stateMap[obj])
+                {
+                    case EntityState.Added:
+                        count++;
+                        HandleAddEntity(obj);
+                        break;
+
+                    case EntityState.Modified:
+                        count++;
+                        HandleModifyEntity(obj);
+                        break;
+
+                    case EntityState.Deleted:
+                        count++;
+                        HandleDeleteEntity(obj);
+                        break;
+                }
+            }
+
+            foreach (object obj in _stateMap.Keys.ToList())
+            {
+                _stateMap[obj] = EntityState.Unchanged;
+            }
+
+            return count;
+        }
+
+        public IDbSetBase<TEntity> Set<TEntity>() where TEntity : EntityBase<TEntity>, new()
+        {
+            // check core entities
+            IDbSetBase<TEntity> result = GetEntitySetCore<TEntity>();
+
+            // check project entities
+            if (result == null)
+            {
+                result = GetEntitySetProject<TEntity>();
+            }
+
+            return result;
+        }
+
+        public void SetContextState<T>(EntityBase<T> entity, EntityState entityState) where T : EntityBase<T>, new()
+        {
+            _stateMap[entity] = entityState;
         }
 
         protected void AddEntity<TEntity>(TEntity entity) where TEntity : EntityBase<TEntity>, new()
         {
             long longId = 1;
             if (Set<TEntity>().Count() > 0)
-                longId = Set<TEntity>().Max<TEntity, long>(e => e.LongId) + 1;
+                longId = Set<TEntity>().Max<TEntity, long>(e => e.CacheId) + 1;
 
             Type entityType = entity.GetType();
             PropertyInfo idProperty = GetIdProperty(entityType);
@@ -94,6 +178,15 @@ namespace Core.UnitTesting.Mock
                 }
 
                 Set<TEntity>().Add(entity);
+            }
+        }
+
+        protected void DeleteEntity<TEntity>(TEntity entity) where TEntity : EntityBase<TEntity>, new()
+        {
+            entity = FindEntity(entity);
+            if (entity != null)
+            {
+                Set<TEntity>().Remove(entity);
             }
         }
 
@@ -143,69 +236,12 @@ namespace Core.UnitTesting.Mock
 
             return found;
         }
-        protected void UpdateEntity<TEntity>(TEntity entity) where TEntity : EntityBase<TEntity>, new()
-        {
-            TEntity old = FindEntity(entity);
-            if (old != null)
-            {
-                Set<TEntity>().Remove(old);
-                Set<TEntity>().Add(entity);
-            }
-        }
 
-        protected void DeleteEntity<TEntity>(TEntity entity) where TEntity : EntityBase<TEntity>, new()
+        protected virtual IDbSetBase<TEntity> GetEntitySetProject<TEntity>() where TEntity : EntityBase<TEntity>, new()
         {
-            entity = FindEntity(entity);
-            if (entity != null)
-            {
-                Set<TEntity>().Remove(entity);
-            }
-        }
-
-        public MockDbContextBase()
-        {
-            DisableExceptionLogger = true;
-        }
-
-        public bool DisableExceptionLogger
-        {
-            get; set;
-        }
-
-        private IDatabase _database;
-        public IDatabase Database
-        {
-            get
-            {
-                return _database ?? (_database = MockHelperBase.BuildMockDatabase());
-            }
-        }
-
-        private IDbContextConfigurationBase _configuration;
-        public IDbContextConfigurationBase Configuration
-        {
-            get
-            {
-                return _configuration ?? (_configuration = MockHelperBase.BuildMockDbContextConfiguration());
-            }
-        }
-
-        public IDbChangeTrackerBase ChangeTracker
-        {
-            get
-            {
-                return null;
-            }
-        }
-
-        public void Dispose()
-        {
-
-        }
-
-        public DbEntityEntryBase<TEntity> Entry<TEntity>(TEntity entity) where TEntity : _EntityBase
-        {
-            return null;
+            return EntityUnitTestHelperBase<TEntity>.GetMockData();
+            // will be overridden in child classes
+          //  return null;
         }
 
         protected virtual bool HandleAddEntity(object entity)
@@ -221,26 +257,6 @@ namespace Core.UnitTesting.Mock
                     handled = true;
                     break;
                 }
-
-            }
-
-            return handled;
-        }
-
-        protected virtual bool HandleModifyEntity(object entity)
-        {
-            bool handled = false;
-
-            foreach (Type entityType in ENTITY_TYPES)
-            {
-                if (entity.GetType() == entityType)
-                {
-                    MethodInfo generic = UpdateEntityMethod.MakeGenericMethod(entityType);
-                    generic.Invoke(this, new object[] { entity });
-                    handled = true;
-                    break;
-                }
-
             }
 
             return handled;
@@ -259,40 +275,37 @@ namespace Core.UnitTesting.Mock
                     handled = true;
                     break;
                 }
-
             }
 
             return handled;
         }
 
-        public int SaveChanges()
+        protected virtual bool HandleModifyEntity(object entity)
         {
-            int count = 0;
-            foreach (object obj in _stateMap.Keys)
+            bool handled = false;
+
+            foreach (Type entityType in ENTITY_TYPES)
             {
-                switch (_stateMap[obj])
+                if (entity.GetType() == entityType)
                 {
-                    case EntityState.Added:
-                        count++;
-                        HandleAddEntity(obj);
-                        break;
-                    case EntityState.Modified:
-                        count++;
-                        HandleModifyEntity(obj);
-                        break;
-                    case EntityState.Deleted:
-                        count++;
-                        HandleDeleteEntity(obj);
-                        break;
+                    MethodInfo generic = UpdateEntityMethod.MakeGenericMethod(entityType);
+                    generic.Invoke(this, new object[] { entity });
+                    handled = true;
+                    break;
                 }
             }
 
-            foreach (object obj in _stateMap.Keys.ToList())
-            {
-                _stateMap[obj] = EntityState.Unchanged;
-            }
+            return handled;
+        }
 
-            return count;
+        protected void UpdateEntity<TEntity>(TEntity entity) where TEntity : EntityBase<TEntity>, new()
+        {
+            TEntity old = FindEntity(entity);
+            if (old != null)
+            {
+                Set<TEntity>().Remove(old);
+                Set<TEntity>().Add(entity);
+            }
         }
 
         private IDbSetBase<TEntity> GetEntitySetCore<TEntity>() where TEntity : EntityBase<TEntity>, new()
@@ -307,30 +320,10 @@ namespace Core.UnitTesting.Mock
             return result;
         }
 
-        protected virtual IDbSetBase<TEntity> GetEntitySetProject<TEntity>() where TEntity : EntityBase<TEntity>, new()
-        {  
-            // will be overridden in child classes         
-            return null;
-        }
-
-        public IDbSetBase<TEntity> Set<TEntity>() where TEntity : EntityBase<TEntity>, new()
+        private PropertyInfo GetIdProperty(Type entityType)
         {
-            // check core entities
-            IDbSetBase<TEntity> result = GetEntitySetCore<TEntity>();
-
-            // check project entities
-            if(result == null)
-            {
-                result = GetEntitySetProject<TEntity>();
-            }
-
-            return result;
+            string idPropertyName = EntityIdPropertyNameMap.ContainsKey(entityType) ? EntityIdPropertyNameMap[entityType] : null;
+            return !string.IsNullOrEmpty(idPropertyName) ? entityType.GetProperty(idPropertyName) : (entityType.GetProperty("ID") ?? entityType.GetProperty("Id"));
         }
-
-        public void SetContextState<T>(EntityBase<T> entity, EntityState entityState) where T : EntityBase<T>, new()
-        {
-            _stateMap[entity] = entityState;
-        }
-
     }
 }

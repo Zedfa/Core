@@ -6,7 +6,7 @@ dateInfoServiceModule.addService("dateInfoService", ["$http", "$q", function ($h
         GetTodaysShamsiDate: () => {
 
             var defer = $q.defer();
-            $http.get("/api/DateInfoApi/GetTodaysShamsiDate")
+            $http.get("/fa/api/DateInfoApi/GetTodaysShamsiDate")
                 .success((date) => {
 
                     defer.resolve(date);

@@ -10,7 +10,7 @@ namespace Core.Cmn
     {
         int Id { get; set; }
         string DeletedTimeStamp { get; set; }
-        long DeletedEntityId { get; }
+        int DeletedEntityId { get; }
         string TableName { get; set; }
         DateTime DeletionDateTime { get; set; }
 

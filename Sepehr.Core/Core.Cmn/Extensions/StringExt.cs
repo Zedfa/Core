@@ -196,10 +196,12 @@ namespace Core.Cmn.Extensions
                     if (!(dateTime > DateTime.Parse("1/1/1753 12:00:00 AM") && dateTime < DateTime.Parse("1/1/2054 11:59:59 PM")))
                     {
 
-                        var eLog = _logService.GetEventLogObj();
+                        //var eLog = _logService.GetEventLogObj();
 
-                        eLog.CustomMessage = String.Format("IsValidDateTime : {0} is invalid Date for {1}", str, Thread.CurrentThread.CurrentUICulture.Name);
-                        _logService.Handle(eLog);
+                        //eLog.CustomMessage = String.Format("IsValidDateTime : {0} is invalid Date for {1}", str, Thread.CurrentThread.CurrentUICulture.Name);
+                        //_logService.Handle(eLog);
+                        _logService.Write(String.Format("IsValidDateTime : {0} is invalid Date for {1}", str, Thread.CurrentThread.CurrentUICulture.Name));
+
 
                         return false;
                     }
@@ -209,9 +211,10 @@ namespace Core.Cmn.Extensions
                 {
                     if (!(dateTime > DateTime.Parse("1/1/1753 12:00:00 AM") && dateTime < DateTime.Parse("1/1/2054 11:59:59 PM")))
                     {
-                        var eLog = _logService.GetEventLogObj();
-                        eLog.CustomMessage = String.Format("IsValidDateTime : {0} is invalid Date for {1}", str, Thread.CurrentThread.CurrentUICulture.Name);
-                        _logService.Handle(eLog);
+                        //var eLog = _logService.GetEventLogObj();
+                        //eLog.CustomMessage = String.Format("IsValidDateTime : {0} is invalid Date for {1}", str, Thread.CurrentThread.CurrentUICulture.Name);
+                        //_logService.Handle(eLog);
+                        _logService.Write(String.Format("IsValidDateTime : {0} is invalid Date for {1}", str, Thread.CurrentThread.CurrentUICulture.Name));
 
                         return false;
                     }
@@ -221,19 +224,21 @@ namespace Core.Cmn.Extensions
             }
             catch (Exception ex)
             {
-                System.Diagnostics.StackTrace st = new System.Diagnostics.StackTrace(ex, true);
-                System.Diagnostics.StackFrame[] frames = st.GetFrames();
-                string x = "";
-                // Iterate over the frames extracting the information you need
-                foreach (System.Diagnostics.StackFrame frame in frames)
-                {
-                    //   x = ""+ frame.GetFileName()+"";
-                    x += "    ** FileName:" + frame.GetFileName() + "** MethodName:" + frame.GetMethod().Name + "** LineNumber:" + frame.GetFileLineNumber() + "** ColumnNumber:" + frame.GetFileColumnNumber();
-                }
-                var eLog = _logService.GetEventLogObj();
-                eLog.OccuredException = ex;
-                eLog.CustomMessage = String.Format("IsValidDateTime : {0} is invalid Date for {1},{2}", str, Thread.CurrentThread.CurrentUICulture.Name, x);
-                _logService.Handle(eLog);
+                //System.Diagnostics.StackTrace st = new System.Diagnostics.StackTrace(ex, true);
+                //System.Diagnostics.StackFrame[] frames = st.GetFrames();
+                //string x = "";
+                //// Iterate over the frames extracting the information you need
+                //foreach (System.Diagnostics.StackFrame frame in frames)
+                //{
+                //    //   x = ""+ frame.GetFileName()+"";
+                //    x += "    ** FileName:" + frame.GetFileName() + "** MethodName:" + frame.GetMethod().Name + "** LineNumber:" + frame.GetFileLineNumber() + "** ColumnNumber:" + frame.GetFileColumnNumber();
+                //}
+                //var eLog = _logService.GetEventLogObj();
+                //eLog.OccuredException = ex;
+                //eLog.CustomMessage = String.Format("IsValidDateTime : {0} is invalid Date for {1},{2}", str, Thread.CurrentThread.CurrentUICulture.Name, x);
+                //_logService.Handle(eLog);
+                _logService.Handle(ex, String.Format("IsValidDateTime : {0} is invalid Date for {1}", str, Thread.CurrentThread.CurrentUICulture.Name));
+
                 return false;
             }
 
@@ -292,20 +297,22 @@ namespace Core.Cmn.Extensions
             }
             catch (Exception ex)
             {
-                System.Diagnostics.StackTrace st = new System.Diagnostics.StackTrace(ex, true);
-                System.Diagnostics.StackFrame[] frames = st.GetFrames();
-                string x = "";
-                // Iterate over the frames extracting the information you need
-                foreach (System.Diagnostics.StackFrame frame in frames)
-                {
-                    //   x = ""+ frame.GetFileName()+"";
-                    x += "    ** FileName:" + frame.GetFileName() + "** MethodName:" + frame.GetMethod().Name + "** LineNumber:" + frame.GetFileLineNumber() + "** ColumnNumber:" + frame.GetFileColumnNumber();
-                }
-                var eLog = _logService.GetEventLogObj();
-                eLog.OccuredException = ex;
-                eLog.UserId = "DateExt";
-                eLog.CustomMessage = "parse " + persianDate + "ShamsiToMiladi" + x;
-                _logService.Handle(eLog);
+                //System.Diagnostics.StackTrace st = new System.Diagnostics.StackTrace(ex, true);
+                //System.Diagnostics.StackFrame[] frames = st.GetFrames();
+                //string x = "";
+                //// Iterate over the frames extracting the information you need
+                //foreach (System.Diagnostics.StackFrame frame in frames)
+                //{
+                //    //   x = ""+ frame.GetFileName()+"";
+                //    x += "    ** FileName:" + frame.GetFileName() + "** MethodName:" + frame.GetMethod().Name + "** LineNumber:" + frame.GetFileLineNumber() + "** ColumnNumber:" + frame.GetFileColumnNumber();
+                //}
+                //var eLog = _logService.GetEventLogObj();
+                //eLog.OccuredException = ex;
+                //eLog.UserId = "DateExt";
+                //eLog.CustomMessage = "parse " + persianDate + "ShamsiToMiladi" + x;
+                //_logService.Handle(eLog);
+                _logService.Handle(ex, customMessage:"parse " + persianDate + "ShamsiToMiladi", source:"DateExt");
+
             }
             return DateTime.Now;
         }

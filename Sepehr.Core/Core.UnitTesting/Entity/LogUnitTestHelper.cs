@@ -17,7 +17,7 @@ namespace Core.UnitTesting.Entity
             Assert.IsNotNull(actual);
             Assert.AreEqual(expected.CreateDate, actual.CreateDate);
             Assert.AreEqual(expected.CustomMessage, actual.CustomMessage);
-            Assert.AreEqual(expected.LogType, actual.LogType);
+            Assert.AreEqual(expected.ApplicationName, actual.ApplicationName);
             Assert.AreEqual(expected.InnerExceptionCount, actual.InnerExceptionCount);
         }
 
@@ -32,13 +32,13 @@ namespace Core.UnitTesting.Entity
             return e =>
                 e.CreateDate == entity.CreateDate
                 && e.CustomMessage == entity.CustomMessage
-                && e.LogType == entity.LogType
+                && e.ApplicationName == entity.ApplicationName
                 && e.InnerExceptionCount == entity.InnerExceptionCount;
         }
 
         public override Expression<Func<Log, bool>> GetFindByIdPredicate(Log entity)
         {
-            return e => e.ID == entity.ID;
+            return e => e.Id == entity.Id;
         }
 
         public override ExpressionInfo GetFilterExpressionInfo(Log entity)
@@ -47,7 +47,7 @@ namespace Core.UnitTesting.Entity
             {
                 CurrentPage = 0,
                 PageSize = 10,
-                Expression = new KeyValuePair<string, string>("ID", entity.ID.ToString())
+                Expression = new KeyValuePair<string, string>("ID", entity.Id.ToString())
             };
         }
 
@@ -55,8 +55,8 @@ namespace Core.UnitTesting.Entity
         {
             entity.CreateDate = GetRandomDateTime();
             entity.CustomMessage = GetRandomString();
-            entity.LogType = GetRandomString();
-            entity.InnerExceptionCount = GetRandomInt();            
+            entity.ApplicationName = GetRandomString();
+            entity.InnerExceptionCount = GetRandomInt();
         }
 
         public override Expression<Func<Log, Log>> GetUpdatePredicate(Log entity)
@@ -65,7 +65,7 @@ namespace Core.UnitTesting.Entity
             {
                 CreateDate = entity.CreateDate,
                 CustomMessage = entity.CustomMessage,
-                LogType = entity.LogType,
+                ApplicationName = entity.ApplicationName,
                 InnerExceptionCount = entity.InnerExceptionCount
             };
         }
@@ -76,7 +76,7 @@ namespace Core.UnitTesting.Entity
             IList<Log> createdList = CreateSampleEntityList(10, 100);
             for (int i = 0; i < createdList.Count; i++)
             {
-                createdList[i].ID = Guid.NewGuid();
+                createdList[i].Id = i + 1;
                 mockEntityList.Add(createdList[i]);
             }
         }

@@ -34,7 +34,7 @@ namespace Core.UnitTesting.Service
         public static void Initialize(TestContext testContext)
         {            
             //Core.Cmn.AppBase.LogService = new Core.Service.LogService(ServiceBase.DependencyInjectionFactory.CreateContextInstance());
-            Core.Cmn.AppBase.BuildEntityInfoDic(Core.Cmn.AppBase.GetAlltypes());            
+           // Core.Cmn.AppBase.BuildEntityInfoDic(Core.Cmn.AppBase.GetAlltypes());            
         }
 
         [TestInitialize]

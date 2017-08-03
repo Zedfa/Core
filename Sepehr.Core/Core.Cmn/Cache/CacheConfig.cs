@@ -1,28 +1,32 @@
 ﻿using Core.Cmn.Attributes;
+using Core.Cmn.Cache.Server;
+using Core.Cmn.Cache.SqlDependency;
+using Core.Cmn.DependencyInjection;
+using Core.Cmn.Extensions;
+using Newtonsoft.Json.Converters;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Reflection;
-using System.Web;
-using Core.Cmn.Extensions;
-using System.Collections.Concurrent;
-using Core.Cmn.Cache;
-using System.Diagnostics;
 using System.ServiceModel;
 using System.ServiceModel.Description;
-using Core.Cmn.Cache.Server;
 
 namespace Core.Cmn.Cache
 {
-
     public class CacheConfig
     {
+        public static ServiceHost serviceHost;
+
+        private static ICacheManagementRepository _cacheManagementRepository;
+
         static CacheConfig()
         {
             CacheInfoDic = new Dictionary<string, CacheInfo>();
         }
+
         public static Dictionary<string, CacheInfo> CacheInfoDic { get; private set; }
-        static ICacheManagementRepository _cacheManagementRepository;
+
         public static ICacheManagementRepository CacheManagementRepository
         {
             get
@@ -32,9 +36,50 @@ namespace Core.Cmn.Cache
                 return _cacheManagementRepository;
             }
         }
+
+        public static bool IsCacheServerServiceStart { get; private set; }
+
+        public static CacheInfo CreateCacheInfo(CacheableAttribute cacheInfoAtt, MethodInfo methodInfo, Delegate funcInstanc, string key)
+        {
+            var name = string.Format("{0}.{1}",
+                                     methodInfo.ReflectedType.Name,
+                                     methodInfo.Name);
+            string parameterPartUniqueKey = string.Empty;
+            foreach (var item in methodInfo.GetParameters())
+            {
+                parameterPartUniqueKey += "_" + item.ParameterType.Name;
+            }
+            var uniqueKeyInServerLevel = name + parameterPartUniqueKey;
+            var currentCacheInfo = CacheInfoDic[key] = new CacheInfo()
+            {
+                Name = name,
+                RefreshCacheTimeSeconds = cacheInfoAtt.ExpireCacheSecondTime,
+                MethodInfo = methodInfo,
+                BasicKey = int.Parse(key),
+                CreateDateTime = DateTime.Now,
+                Func = funcInstanc,
+                EnableUseCacheServer = cacheInfoAtt.EnableUseCacheServer,
+                UniqueKeyInServerLevel = uniqueKeyInServerLevel,
+                EnableToFetchOnlyChangedDataFromDB = cacheInfoAtt.EnableToFetchOnlyChangedDataFromDB,
+                NameOfNavigationPropsForFetchingOnlyChangedDataFromDB = cacheInfoAtt.NameOfNavigationPropsForFetchingOnlyChangedDataFromDB,
+                CacheRefreshingKind = cacheInfoAtt.EnableAutomaticallyAndPeriodicallyRefreshCache ? CacheRefreshingKind.Slide : CacheRefreshingKind.OnRequestToGetCache,
+                DisableToSyncDeletedRecord_JustIfEnableToFetchOnlyChangedDataFromDB = cacheInfoAtt.DisableToSyncDeletedRecord_JustIfEnableToFetchOnlyChangedDataFromDB,
+                DisableCache = cacheInfoAtt.DisableCache,
+                EnableSaveCacheOnHDD = cacheInfoAtt.EnableSaveCacheOnHDD,
+                EnableCoreSerialization = cacheInfoAtt.EnableCoreSerialization
+            };
+
+            if (currentCacheInfo.CacheRefreshingKind == CacheRefreshingKind.OnRequestToGetCache)
+                currentCacheInfo.CacheRefreshingKind = cacheInfoAtt.CacheRefreshingKind;
+
+            var parames = methodInfo.GetParameters();
+            if (typeof(IQueryable).IsAssignableFrom(methodInfo.ReturnType) && parames.Length > 0 && typeof(IQueryable).IsAssignableFrom(parames[0].ParameterType))
+                currentCacheInfo.IsFunctionalCache = false;
+            return currentCacheInfo;
+        }
+
         public static void OnRepositoryCacheConfig(Type dBContext)
         {
-
             var repositoryAssemblies = AppDomain.CurrentDomain.GetAssemblies().Where(ass => ass.FullName.ToLower().Contains(".rep")).ToList();
             bool isNeedCache;
             if (Core.Cmn.ConfigHelper.TryGetConfigValue<bool>("IsNeedCache", out isNeedCache) && !isNeedCache)
@@ -67,9 +112,6 @@ namespace Core.Cmn.Cache
                 StartCacheServerService();
         }
 
-        public static ServiceHost serviceHost;
-
-        public static bool IsCacheServerServiceStart { get; private set; }
         public static void StartCacheServerService()
         {
             Uri baseAddress = new Uri(ConfigHelper.GetConfigValue<string>("CacheHostWebServiceUrl"));
@@ -100,7 +142,7 @@ namespace Core.Cmn.Cache
             // Add metadata exchange behavior to the service
             ServiceDebugBehavior debug = serviceHost.Description.Behaviors.Find<ServiceDebugBehavior>();
 
-            // if not found - add behavior with setting turned on 
+            // if not found - add behavior with setting turned on
             if (debug == null)
             {
                 serviceHost.Description.Behaviors.Add(
@@ -124,11 +166,18 @@ namespace Core.Cmn.Cache
             IsCacheServerServiceStart = true;
 
             // serviceHost.Close();
-
         }
 
+        private static Type AddAndGetCacheDataProviderTypeForSerialization(MethodInfo methodInfo, Type cacheDataProviderType)
+        {
+            List<Type> tArgs = methodInfo.GetParameters().Select(item => item.ParameterType).ToList();
+            tArgs.Add(methodInfo.ReturnType);
+            var cacheDataProviderGenericType = cacheDataProviderType.MakeGenericType(tArgs.ToArray());
+            CacheWCFTypeHelper.typeList.Add(cacheDataProviderGenericType);
+            CacheWCFTypeHelper.typeList.Add(methodInfo.ReturnType);
+            return cacheDataProviderGenericType;
+        }
 
-        static List<System.Windows.Forms.Timer> timers = new List<System.Windows.Forms.Timer>();
         private static void BuildCachesInAssembly(Type dBContext, Assembly repAssembly, bool isRepositoryAssembly)
         {
             IEnumerable<MethodInfo> types = null;
@@ -137,8 +186,9 @@ namespace Core.Cmn.Cache
                 types = repAssembly.GetTypes()
                  .SelectMany(type => type.GetMethods(BindingFlags.Static | BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic));
             }
-            catch (Exception ex)
+            catch
             {
+                //This exception is don't care.
                 return;
             }
 
@@ -150,7 +200,7 @@ namespace Core.Cmn.Cache
                     //if (string.IsNullOrEmpty(cacheInfo.Key))
                     //{
                     //    throw new ArgumentNullException("Cache Key can't be empty.");
-                    //}             
+                    //}
 
                     if ((type as MethodInfo).IsStatic)
                     {
@@ -180,7 +230,6 @@ namespace Core.Cmn.Cache
                             if (!CacheInfoDic.TryGetValue(key, out currentCacheInfo))
                                 // throw new ArgumentException("Duplicate cache key can't be used , please use an unique key for cache.");
                                 currentCacheInfo = CreateCacheInfo(cacheInfoAtt, methodInfo, funcInstanc, key);
-
 
                             if (typeof(IQueryable).IsAssignableFrom(methodInfo.ReturnType) && parames.Length > 0 && typeof(IQueryable).IsAssignableFrom(parames[0].ParameterType))
                             {
@@ -212,37 +261,15 @@ namespace Core.Cmn.Cache
                                         currentCacheInfo.BuildingTime += new TimeSpan(stopwatch.ElapsedTicks);
                                     }
 
-                                    if (cacheInfoAtt.EnableAutomaticallyAndPeriodicallyRefreshCache)
+                                    if (cacheInfoAtt.EnableAutomaticallyAndPeriodicallyRefreshCache || cacheInfoAtt.CacheRefreshingKind == CacheRefreshingKind.Slide)
                                     {
-
-                                        //var timer = new System.Windows.Forms.Timer();
-                                        //timers.Add(timer);
-                                        //timer.Tick += (pt, a) =>
-                                        //{
-                                        //    try
-                                        //    {
-                                        //        Stopwatch stopwatch = new Stopwatch();
-                                        //        stopwatch.Start();
-                                        //        (typeof(CacheBase)).GetMethod("RefreshCache").MakeGenericMethod(returnCacheType).Invoke(null, new object[] { queryableCacheExecution, currentCacheInfo });
-                                        //        stopwatch.Stop();
-                                        //        currentCacheInfo.FrequencyOfBuilding += 1;
-                                        //        currentCacheInfo.BuildingTime += new TimeSpan(stopwatch.ElapsedTicks);
-                                        //        System.Diagnostics.Debug.WriteLine("qqqqqqqqqqqqqqqqqqqqqqqqqqqq");
-                                        //    }
-                                        //    catch
-                                        //    { }
-                                        //};
-
-                                        //timer.Interval = cacheInfoAtt.ExpireCacheSecondTime * 1000;
-                                        //timer.Start();
-
-
                                         PeriodicTaskFactory p = new PeriodicTaskFactory((pt) =>
                                         {
                                             if (currentCacheInfo.CountOfWaitingThreads < 3)
                                             {
                                                 Stopwatch stopwatch = new Stopwatch();
                                                 stopwatch.Start();
+                                                ((IQueryableCacheDataProvider)queryableCacheExecution).DbContext = AppBase.DependencyInjectionFactory.CreateContextInstance();
                                                 (typeof(CacheBase)).GetMethod("RefreshCache").MakeGenericMethod(returnCacheType).Invoke(null, new object[] { queryableCacheExecution, currentCacheInfo });
                                                 stopwatch.Stop();
                                                 currentCacheInfo.FrequencyOfBuilding += 1;
@@ -252,7 +279,32 @@ namespace Core.Cmn.Cache
 
                                         p.Start();
                                     }
-
+                                    else
+                                    {
+                                        if (cacheInfoAtt.CacheRefreshingKind == CacheRefreshingKind.SqlDependency)
+                                        {
+                                            var typeOfSqlNotifier = typeof(IImmediateSqlNotificationRegister<>)
+                                                .MakeGenericType(currentCacheInfo.Repository.GetDomainModelType());
+                                            IImmediateSqlNotificationRegisterBase immediateSqlNotificationRegister = (IImmediateSqlNotificationRegisterBase)
+                                               AppBase.DependencyInjectionManager.Resolve(typeOfSqlNotifier,
+                                               new ParameterOverride("context", ((IQueryableCacheDataProvider)queryableCacheExecution).DbContext),
+                                               new ParameterOverride("query", ((IQueryableCacheDataProvider)queryableCacheExecution).GetQuery()));
+                                            immediateSqlNotificationRegister.OnChanged += (object sender, EventArgs e) =>
+                                            {
+                                                if (currentCacheInfo.CountOfWaitingThreads < 3)
+                                                {
+                                                    Stopwatch stopwatch = new Stopwatch();
+                                                    stopwatch.Start();
+                                                    (typeof(CacheBase)).GetMethod("RefreshCache").MakeGenericMethod(returnCacheType).Invoke(null, new object[] { queryableCacheExecution, currentCacheInfo });
+                                                    ((IQueryableCacheDataProvider)queryableCacheExecution).DbContext = AppBase.DependencyInjectionFactory.CreateContextInstance();
+                                                    immediateSqlNotificationRegister.Init(((IQueryableCacheDataProvider)queryableCacheExecution).DbContext, ((IQueryableCacheDataProvider)queryableCacheExecution).GetQuery());
+                                                    stopwatch.Stop();
+                                                    currentCacheInfo.FrequencyOfBuilding += 1;
+                                                    currentCacheInfo.BuildingTime += new TimeSpan(stopwatch.ElapsedTicks);
+                                                }
+                                            };
+                                        }
+                                    }
                                 }
 
                                 if (currentCacheInfo.EnableToFetchOnlyChangedDataFromDB && !currentCacheInfo.DisableToSyncDeletedRecord_JustIfEnableToFetchOnlyChangedDataFromDB)
@@ -303,7 +355,6 @@ namespace Core.Cmn.Cache
                                 }
                                 else
                                 {
-
                                     if (parames.Length == 1)
                                     {
                                         cacheDataProviderType = typeof(FunctionalCacheDataProvider<,>);
@@ -331,7 +382,6 @@ namespace Core.Cmn.Cache
 
                                     AddAndGetCacheDataProviderTypeForSerialization(methodInfo, cacheDataProviderType);
                                 }
-
                             }
                             currentCacheInfo.LastBuildDateTime = DateTime.Now;
                         }
@@ -345,57 +395,8 @@ namespace Core.Cmn.Cache
                     {
                         throw new NotSupportedException("Cacheable Attribute can't use on Non static methods, because we can't work on nostatic method for caching.");
                     }
-
                 }
             }
-
-        }
-
-        public static CacheInfo CreateCacheInfo(CacheableAttribute cacheInfoAtt, MethodInfo methodInfo, Delegate funcInstanc, string key)
-        {
-            var name = string.Format("{0}.{1}",
-                                     methodInfo.ReflectedType.Name,
-                                     methodInfo.Name);
-            string parameterPartUniqueKey = string.Empty;
-            foreach (var item in methodInfo.GetParameters())
-            {
-                parameterPartUniqueKey += "_" + item.ParameterType.Name;
-            }
-            var uniqueKeyInServerLevel = name + parameterPartUniqueKey;
-            var currentCacheInfo = CacheInfoDic[key] = new CacheInfo()
-            {
-                Name = name,
-                ExpireCacheSecondTime = cacheInfoAtt.ExpireCacheSecondTime,
-                MethodInfo = methodInfo,
-                BasicKey = int.Parse(key),
-                CreateDateTime = DateTime.Now,
-                Func = funcInstanc,
-                EnableUseCacheServer = cacheInfoAtt.EnableUseCacheServer,
-                UniqueKeyInServerLevel = uniqueKeyInServerLevel,
-                EnableToFetchOnlyChangedDataFromDB = cacheInfoAtt.EnableToFetchOnlyChangedDataFromDB,
-                NameOfNavigationPropsForFetchingOnlyChangedDataFromDB = cacheInfoAtt.NameOfNavigationPropsForFetchingOnlyChangedDataFromDB,
-                IsAutomaticallyAndPeriodicallyRefreshCache = cacheInfoAtt.EnableAutomaticallyAndPeriodicallyRefreshCache,
-                DisableToSyncDeletedRecord_JustIfEnableToFetchOnlyChangedDataFromDB = cacheInfoAtt.DisableToSyncDeletedRecord_JustIfEnableToFetchOnlyChangedDataFromDB,
-                DisableCache = cacheInfoAtt.DisableCache,
-                EnableSaveCacheOnHDD = cacheInfoAtt.EnableSaveCacheOnHDD,
-                EnableCoreSerialization = cacheInfoAtt.EnableCoreSerialization
-
-            };
-
-            var parames = methodInfo.GetParameters();
-            if (typeof(IQueryable).IsAssignableFrom(methodInfo.ReturnType) && parames.Length > 0 && typeof(IQueryable).IsAssignableFrom(parames[0].ParameterType))
-                currentCacheInfo.IsFunctionalCache = false;
-            return currentCacheInfo;
-        }
-
-        private static Type AddAndGetCacheDataProviderTypeForSerialization(MethodInfo methodInfo, Type cacheDataProviderType)
-        {
-            List<Type> tArgs = methodInfo.GetParameters().Select(item => item.ParameterType).ToList();
-            tArgs.Add(methodInfo.ReturnType);
-            var cacheDataProviderGenericType = cacheDataProviderType.MakeGenericType(tArgs.ToArray());
-            CacheWCFTypeHelper.typeList.Add(cacheDataProviderGenericType);
-            CacheWCFTypeHelper.typeList.Add(methodInfo.ReturnType);
-            return cacheDataProviderGenericType;
         }
     }
 }

@@ -42,14 +42,16 @@ namespace Core.Rep
         #endregion
 
         #region Methods
-        [Cacheable(EnableSaveCacheOnHDD = true, ExpireCacheSecondTime = 60, EnableAutomaticallyAndPeriodicallyRefreshCache = true)]
+        [Cacheable(EnableSaveCacheOnHDD = true, ExpireCacheSecondTime = 600, CacheRefreshingKind = Cmn.Cache.CacheRefreshingKind.SqlDependency, EnableToFetchOnlyChangedDataFromDB =true)]
         public static IQueryable<Constant> AllConstantCache(IQueryable<Constant> query)
         {
+          
             return query.Include(item => item.ConstantCategory).AsNoTracking();
         }
 
         public override IQueryable<Constant> All(bool canUseCacheIfPossible = true)
         {
+
             return Cache<Constant>(AllConstantCache, canUseCacheIfPossible);
         }
 
@@ -61,12 +63,13 @@ namespace Core.Rep
             }
             catch (Exception ex)
             {
-                var eLog = AppBase.LogService.GetEventLogObj();
-                eLog.UserId = "constantRepository";
-                eLog.CustomMessage = "This Name[" + key + "] not found in constants table.";
-                eLog.LogFileName = "constantRepository";
-                eLog.OccuredException = ex;
-                AppBase.LogService.Handle(eLog);
+                //var eLog = AppBase.LogService.GetEventLogObj();
+                //eLog.UserId = "constantRepository";
+                //eLog.CustomMessage = "This Name[" + key + "] not found in constants table.";
+                //eLog.LogFileName = "constantRepository";
+                //eLog.OccuredException = ex;
+                //AppBase.LogService.Handle(eLog);
+                AppBase.LogService.Handle(ex, "This Name[" + key + "] not found in constants table.");
 
                 return null;
             }
@@ -146,13 +149,13 @@ namespace Core.Rep
             }
             catch (Exception ex)
             {
-                var eLog = AppBase.LogService.GetEventLogObj();
-                eLog.UserId = "constantRepository";
-                eLog.CustomMessage = "This Name[" + constantCat + "] not found in constantCategories in constant table.";
-                eLog.LogFileName = "constantRepository";
-                eLog.OccuredException = ex;
-                AppBase.LogService.Handle(eLog);
-
+                //var eLog = AppBase.LogService.GetEventLogObj();
+                //eLog.UserId = "constantRepository";
+                //eLog.CustomMessage = "This Name[" + constantCat + "] not found in constantCategories in constant table.";
+                //eLog.LogFileName = "constantRepository";
+                //eLog.OccuredException = ex;
+                //AppBase.LogService.Handle(eLog);
+                AppBase.LogService.Handle(ex, "This Name[" + constantCat + "] not found in constantCategories in constant table.");
                 return null;
             }
         }
@@ -164,12 +167,13 @@ namespace Core.Rep
             }
             catch (Exception ex)
             {
-                var eLog = AppBase.LogService.GetEventLogObj();
-                eLog.UserId = "constantRepository";
-                eLog.CustomMessage = "This Name[" + constantCat + "] not found in constantCategories in constant table.";
-                eLog.LogFileName = "constantRepository";
-                eLog.OccuredException = ex;
-                AppBase.LogService.Handle(eLog);
+                //var eLog = AppBase.LogService.GetEventLogObj();
+                //eLog.UserId = "constantRepository";
+                //eLog.CustomMessage = "This Name[" + constantCat + "] not found in constantCategories in constant table.";
+                //eLog.LogFileName = "constantRepository";
+                //eLog.OccuredException = ex;
+                //AppBase.LogService.Handle(eLog);
+                AppBase.LogService.Handle(ex, "This Name[" + constantCat + "] not found in constantCategories in constant table.");
 
                 return null;
             }

@@ -36,10 +36,9 @@ namespace Core.Serialization.Tests
         {
             // var str = "6/21/2017 6:47:32 PM";
             // var dt =  DateTime.Parse(str);
-            // var dt = DateTime.Now;
-            // var a = BinarySerialization.Serialize(dt);
-            byte[] dtBinary = new byte[] { 0, 250, 134, 249, 213, 184, 212, 8 };
-            var c = (DateTime)BinaryConverter.Deserialize(dtBinary, typeof(DateTime));
+            var dt = DateTime.Now;
+            var a = BinaryConverter.Serialize(dt);
+            var c = (DateTime)BinaryConverter.Deserialize(a, typeof(DateTime));
             // Assert.AreEqual(c, dt);
         }
 
@@ -138,7 +137,7 @@ namespace Core.Serialization.Tests
         public void IntegrateTestForBinarySerializeDeserialize()
         {
             var a = BinaryConverter.Serialize(aa);
-            var c = BinaryConverter.Deserialize(a, typeof(ConcurrentDictionary<int, User<UserRole>>)) as ConcurrentDictionary<int, User<UserRole>>;
+            var c = BinaryConverter.Deserialize(a, typeof(ConcurrentDictionary<int, User<UserRole>>)) as ConcurrentDictionary<int, User<IUserRole>>;
             var nullCheckBinary = BinaryConverter.Serialize(null);
             var nullCheck = BinaryConverter.Deserialize(nullCheckBinary, typeof(ConcurrentDictionary<int, User<UserRole>>)) as ConcurrentDictionary<int, User<UserRole>>;
             Assert.AreEqual(nullCheck, null);
@@ -152,8 +151,8 @@ namespace Core.Serialization.Tests
                 Assert.AreEqual(aa[i].FName, c[i].FName);
                 Assert.AreEqual(aa[i].Id, c[i].Id);
                 Assert.AreEqual(aa[i].LName, c[i].LName);
-                Assert.AreEqual(((UserRole)aa[i].UserRoles[1]).Id, c[i].UserRoles[1].Id);
-                Assert.AreEqual(((UserRole)aa[i].UserRoles[1]).User.Email, c[i].UserRoles[1].User.Email);
+                Assert.AreEqual(((UserRole)aa[i].UserRoles[1]).Id, ((UserRole)c[i].UserRoles[1]).Id);
+                Assert.AreEqual(((UserRole)aa[i].UserRoles[1]).User.Email, ((UserRole)c[i].UserRoles[1]).User.Email);
                 Assert.AreEqual(null, c[i].UserRoles[0]);
                 Assert.AreEqual(aa[i].UserDefined.Id, c[i].UserDefined.Id);
                 Assert.AreEqual(aa[i].UserDefined.Date1, c[i].UserDefined.Date1);
@@ -171,7 +170,8 @@ namespace Core.Serialization.Tests
         {
             JsonSerializerSettings sets = new JsonSerializerSettings
             {
-                PreserveReferencesHandling = PreserveReferencesHandling.Objects
+                PreserveReferencesHandling = PreserveReferencesHandling.Objects,
+                TypeNameHandling= TypeNameHandling.All
             };
 
             var ser = JsonSerializer.Create(sets);
@@ -180,7 +180,7 @@ namespace Core.Serialization.Tests
             ser.Serialize(writer, aa);
             var strR = new StringReader(str.ToString());
             var reader = new JsonTextReader(strR);
-            var c = ser.Deserialize(reader, typeof(ConcurrentDictionary<int, User<UserRole>>)) as ConcurrentDictionary<int, User<UserRole>>;
+            var c = ser.Deserialize(reader, typeof(ConcurrentDictionary<int, User<IUserRole>>)) as ConcurrentDictionary<int, User<IUserRole>>;
             var dic = new Dictionary<object, int>();
             for (var i = 0; i < aa.Count; i++)
             {
@@ -191,13 +191,14 @@ namespace Core.Serialization.Tests
                 Assert.AreEqual(aa[i].FName, c[i].FName);
                 Assert.AreEqual(aa[i].Id, c[i].Id);
                 Assert.AreEqual(aa[i].LName, c[i].LName);
-                Assert.AreEqual(((UserRole)aa[i].UserRoles[1]).Id, c[i].UserRoles[1].Id);
-                Assert.AreEqual(((UserRole)aa[i].UserRoles[1]).User.Email, c[i].UserRoles[1].User.Email);
+                Assert.AreEqual(((UserRole)aa[i].UserRoles[1]).Id, ((UserRole)c[i].UserRoles[1]).Id);
+                Assert.AreEqual(((UserRole)aa[i].UserRoles[1]).User.Email, ((UserRole)c[i].UserRoles[1]).User.Email);
                 Assert.AreEqual(null, c[i].UserRoles[0]);
                 Assert.AreEqual(aa[i].UserDefined.Id, c[i].UserDefined.Id);
                 Assert.AreEqual(aa[i].UserDefined.Date1, c[i].UserDefined.Date1);
                 Assert.AreEqual(aa[i].UserDefined.Date2, c[i].UserDefined.Date2);
                 Assert.AreEqual(aa[i].UserDefined.Pint, c[i].UserDefined.Pint);
+                Assert.AreEqual(aa[i].UserDefined.HashSet.First().Id, c[i].UserDefined.HashSet.First().Id);
                 dic[c[i].UserRoles[1]] = 1;
             }
         }

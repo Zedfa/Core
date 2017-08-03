@@ -40,23 +40,23 @@ namespace Core.Rep
         {
 
             QueryableDtos = queryable.Select(
-                                l =>
+                                log =>
                                 new LogDTO()
                                 {
-                                    ID = l.ID,
-                                    UserId = l.UserId,
-                                    CustomMessage = l.CustomMessage,
-                                    CreateDate = l.CreateDate,
-                                    InnerExceptionCount = l.InnerExceptionCount,
-                                    LogType = l.LogType
+                                    ID = log.Id,
+                                    Source = log.Source,
+                                    CustomMessage = log.CustomMessage,
+                                    CreateDate = log.CreateDate,
+                                    InnerExceptionCount = log.InnerExceptionCount,
+                                    ApplicationName = log.ApplicationName
                                 });
         }
 
 
-        public ExceptionLog GetExceptionLog(Guid logId)
+        public ExceptionLog GetExceptionLog(int logId)
         {
             var coreDbContext = (DbContextBase)_dc;
-            var log = _dc.Set<Log>().Include("ExceptionLog").FirstOrDefault(l => l.ID == logId);
+            var log = _dc.Set<Log>().Include("ExceptionLog").FirstOrDefault(l => l.Id == logId);
             if (log != null)
             {
                 return log.ExceptionLog;
@@ -65,12 +65,12 @@ namespace Core.Rep
             return null;
         }
 
-        public ExceptionLog GetExceptionLogOfThisParent(Guid parentId)
+        public ExceptionLog GetExceptionLogOfThisParent(int parentId)
         {
 
             var coreDbContext = (DbContextBase)_dc;
             // var gId = Guid.Parse("8B2D4C2F-D3A6-E411-89E8-005056C00008");
-            var exceptionlog = _dc.Set<ExceptionLog>().Include("InnerException").Where(l => l.ID == parentId).Select(ell => ell.InnerException).First();
+            var exceptionlog = _dc.Set<ExceptionLog>().Include("InnerException").Where(l => l.Id == parentId).Select(ell => ell.InnerException).First();
             if (exceptionlog != null)
             {
                 return exceptionlog;
@@ -80,11 +80,11 @@ namespace Core.Rep
 
         }
 
-        public bool HasAnyChildren(Guid Id)
+        public bool HasAnyChildren(int Id)
         {
             //var gId = Guid.Parse("8B2D4C2F-D3A6-E411-89E8-005056C00008");   gId
             var coreDbContext = (DbContextBase)_dc;
-            var hasExceptionlog = _dc.Set<ExceptionLog>().Include("InnerException").Any(l => l.ID == Id);
+            var hasExceptionlog = _dc.Set<ExceptionLog>().Include("InnerException").Any(l => l.Id == Id);
             return hasExceptionlog;
         }
 

@@ -15,7 +15,7 @@ namespace Core.UnitTesting.Mock
 {
     public class MockDbSet<TEntity> : IDbSetBase<TEntity>, IQueryable<TEntity> where TEntity : EntityBase<TEntity>, new()
     {
-        IList<TEntity> mockEntityList;
+        public IList<TEntity> MockEntityList { get; set; }
 
         private PropertyInfo GetIdProperty(Type entityType)
         {
@@ -25,12 +25,19 @@ namespace Core.UnitTesting.Mock
 
 
         public Type ElementType { get { return typeof(TEntity); } }
-        public Expression Expression { get; private set; }
-        public IQueryProvider Provider { get; private set; }
-
-        public IList<TEntity> MockEntityList
+        public Expression Expression
         {
-            get { return mockEntityList; }
+            get
+            {
+                return MockEntityList.AsQueryable().Expression;
+            }
+        }
+        public IQueryProvider Provider
+        {
+            get
+            {
+                return MockEntityList.AsQueryable().Provider;
+            }
         }
 
         public ObservableCollection<TEntity> Local
@@ -43,15 +50,18 @@ namespace Core.UnitTesting.Mock
 
         public MockDbSet()
         {
-            mockEntityList = new List<TEntity>();
+            MockEntityList = new ObservableCollection<TEntity>();
+            ((ObservableCollection<TEntity>)MockEntityList).CollectionChanged += MockDbSet_CollectionChanged;
+        }
 
-            Provider = mockEntityList.AsQueryable().Provider;
-            Expression = mockEntityList.AsQueryable().Expression;
+        private void MockDbSet_CollectionChanged(object sender, System.Collections.Specialized.NotifyCollectionChangedEventArgs e)
+        {
+
         }
 
         public IEnumerator<TEntity> GetEnumerator()
         {
-            return mockEntityList.GetEnumerator();
+            return MockEntityList.GetEnumerator();
         }
 
         public TEntity Add(TEntity entity)
@@ -62,12 +72,12 @@ namespace Core.UnitTesting.Mock
             {
                 object key = idProperty.GetValue(entity);
                 TEntity found = FindByKey(key);
-                if (found != null)
-                {
-                    throw new DbUpdateExceptionBase();
-                }
+                //if (found != null)
+                //{
+                //    throw new DbUpdateExceptionBase();
+                //}
             }
-            mockEntityList.Add(entity);
+            MockEntityList.Add(entity);
             return entity;
         }
 
@@ -95,7 +105,7 @@ namespace Core.UnitTesting.Mock
 
         public IEnumerable<TEntity> AddRange(IEnumerable<TEntity> entities)
         {
-            long longId = this.Max<TEntity, long>(e => e.LongId) + 1;
+            long longId = this.Max<TEntity, long>(e => e.CacheId) + 1;
 
             Type entityType = typeof(TEntity);
             PropertyInfo idProperty = GetIdProperty(entityType);
@@ -103,9 +113,9 @@ namespace Core.UnitTesting.Mock
             foreach (TEntity entity in entities)
             {
                 SetEntityKey(idProperty, entity, ref longId);
-                mockEntityList.Add(entity);
+                MockEntityList.Add(entity);
             }
-            return mockEntityList.ToList();
+            return MockEntityList.ToList();
         }
 
         public TEntity Create()
@@ -123,7 +133,7 @@ namespace Core.UnitTesting.Mock
                 TEntity found = FindByKey(key);
                 if (found != null)
                 {
-                    mockEntityList.Remove(entity);
+                    MockEntityList.Remove(entity);
                 }
             }
             return entity;
@@ -147,7 +157,7 @@ namespace Core.UnitTesting.Mock
             PropertyInfo idProperty = GetIdProperty(entityType);
             if (idProperty != null)
             {
-                foreach (TEntity entity in mockEntityList)
+                foreach (TEntity entity in MockEntityList)
                 {
                     if (CheckKey(idProperty, key, entity))
                     {
@@ -192,11 +202,11 @@ namespace Core.UnitTesting.Mock
             }
             else if (keyProperty.PropertyType == typeof(long))
             {
-                result = CheckEntityKey<long>(key, keyProperty, entity);                
+                result = CheckEntityKey<long>(key, keyProperty, entity);
             }
             else if (keyProperty.PropertyType == typeof(Guid))
             {
-                result = CheckEntityKey<Guid>(key, keyProperty, entity);                
+                result = CheckEntityKey<Guid>(key, keyProperty, entity);
             }
 
             return result;
@@ -234,7 +244,7 @@ namespace Core.UnitTesting.Mock
 
         public IEnumerable<TEntity> RemoveRange(IEnumerable<TEntity> entities)
         {
-            foreach(TEntity e in entities)
+            foreach (TEntity e in entities)
             {
                 Remove(e);
             }

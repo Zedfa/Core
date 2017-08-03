@@ -5,7 +5,7 @@ using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Reflection;
-
+using System.Runtime.CompilerServices;
 namespace Core.Cmn
 {
     public class AppBase
@@ -16,16 +16,26 @@ namespace Core.Cmn
         public static event EventHandler UserLoginEvent;
         public static event EventHandler UserSignOutEvent;
 
-        public static List<EventLog> Logs { get; set; }
+        public static List<LogInfo> Logs { get; set; }
         public static Assembly StartupProject { get; private set; }
         public static ILogService LogService { get; set; }
         public static IDependencyInjectionManager DependencyInjectionManager { get; set; }
+        private static DependencyInjectionFactory _dependencyInjectionFactory;
+        public static DependencyInjectionFactory DependencyInjectionFactory
+        {
+            get
+            {
+                if (_dependencyInjectionFactory == null)
+                    _dependencyInjectionFactory = new DependencyInjectionFactory();
+                return _dependencyInjectionFactory;
+            }
+        }
         public static ITraceViewer TraceViewer { get; set; }
 
 
         static AppBase()
         {
-            Logs = new List<EventLog>();
+            Logs = new List<LogInfo>();
             if (ConfigHelper.GetConfigValue<bool>("EnableLogFirstChanceException"))
                 System.AppDomain.CurrentDomain.FirstChanceException += CurrentDomain_FirstChanceException;
         }
@@ -44,12 +54,10 @@ namespace Core.Cmn
 
             if (e.Exception.Source != "Glimpse.Core" && e.Exception.Source != "mscorlib")
             {
-                var eLog = new EventLog();
+                var eLog = new LogInfo();    //LogService.GetEventLogObj();
                 eLog.OccuredException = e.Exception;
-                eLog.UserId = "Basic Exc";
                 eLog.CustomMessage = "It's basic Exception!";
-                eLog.CreateDate = DateTime.Now;
-                List<EventLog> logs = null;
+                List<LogInfo> logs = null;
                 lock (Logs)
                 {
                     Logs.Add(eLog);
@@ -61,6 +69,7 @@ namespace Core.Cmn
                 }
 
                 if (logs != null)
+
                     LogService.BatchHandle(logs);
             }
         }
@@ -90,7 +99,7 @@ namespace Core.Cmn
             if (IsWebApp)
                 binPath = AppDomain.CurrentDomain.RelativeSearchPath;
             else
-                binPath = System.IO.Directory.GetCurrentDirectory();
+                binPath = AppDomain.CurrentDomain.BaseDirectory;
 
             foreach (string dll in Directory.GetFiles(binPath, "*.dll", SearchOption.AllDirectories))
             {
@@ -152,7 +161,9 @@ namespace Core.Cmn
 
             System.Threading.ThreadPool.GetMinThreads(out workerThreads, out portThreads);
 
-            LogService.Handle(null, "", $"MinThreads: workerThreads({workerThreads}) portThreads({portThreads})");
+            //LogService.Handle(null, "", $"MinThreads: workerThreads({workerThreads}) portThreads({portThreads})");
+            LogService.Write($"MinThreads: workerThreads({workerThreads}) portThreads({portThreads})");
+
         }
 
         private static void LogMaxThreads()
@@ -162,7 +173,8 @@ namespace Core.Cmn
 
             System.Threading.ThreadPool.GetMaxThreads(out workerThreads, out portThreads);
 
-            LogService.Handle(null, "", $"MaxThreads: workerThreads({workerThreads}) portThreads({portThreads})");
+            //LogService.Handle(null, "", $"MaxThreads: workerThreads({workerThreads}) portThreads({portThreads})");
+            LogService.Write($"MaxThreads: workerThreads({workerThreads}) portThreads({portThreads})");
         }
 
         public static void StartApplication()
@@ -193,9 +205,9 @@ namespace Core.Cmn
 
                       });
 
-                    LogService.Handle(null, "", "Application started");
-                    LogService.Handle(null, "", $"Is64BitProcess: {Environment.Is64BitProcess}");
-                    LogService.Handle(null, "", $"ProcessorCount: {Environment.ProcessorCount}");
+                    LogService.Write("Application started");
+                    LogService.Write($"Is64BitProcess: {Environment.Is64BitProcess}");
+                    LogService.Write($"ProcessorCount: {Environment.ProcessorCount}");
                     LogMinThreads();
                     LogMaxThreads();
 

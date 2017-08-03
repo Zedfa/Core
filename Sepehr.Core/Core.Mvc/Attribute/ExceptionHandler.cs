@@ -35,14 +35,15 @@ namespace Core.Mvc.Attribute
                 exp = new Exception($"{exp.Message} {exp.Source}");
             }
 
-            var eLog = _logService.GetEventLogObj();
-            eLog.UserId = "ApiControllerBase";
-            eLog.CustomMessage = $"Error accured in {actionContext.Request?.RequestUri?.OriginalString};Details: {exp.Message}";
-            eLog.LogFileName = "ApiControllerBaseLog";
-            eLog.OccuredException = actionContext.Exception;
-            _logService.Handle(eLog);
-            actionContext.Response = actionContext.Request.CreateErrorResponse
-                (System.Net.HttpStatusCode.InternalServerError, exp);
+            //var eLog = _logService.GetEventLogObj();
+            //eLog.UserId = "ApiControllerBase";
+            //eLog.CustomMessage = $"Error accured in {actionContext.Request?.RequestUri?.OriginalString};Details: {exp.Message}";
+            //eLog.LogFileName = "ApiControllerBaseLog";
+            //eLog.OccuredException = actionContext.Exception;
+            //_logService.Handle(eLog);
+            _logService.Handle(actionContext.Exception, customMessage: $"Error accured in {actionContext.Request?.RequestUri?.OriginalString};Details: {exp.Message}", source: "ApiControllerBaseLog");
+
+            actionContext.Response = actionContext.Request.CreateErrorResponse(System.Net.HttpStatusCode.InternalServerError, exp);
 
         }
 

@@ -51,7 +51,7 @@ namespace Core.UnitTesting.Repository
         public static void Initialize(TestContext testContext)
         {
             Core.Cmn.AppBase.LogService = new Core.Service.LogService(BuildNewContext());
-            Core.Cmn.AppBase.BuildEntityInfoDic(Core.Cmn.AppBase.GetAlltypes());            
+           // Core.Cmn.AppBase.BuildEntityInfoDic(Core.Cmn.AppBase.GetAlltypes());            
         }
 
         [TestInitialize]
@@ -140,7 +140,7 @@ namespace Core.UnitTesting.Repository
                 exceptionLog = repository.Create(exceptionLog);
 
                 // act
-                ExceptionLog found = repository.Find(exceptionLog.ID);
+                ExceptionLog found = repository.Find(exceptionLog.Id);
 
                 // assert
                 Assert.IsNotNull(found);

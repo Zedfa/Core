@@ -15,12 +15,8 @@ using System.Data.SqlClient;
 using System.Text;
 using Core.Cmn.Attributes;
 using Core.Ef.Extensions;
-using System.Linq.Dynamic;
 using System.Globalization;
-using System.Data.Entity.Core.Objects;
-using System.Data.Entity.Infrastructure;
-using System.Data.Entity;
-using EntityFramework.MappingAPI.Extensions;
+using System.Linq.Dynamic;
 
 namespace Core.Rep
 {//, IDTOQueryableBuilder<TObject>
@@ -53,7 +49,7 @@ namespace Core.Rep
 
         protected IDbContextBase ContextBase;
 
-      
+
         private IDbSetBase<TObject> dbSet;
 
         //public virtual IDbContextBase ContextGenerator()
@@ -63,7 +59,7 @@ namespace Core.Rep
 
         Stopwatch Stopwatch { get; set; }
 
-        
+
         public RepositoryBase(IDbContextBase dbContextBase)
         {
             Stopwatch = new Stopwatch();
@@ -178,17 +174,11 @@ namespace Core.Rep
             {
                 if (string.IsNullOrEmpty(_keyName))
                 {
-                    ObjectContext objectContext = ((IObjectContextAdapter)ContextBase).ObjectContext;
-                    var set = objectContext.CreateObjectSet<TObject>();
-                    _keyName = (ContextBase as DbContext).Db(typeof(TObject)).Pks.Select(x => x.ColumnName).First();
+                    ContextBase.GetKeyColumnNames<TObject>().First();
                 }
                 return _keyName;
             }
         }
-
-
-
-
         public IDbSetBase<TObject> DbSet
         {
             get
@@ -471,14 +461,14 @@ namespace Core.Rep
                 var cacheKey = func.Method.GetHashCode().ToString();
                 var cacheInfo = CacheConfig.CacheInfoDic[cacheKey];
                 var queryableCacheExecution = new QueryableCacheDataProvider<T>(cacheInfo);
-                IQueryable<T> result = queryableCacheExecution.Cache<List<T>>(cacheInfo, cacheInfo.ExpireCacheSecondTime, cacheKey, canUseCacheIfPossible).AsQueryable();
+                IQueryable<T> result = queryableCacheExecution.Cache<List<T>>(cacheInfo, cacheInfo.RefreshCacheTimeSeconds, cacheKey, canUseCacheIfPossible).AsQueryable();
                 Stopwatch.Stop();
                 cacheInfo.UsingTime += TimeSpan.FromTicks(Stopwatch.ElapsedTicks);
                 return result;
             }
             else
             {
-                return func.Invoke(GetQueryableForCahce() as IQueryable<TObject>);
+                return func.Invoke(GetQueryableForCahce((Activator.CreateInstance(ContextBase.GetType()) as IDbContextBase)) as IQueryable<TObject>);
             }
         }
 
@@ -491,14 +481,14 @@ namespace Core.Rep
                 var cacheInfo = CacheConfig.CacheInfoDic[cacheKey];
                 cacheKey += param1;
                 var queryableCacheExecution = new QueryableCacheDataProvider<T, P1>(cacheInfo, param1);
-                IQueryable<T> result = queryableCacheExecution.Cache<List<T>>(cacheInfo, cacheInfo.ExpireCacheSecondTime, cacheKey, canUseCacheIfPossible).AsQueryable();
+                IQueryable<T> result = queryableCacheExecution.Cache<List<T>>(cacheInfo, cacheInfo.RefreshCacheTimeSeconds, cacheKey, canUseCacheIfPossible).AsQueryable();
                 Stopwatch.Stop();
                 cacheInfo.UsingTime += TimeSpan.FromTicks(Stopwatch.ElapsedTicks);
                 return result;
             }
             else
             {
-                return func.Invoke(GetQueryableForCahce() as IQueryable<TObject>, param1);
+                return func.Invoke(GetQueryableForCahce((Activator.CreateInstance(ContextBase.GetType()) as IDbContextBase)) as IQueryable<TObject>, param1);
             }
         }
         public IQueryable<T> Cache<T, P1, P2>(Func<IQueryable<TObject>, P1, P2, IQueryable<T>> func, P1 param1, P2 param2, bool canUseCacheIfPossible = true) where T : IEntity, new()
@@ -510,14 +500,14 @@ namespace Core.Rep
                 var cacheInfo = CacheConfig.CacheInfoDic[cacheKey];
                 cacheKey = cacheKey + param1 + param2;
                 var queryableCacheExecution = new QueryableCacheDataProvider<T, P1, P2>(cacheInfo, param1, param2);
-                IQueryable<T> result = queryableCacheExecution.Cache<List<T>>(cacheInfo, cacheInfo.ExpireCacheSecondTime, cacheKey, canUseCacheIfPossible).AsQueryable();
+                IQueryable<T> result = queryableCacheExecution.Cache<List<T>>(cacheInfo, cacheInfo.RefreshCacheTimeSeconds, cacheKey, canUseCacheIfPossible).AsQueryable();
                 Stopwatch.Stop();
                 cacheInfo.UsingTime += TimeSpan.FromTicks(Stopwatch.ElapsedTicks);
                 return result;
             }
             else
             {
-                return func.Invoke(GetQueryableForCahce() as IQueryable<TObject>, param1, param2);
+                return func.Invoke(GetQueryableForCahce((Activator.CreateInstance(ContextBase.GetType()) as IDbContextBase)) as IQueryable<TObject>, param1, param2);
             }
         }
 
@@ -530,14 +520,14 @@ namespace Core.Rep
                 var cacheInfo = CacheConfig.CacheInfoDic[cacheKey];
                 cacheKey = cacheKey + param1 + param2 + param3;
                 var queryableCacheExecution = new QueryableCacheDataProvider<T, P1, P2, P3>(cacheInfo, param1, param2, param3);
-                IQueryable<T> result = queryableCacheExecution.Cache<List<T>>(cacheInfo, cacheInfo.ExpireCacheSecondTime, cacheKey, canUseCacheIfPossible).AsQueryable();
+                IQueryable<T> result = queryableCacheExecution.Cache<List<T>>(cacheInfo, cacheInfo.RefreshCacheTimeSeconds, cacheKey, canUseCacheIfPossible).AsQueryable();
                 Stopwatch.Stop();
                 cacheInfo.UsingTime += TimeSpan.FromTicks(Stopwatch.ElapsedTicks);
                 return result;
             }
             else
             {
-                return func.Invoke(GetQueryableForCahce() as IQueryable<TObject>, param1, param2, param3);
+                return func.Invoke(GetQueryableForCahce((Activator.CreateInstance(ContextBase.GetType()) as IDbContextBase)) as IQueryable<TObject>, param1, param2, param3);
             }
 
         }
@@ -551,14 +541,14 @@ namespace Core.Rep
                 var cacheInfo = CacheConfig.CacheInfoDic[cacheKey];
                 // cacheKey = cacheKey + param1 + param2 + param3 + param4;
                 var queryableCacheExecution = new QueryableCacheDataProvider<T, P1, P2, P3, P4>(cacheInfo, param1, param2, param3, param4);
-                IQueryable<T> result = queryableCacheExecution.Cache<List<T>>(cacheInfo, cacheInfo.ExpireCacheSecondTime, queryableCacheExecution.GenerateCacheKey(), canUseCacheIfPossible).AsQueryable();
+                IQueryable<T> result = queryableCacheExecution.Cache<List<T>>(cacheInfo, cacheInfo.RefreshCacheTimeSeconds, queryableCacheExecution.GenerateCacheKey(), canUseCacheIfPossible).AsQueryable();
                 Stopwatch.Stop();
                 cacheInfo.UsingTime += TimeSpan.FromTicks(Stopwatch.ElapsedTicks);
                 return result;
             }
             else
             {
-                return func.Invoke(GetQueryableForCahce() as IQueryable<TObject>, param1, param2, param3, param4);
+                return func.Invoke(GetQueryableForCahce((Activator.CreateInstance(ContextBase.GetType()) as IDbContextBase)) as IQueryable<TObject>, param1, param2, param3, param4);
             }
         }
 
@@ -573,9 +563,9 @@ namespace Core.Rep
             return result;
         }
 
-        public IQueryable GetQueryableForCahce()
+        public IQueryable GetQueryableForCahce(IDbContextBase dbContext)
         {
-            return (Activator.CreateInstance(ContextBase.GetType()) as IDbContextBase).Set<TObject>().AsNoTracking();
+            return dbContext.Set<TObject>().AsNoTracking();
         }
 
         public Type GetDomainModelType()
@@ -653,7 +643,10 @@ namespace Core.Rep
 
         public byte[] GetMaxTimeStamp()
         {
-            return (Activator.CreateInstance(ContextBase.GetType()) as IDbContextBase).Set<TObject>().Max(item => item.TimeStamp);
+            var result = AppBase.DependencyInjectionFactory.CreateContextInstance().Set<TObject>().Max(item => item.TimeStamp);
+            if (result == null)
+                result = new byte[0];
+            return result;
         }
     }
 }

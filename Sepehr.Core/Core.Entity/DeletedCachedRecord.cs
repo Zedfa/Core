@@ -16,18 +16,18 @@ namespace Core.Entity
         [DataMember]
         public int Id { get; set; }
         [DataMember]
-
+        //ToDo: change DeletedTimeStamp name to IdForDeletedEntity and datatype int
         public string DeletedTimeStamp { get; set; }
         [DataMember]
 
         public string TableName { get; set; }
-        private long _deletedEntityId;
-        public long DeletedEntityId
+        private int _deletedEntityId;
+        public int DeletedEntityId
         {
             get
             {
-                if (_deletedEntityId == default(long))
-                    _deletedEntityId = long.Parse(DeletedTimeStamp);
+                if (_deletedEntityId == default(int))
+                    _deletedEntityId = int.Parse(DeletedTimeStamp);
                 return _deletedEntityId;
             }
         }

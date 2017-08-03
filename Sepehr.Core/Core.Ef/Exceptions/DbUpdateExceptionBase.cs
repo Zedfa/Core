@@ -7,14 +7,15 @@ using System.Threading.Tasks;
 
 namespace Core.Ef.Exceptions
 {
-   public class DbUpdateExceptionBase:Exception
+    public class DbUpdateExceptionBase : Exception
     {
         private DbUpdateException _dbUpdateException;
         //
         // Summary:
         //     Initializes a new instance of the System.Data.Entity.Infrastructure.DbUpdateException
         //     class.
-        public DbUpdateExceptionBase() {
+        public DbUpdateExceptionBase()
+        {
             _dbUpdateException = new DbUpdateException();
         }
         public DbUpdateExceptionBase(Exception exception)
@@ -29,7 +30,8 @@ namespace Core.Ef.Exceptions
         // Parameters:
         //   message:
         //     The message.
-        public DbUpdateExceptionBase(string message) {
+        public DbUpdateExceptionBase(string message)
+        {
             _dbUpdateException = new DbUpdateException(message);
         }
         //
@@ -43,8 +45,9 @@ namespace Core.Ef.Exceptions
         //
         //   innerException:
         //     The inner exception.
-        public DbUpdateExceptionBase(string message, Exception innerException) {
-            _dbUpdateException = new DbUpdateException(message,innerException);
+        public DbUpdateExceptionBase(string message, Exception innerException)
+        {
+            _dbUpdateException = new DbUpdateException(message, innerException);
 
         }
 

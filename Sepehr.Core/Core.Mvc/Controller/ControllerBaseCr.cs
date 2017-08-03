@@ -40,14 +40,13 @@ namespace Core.Mvc.Controller
             filterContext.Result = SetException(excepInfo);
             filterContext.ExceptionHandled = true;
 
-            var eLog = _logService.GetEventLogObj();
-            eLog.UserId = "ControllerBase";
-            eLog.CustomMessage = excepInfo.Message;
-            eLog.LogFileName = "ControllerBaseLog";
-            eLog.OccuredException = filterContext.Exception;
-            _logService.Handle(eLog);
-            // log error by elmah
-
+            // var eLog = _logService.GetEventLogObj();
+            // eLog.UserId = "ControllerBase";
+            // eLog.CustomMessage = excepInfo.Message;
+            //// eLog.LogFileName = "ControllerBaseLog";
+            // eLog.OccuredException = filterContext.Exception;
+            // _logService.Handle(eLog);
+            _logService.Handle(filterContext.Exception, excepInfo.Message);
         }
 
         private ActionResult SetException(ExceptionInfo exception)
@@ -237,6 +236,9 @@ namespace Core.Mvc.Controller
 
             //base.OnResultExecuted(filterContext);
         }
-
+        protected override void Dispose(bool disposing)
+        {
+            base.Dispose(disposing);
+        }
     }
 }

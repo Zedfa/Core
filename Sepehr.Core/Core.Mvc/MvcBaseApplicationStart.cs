@@ -89,11 +89,13 @@ namespace Core.Mvc
                     break;
             }
 
-            var eLog = Core.Cmn.AppBase.LogService.GetEventLogObj();
-            eLog.OccuredException = null;
-            eLog.UserId = "Core";
-            eLog.CustomMessage = "Application_End => Cause: " + shutdownDetail;
-            Core.Cmn.AppBase.LogService.Handle(eLog);
+            //var eLog = Core.Cmn.AppBase.LogService.GetEventLogObj();
+            //eLog.OccuredException = null;
+            //eLog.UserId = "Core";
+            //eLog.CustomMessage = "Application_End => Cause: " + shutdownDetail;
+            //Core.Cmn.AppBase.LogService.Handle(eLog);
+            Core.Cmn.AppBase.LogService.Write("Core=> Application_End => Cause: " + shutdownDetail);
+
         }
     }
 }

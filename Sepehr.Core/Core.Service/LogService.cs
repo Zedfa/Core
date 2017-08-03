@@ -1,67 +1,107 @@
 ﻿using Core.Cmn;
+using Core.Cmn.Attributes;
 using Core.Entity;
 using Core.Rep;
+using Core.Rep.DTO;
 using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Xml;
-using System.IO;
 using System.Configuration;
-using Core.Rep.DTO;
-using Core.Cmn.Attributes;
+using System.IO;
+using System.Linq;
+using System.Runtime.CompilerServices;
+using System.Xml;
 
 namespace Core.Service
 {
+    /// <summary>
+    ///  1.zamani ke mikhaym chizi ro mahze etela dar log sabt konim az method e write estefade mikonim
+    ///  2.zamani ke mikhaym exception dar log sabt beshe az method e handle estefade mikonim
+    ///  3. faghat zamani ke mikhayd file, method , line , applicationName , source ro khodetoon poor konid az override Handle(LogInfo logInfo) estefade mikonim
+    ///  4. log bardari be 2sorat anjam mishavad : sabt dar jadval logs , exceptionlogs dar sql  va agar natavanest sabt dar file xml(  makane save ro kilid e  LogPath dar config file moshakhas mikonad)
+    /// </summary>
+    /// <param name="customMessage"> too field e CustomMessage gharar migirad</param>
+    /// <param name="raiseThrowException">agar true bashad throw exception raise mikonad </param>
+    /// <param name="source"> az tarkibe meghdari ke developer mide-agar bedahad- + (file, method , line)</param>
+    /// <param name="ip">too field e IP gharar migirad</param>
+    /// <param name="file ,method,line"> har se motagheyer be sorate automatic poor mishe.aslan niaz be por kardan nadarad. </param>
+    ///
+
     [Injectable(DomainName = "core", InterfaceType = typeof(ILogService))]
     public class LogService : ServiceBase<Log>, ILogService
     {
-        #region Variable
-        private ExceptionEventLogCreator _exceptionEventLogCreator;
-
-        #endregion
-
-        #region Constructors
+        private static readonly object _locker = new object();
+        
 
         public LogService(IDbContextBase context)
-            : base(context)
+                            : base(context)
         {
-            _exceptionEventLogCreator = new ExceptionEventLogCreator();
             _repositoryBase = new LogRepository(context);
-
         }
+
         public LogService()
             : base()
         {
-            _exceptionEventLogCreator = new ExceptionEventLogCreator();
             _repositoryBase = new LogRepository();
-
         }
 
-        #endregion
-        #region method
-        private static readonly object _locker = new object();
-        private static readonly object _dbLocker = new object();
+        public string XmlLogFileName
+        {
+            get
+            {
+                return Path.Combine(ConfigurationManager.AppSettings["LogPath"],
+                    $"{DateTime.Now.ToShortDateString().Replace("/", "")}_{ ConfigurationManager.AppSettings["ApplicationNameForLog"]}.Xml");
+            }
+        }
+        public void BatchHandle(List<LogInfo> logs)
+        {
+            HandleBatchLogInfo(logs);
+        }
+
         public IQueryable<LogDTO> GetAllLogDTOs()
         {
-
             _repositoryBase = new LogRepository();
             var dtos = _repositoryBase.GetDtoQueryable(_repositoryBase.All().AsQueryable()) as IQueryable<LogDTO>;
             return dtos;
         }
-        public ExceptionLogDTO GetExceptionLogOfCorrespondentLog(Guid logId)
+
+        public ExceptionLogDTO GetExceptionLogOfCorrespondentExceptionLog(int id)
+        {
+            LogRepository rep = new LogRepository();
+            ExceptionLog excLog = rep.GetExceptionLogOfThisParent(id);
+            ExceptionLogDTO excLogDto = null;
+            if (excLog != null)
+            {
+                excLogDto = new ExceptionLogDTO
+                {
+                    Id = excLog.Id,
+                    Message = excLog.Message,
+                    Source = excLog.Source,
+                    ParentId = id,
+                    StackTrace = excLog.StackTrace,
+                    ExceptionType = excLog.ExceptionType,
+                    HasChildren = rep.HasAnyChildren(id)
+                };
+                return excLogDto;
+            }
+            else
+            {
+                return null;
+            }
+        }
+
+        public ExceptionLogDTO GetExceptionLogOfCorrespondentLog(int logId)
         {
             LogRepository rep = new LogRepository();
             ExceptionLog excLog = rep.GetExceptionLog(logId);
             ExceptionLogDTO excLogDto = null;
             if (excLog != null)
             {
-
                 excLogDto = new ExceptionLogDTO
                 {
-                    ID = excLog.ID,
+                    Id = excLog.Id,
                     Message = excLog.Message,
                     Source = excLog.Source,
-                    ParentId = excLog.ID,
+                    ParentId = excLog.Id,
                     StackTrace = excLog.StackTrace,
                     ExceptionType = excLog.ExceptionType,
                     HasChildren = rep.HasAnyChildren(logId)
@@ -72,45 +112,231 @@ namespace Core.Service
             {
                 return null;
             }
-
         }
 
-        private void LogToDbException(EventLog eventLog)//, string logFileName = "Log"
+        public Exception Handle(string IP, Exception ex, string customMessage, [CallerFilePath] string file = null, [CallerMemberName] string method = null, [CallerLineNumber] int line = 0)
         {
-            #if DEBUG
-            if (eventLog.OccuredException == null)
+            var info = new LogInfo($"File: {file} , Method: {method} , Line: {line}");
+            info.OccuredException = ex;
+            info.CustomMessage = customMessage;
+            info.IP = IP;
+            HandleLogInfo(info);
+            return ex;
+        }
+
+        public Exception Handle(Exception ex, string customMessage, string source, [CallerFilePath] string file = null, [CallerMemberName] string method = null, [CallerLineNumber] int line = 0)
+        {
+            var info = new LogInfo($"{source}  .File: {file} , Method: {method} , Line: {line}");
+            info.OccuredException = ex;
+            info.CustomMessage = customMessage;
+            HandleLogInfo(info);
+            return ex;
+        }
+        
+
+        public Exception Handle(Exception ex, string customMessage, bool raiseThrowException, string source, string platform, [CallerFilePath] string file = null, [CallerMemberName] string method = null, [CallerLineNumber] int line = 0)
+        {
+            var info = new LogInfo($"{source}  .File: {file} , Method: {method} , Line: {line}");
+            info.OccuredException = ex;
+            info.CustomMessage = customMessage;
+            info.RaiseThrowException = raiseThrowException;
+            info.Platform = platform;
+            HandleLogInfo(info);
+            return ex;
+        }
+
+        public Exception Handle(Exception ex, string customMessage, bool raiseThrowException, string source, [CallerFilePath] string file = null, [CallerMemberName] string method = null, [CallerLineNumber] int line = 0)
+        {
+            var info = new LogInfo($"{source}  .File: {file} , Method: {method} , Line: {line}");
+            info.OccuredException = ex;
+            info.CustomMessage = customMessage;
+            info.RaiseThrowException = raiseThrowException;
+            HandleLogInfo(info);
+            return ex;
+        }
+
+        public Exception Handle(Exception ex, string customMessage, [CallerFilePath] string file = null, [CallerMemberName] string method = null, [CallerLineNumber] int line = 0)
+        {
+            var info = new LogInfo($"File: {file} , Method: {method} , Line: {line}");
+            info.OccuredException = ex;
+            info.CustomMessage = customMessage;
+            HandleLogInfo(info);
+            return ex;
+        }
+
+        public Exception Handle(LogInfo info)
+        {
+            HandleLogInfo(info);
+            return info.OccuredException;
+        }
+
+        public void Write(string customMessage, [CallerFilePath] string file = null, [CallerMemberName] string method = null, [CallerLineNumber] int line = 0)
+        {
+            var info = new LogInfo($"File: {file} , Method: {method} , Line: {line}");
+            info.CustomMessage = customMessage;
+            HandleLogInfo(info);
+        }
+
+        public void Write(string customMessage, string ip, [CallerFilePath] string file = null, [CallerMemberName] string method = null, [CallerLineNumber] int line = 0)
+        {
+            var info = new LogInfo($"File: {file} , Method: {method} , Line: {line}");
+            info.CustomMessage = customMessage;
+            info.IP = ip;
+            HandleLogInfo(info);
+        }
+
+        private void FillLogObjectList(LogInfo logInfo, List<LogInfo> logInfoList)
+        {
+
+            logInfoList.Add(logInfo);
+
+            if (logInfo.OccuredException != null && logInfo.OccuredException.InnerException != null)
             {
-                Console.ForegroundColor = ConsoleColor.White;
+                var childLog = new LogInfo(logInfo.Source);
+                childLog.OccuredException = logInfo.OccuredException.InnerException;
+                childLog.CustomMessage = logInfo.CustomMessage;
+                childLog.IP = logInfo.IP;
+                childLog.Platform = logInfo.Platform;
+                FillLogObjectList(childLog, logInfoList);
+            }
+        }
+
+        private  void GenerateXmlElement(LogInfo logInfo, XmlDocument doc)
+        {
+            List<LogInfo> logObjects = new List<LogInfo>();
+            FillLogObjectList(logInfo, logObjects);
+
+            var xmlElement = (XmlElement)doc.DocumentElement.AppendChild(doc.CreateElement("Log"));
+            xmlElement.SetAttribute("ApplicationName", logInfo.ApplicationName);
+
+            for (int i = 0; i < logObjects.Count; i++)
+            {
+                if (i == 0)
+                {
+
+
+                    xmlElement.AppendChild(doc.CreateElement("Source")).InnerText = logObjects[i].Source;
+                    xmlElement.AppendChild(doc.CreateElement("CustomMessage")).InnerText = logInfo.CustomMessage + "." + logInfo.OccuredException?.Message;
+                    xmlElement.AppendChild(doc.CreateElement("InnerExceptionCount")).InnerText = (logObjects.Count - 1).ToString();
+                    xmlElement.AppendChild(doc.CreateElement("CreateDateTime")).InnerText = DateTime.Now.ToString();
+                    xmlElement.AppendChild(doc.CreateElement("IP")).InnerText = logObjects[i].IP;
+                    xmlElement.AppendChild(doc.CreateElement("Platform")).InnerText = logObjects[i].Platform;
+                    xmlElement.AppendChild(doc.CreateElement(String.Format("ExceptionType", i))).InnerText = logObjects[i].OccuredException?.GetType().Name;
+
+                }
+                else if (i > 0)
+                {
+                    xmlElement.AppendChild(doc.CreateElement(String.Format("ExceptionType_{0}", i))).InnerText = logObjects[i].OccuredException?.GetType().Name;
+                    xmlElement.AppendChild(doc.CreateElement(String.Format("InnerMessage_{0}", i))).InnerText = logObjects[i].OccuredException?.InnerException?.Message;
+                    xmlElement.AppendChild(doc.CreateElement(String.Format("InnerStackTrace_{0}", i))).InnerText = logObjects[i].OccuredException?.StackTrace;
+                    xmlElement.AppendChild(doc.CreateElement(String.Format("InnerSource_{0}", i))).InnerText = logObjects[i].OccuredException?.Source;
+                    xmlElement.AppendChild(doc.CreateElement("CreateDateTime")).InnerText = DateTime.Now.ToString();
+                    xmlElement.AppendChild(doc.CreateElement("IP")).InnerText = logObjects[i].IP;
+                    xmlElement.AppendChild(doc.CreateElement("Platform")).InnerText = logObjects[i].Platform;
+                }
+            }
+        }
+
+        private void LogToFileException(LogInfo logInfo)
+        {
+
+            string diretoryPath = ConfigurationManager.AppSettings["LogPath"];
+
+            if (!Directory.Exists(diretoryPath))
+            {
+                Directory.CreateDirectory(diretoryPath);
+            }
+
+           // string fileName = Path.Combine(diretoryPath, String.Format("{0}_{1}.Xml", DateTime.Now.ToShortDateString().Replace("/", ""), logInfo.ApplicationName));
+
+            XmlDocument doc = new XmlDocument();
+            if (File.Exists(XmlLogFileName))
+            {
+                doc.Load(XmlLogFileName);
             }
             else
             {
-                Console.ForegroundColor = ConsoleColor.Red;
+                var root = doc.CreateElement("Logs");
+                doc.AppendChild(root);
             }
 
-            Console.WriteLine($"{eventLog.UserId}: {eventLog.CustomMessage} {eventLog.OccuredException?.Message} {DateTime.Now.ToLongTimeString()} {Environment.NewLine}");
-            #endif
+            lock (_locker)
+            {
+                GenerateXmlElement(logInfo, doc);
+                doc.Save(XmlLogFileName);
+            }
+        }
 
-            var log = GenerateLog(eventLog);
-            var repositoryBase = new LogRepository();
-            //if (eventLog.OccuredException == null) return;
-            repositoryBase.Create(log);
+        private void LogToFileException(List<LogInfo> logInfoList)
+        {
+            if (logInfoList.Any(log => log.OccuredException != null))
+            {
+
+                string diretoryPath = Path.Combine(ConfigurationManager.AppSettings["LogPath"], "/Logs");
+
+                if (!Directory.Exists(diretoryPath))
+                {
+                    Directory.CreateDirectory(diretoryPath);
+                }
+
+                string fileName = Path.Combine(diretoryPath, String.Format("{0}_{1}.Xml", DateTime.Now.ToShortDateString().Replace("/", ""), logInfoList[0].ApplicationName));
+
+                XmlDocument doc = new XmlDocument();
+                if (File.Exists(fileName))
+                {
+                    doc.Load(fileName);
+                }
+                else
+                {
+                    var root = doc.CreateElement("Logs");
+                    doc.AppendChild(root);
+                }
+
+                lock (_locker)
+                {
+                    foreach (var logInfo in logInfoList)
+                    {
+                        GenerateXmlElement(logInfo, doc);
+
+                    }
+                    doc.Save(fileName);
+                }
+            }
+
+        }
+
+        private void FillInnerException(Exception ex, ExceptionLog innerExceptionLog, ExceptionLog pExceptionLog, ref int i)
+        {
+            innerExceptionLog.ExceptionType = ex.GetType().Name;
+            innerExceptionLog.Message = ex.Message;
+            innerExceptionLog.StackTrace = ex.StackTrace;
+            innerExceptionLog.Source = ex.Source;
+            if (pExceptionLog != null)
+            {
+                pExceptionLog.InnerException = innerExceptionLog;
+                i = ++i;
+            }
+
+            if (ex.InnerException != null)
+            {
+                innerExceptionLog.InnerException = new ExceptionLog();
+                FillInnerException(ex.InnerException, innerExceptionLog.InnerException, innerExceptionLog, ref i);
+            }
         }
 
 
-        private Log GenerateLog(EventLog eventLog)
+
+        private Log GenerateLog(LogInfo eventLog)
         {
             var log = new Log();
             var ex = eventLog.OccuredException;
             log.CustomMessage = eventLog.CustomMessage;
-            log.UserId = eventLog.UserId;
-            log.LogType = eventLog.LogType;
+            log.ApplicationName = eventLog.ApplicationName;
             log.InnerExceptionCount = 0;
-            if (eventLog.CreateDate == null)
-                log.CreateDate = DateTime.Now;
-            else
-                log.CreateDate = eventLog.CreateDate.Value;
-
-
+            log.ClientPlatform = eventLog.Platform;
+            log.CreateDate = DateTime.Now;
+            log.Source = eventLog.Source;
+            log.IP = eventLog.IP;
             if (ex != null)
             {
                 ExceptionLog exceptionLog = new ExceptionLog();
@@ -132,213 +358,105 @@ namespace Core.Service
             }
             return log;
         }
-        private void FillInnerException(Exception ex, ExceptionLog innerExceptionLog, ExceptionLog pExceptionLog, ref int i)
+
+
+
+        private void HandleBatchLogInfo(List<LogInfo> info)
         {
-            innerExceptionLog.ExceptionType = ex.GetType().Name;
-            innerExceptionLog.Message = ex.Message;
-            innerExceptionLog.StackTrace = ex.StackTrace;
-            innerExceptionLog.Source = ex.Source;
-            if (pExceptionLog != null)
-            {
-                pExceptionLog.InnerException = innerExceptionLog;
-                i = ++i;
-            }
-
-            if (ex.InnerException != null)
-            {
-                innerExceptionLog.InnerException = new ExceptionLog();
-                FillInnerException(ex.InnerException, innerExceptionLog.InnerException, innerExceptionLog, ref i);
-            }
-        }
-
-        private void LogToFileException(Exception ex, string userId, string customMessage = "")
-        {
-            if (ex == null)
-            { return; }
-
-            //string assemblyPath = (new System.Uri(System.Reflection.Assembly.GetExecutingAssembly().CodeBase)).AbsolutePath;
-            //string diretoryPath = assemblyPath.Remove(assemblyPath.LastIndexOf("/")) + "/Logs";
-            string diretoryPath = Path.Combine(ConfigurationManager.AppSettings["LogPath"], "Logs");
-
-            if (!Directory.Exists(diretoryPath))
-            {
-                Directory.CreateDirectory(diretoryPath);
-            }
-
-            string fileName = Path.Combine(diretoryPath, String.Format("{0}_{1}.Xml", DateTime.Now.ToShortDateString().Replace("/", ""), userId));
-
-            XmlDocument doc = new XmlDocument();
-            if (File.Exists(fileName))
-            {
-                doc.Load(fileName);
-            }
-            else
-            {
-                var root = doc.CreateElement("Logs");
-                doc.AppendChild(root);
-            }
-
-            lock (_locker)
-            {
-                GenerateXmlDoc(ex, userId, customMessage, doc);
-
-                doc.Save(fileName);
-            }
-        }
-        private void GenerateXmlDoc(Exception ex, string userId, string customMessage, XmlDocument doc)
-        {
-            List<LogObject> logObjects = new List<LogObject>();
-            FillLogObjectList(ex, logObjects);
-
-            var xmlElement = (XmlElement)doc.DocumentElement.AppendChild(doc.CreateElement("Log"));
-            xmlElement.SetAttribute("UserId", userId);
-
-            for (int i = 0; i < logObjects.Count; i++)
-            {
-                if (i == 0)
-                {
-                    xmlElement.AppendChild(doc.CreateElement("ExceptionType")).InnerText = logObjects[i].ExceptionType;
-                    xmlElement.AppendChild(doc.CreateElement("Message")).InnerText = logObjects[i].Message;
-                    xmlElement.AppendChild(doc.CreateElement("StackTrace")).InnerText = logObjects[i].StackTrace;
-                    xmlElement.AppendChild(doc.CreateElement("Source")).InnerText = logObjects[i].Source;
-                    xmlElement.AppendChild(doc.CreateElement("CustomMessage")).InnerText = customMessage;
-                    xmlElement.AppendChild(doc.CreateElement("InnerExceptionCount")).InnerText = (logObjects.Count - 1).ToString();
-                    xmlElement.AppendChild(doc.CreateElement("CreateDateTime")).InnerText = DateTime.Now.ToString();
-                }
-                else if (i > 0)
-                {
-                    xmlElement.AppendChild(doc.CreateElement(String.Format("InnerExceptionType_{0}", i))).InnerText = logObjects[i].ExceptionType;
-                    xmlElement.AppendChild(doc.CreateElement(String.Format("InnerMessage_{0}", i))).InnerText = logObjects[i].Message;
-                    xmlElement.AppendChild(doc.CreateElement(String.Format("InnerStackTrace_{0}", i))).InnerText = logObjects[i].StackTrace;
-                    xmlElement.AppendChild(doc.CreateElement(String.Format("InnerSource_{0}", i))).InnerText = logObjects[i].Source;
-                }
-            }
-        }
-        private void FillLogObjectList(Exception ex, List<LogObject> logObjects)
-        {
-            logObjects.Add(new LogObject
-            {
-                Message = ex.Message,
-                Source = ex.Source,
-                StackTrace = ex.StackTrace,
-                ExceptionType = ex.GetType().Name
-            });
-
-            if (ex.InnerException != null)
-            {
-                FillLogObjectList(ex.InnerException, logObjects);
-            }
-        }
-        #endregion
-
-        public ExceptionLogDTO GetExceptionLogOfCorrespondentExceptionLog(Guid guid)
-        {
-            LogRepository rep = new LogRepository();
-            ExceptionLog excLog = rep.GetExceptionLogOfThisParent(guid);
-            ExceptionLogDTO excLogDto = null;
-            if (excLog != null)
-            {
-
-                excLogDto = new ExceptionLogDTO
-                {
-                    ID = excLog.ID,
-                    Message = excLog.Message,
-                    Source = excLog.Source,
-                    ParentId = guid,
-                    StackTrace = excLog.StackTrace,
-                    ExceptionType = excLog.ExceptionType,
-                    HasChildren = rep.HasAnyChildren(guid)
-                };
-                return excLogDto;
-            }
-            else
-            {
-                return null;
-            }
-        }
-
-
-        public void Handle(Exception ex, string logFileName, string customMessage)
-        {
-            Handle(ex, logFileName, "", customMessage);
-        }
-        public void Handle(Exception ex, string logFileName, string logUserId, string customMessage)
-        {
-            var errorLog = this.GetEventLogObj();
-            errorLog.OccuredException = ex;
-            errorLog.LogFileName = logFileName;
-            errorLog.UserId = logUserId;
-            errorLog.CustomMessage = customMessage;
-            Handle(errorLog);
-        }
-        public void Handle(IEventLog el)
-        {
-
-            var eventLog = el as EventLog;
             try
             {
-                //ToDo: DbContext should't be made new here!
-
-                //if (_eventLog.LogEx)
-                {
-                    LogToDbException(eventLog);
-                }
+                LogToDbException(info);
             }
             catch (Exception ex)
             {
                 try
                 {
-                    ExceptionHandler.Handle(eventLog.OccuredException, eventLog.UserId, eventLog.CustomMessage);
-                    ExceptionHandler.Handle(ex, eventLog.UserId, "خطا در هنگام ثبت لاگ در دیتابیس!");
+
+                    LogToFileException(info);
+                    var log = new LogInfo();
+                    log.OccuredException = ex;
+                    log.CustomMessage = "خطا در هنگام ثبت batch log  در دیتابیس!";
+                    LogToFileException(log);
+
                 }
                 catch
                 {
-
                 }
             }
 
-            if (eventLog.ThrowEx)
-            {
-                throw eventLog.OccuredException;
-            }
+
         }
 
-        public void BatchHandle(List<EventLog> eventLogs)
+        private void HandleLogInfo(LogInfo info)
         {
             try
             {
-                BatchLogToDbException(eventLogs);
+                LogToDbException(info);
             }
             catch (Exception ex)
             {
                 try
                 {
-                    var eventLog = new EventLog();
-                    ExceptionHandler.Handle(ex, eventLog.UserId, "خطا در هنگام ثبت لاگ در دیتابیس!");
+                    //ExceptionXMLHandler.Handle(info);
+                    LogToFileException(info);
+                    var log = new LogInfo();
+                    log.OccuredException = ex;
+                    log.CustomMessage = "خطا در هنگام ثبت لاگ در دیتابیس!";
+                    // ExceptionXMLHandler.Handle(log);
+                    LogToFileException(log);
+
                 }
                 catch
                 {
-
                 }
             }
+
+            if (info.RaiseThrowException)
+            {
+                throw info.OccuredException;
+            }
+        }
+        private void LogToDbException(LogInfo logInfo)
+        {
+            if (logInfo.Source == null) throw new NotSupportedException("you must set Source");
+            
+            WriteInConsole(logInfo);
+            var log = GenerateLog(logInfo);
+            //var repositoryBase = new LogRepository();
+            _repositoryBase.Create(log);
         }
 
-        private void BatchLogToDbException(List<EventLog> eventLogs)
+        private void LogToDbException(List<LogInfo> logInfoList)
         {
-            var repositoryBase = new LogRepository();
-            foreach (var el in eventLogs)
+            var logs = new List<Log>();
+            foreach (var logInfo in logInfoList)
             {
-                repositoryBase.Create(GenerateLog(el), false);
+
+                WriteInConsole(logInfo);
+
+                logs.Add(GenerateLog(logInfo));
             }
 
-            repositoryBase.SaveChanges();
+            //var repositoryBase = new LogRepository();
+            _repositoryBase.Create(logs);
         }
 
-        public EventLog GetEventLogObj()
+        private void WriteInConsole(LogInfo logInfo)
         {
-            return (EventLog)_exceptionEventLogCreator.BuildOccuredEvent();
+
+#if DEBUG
+            if (logInfo.OccuredException == null)
+            {
+                Console.ForegroundColor = ConsoleColor.White;
+            }
+            else
+            {
+                Console.ForegroundColor = ConsoleColor.Red;
+            }
+
+            Console.WriteLine($"{logInfo.ApplicationName}: {logInfo.CustomMessage} {logInfo.OccuredException?.Message} {DateTime.Now.ToLongTimeString()} {Environment.NewLine}");
+#endif
+
         }
-
-
     }
 }

@@ -56,27 +56,11 @@
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="EdgeJs, Version=0.0.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\..\NugetPackages\Edge.js.7.10.1\lib\net40\EdgeJs.dll</HintPath>
-      <Private>True</Private>
-    </Reference>
-    <Reference Include="EntityFramework, Version=6.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089, processorArchitecture=MSIL">
-      <HintPath>..\..\NugetPackages\EntityFramework.6.1.3\lib\net45\EntityFramework.dll</HintPath>
-      <Private>True</Private>
-    </Reference>
-    <Reference Include="EntityFramework.Extended, Version=6.0.0.0, Culture=neutral, PublicKeyToken=05b7e29bdd433584, processorArchitecture=MSIL">
-      <HintPath>..\..\NugetPackages\EntityFramework.Extended.6.1.0.168\lib\net45\EntityFramework.Extended.dll</HintPath>
-      <Private>True</Private>
-    </Reference>
-    <Reference Include="EntityFramework.SqlServer, Version=6.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089, processorArchitecture=MSIL">
-      <HintPath>..\..\NugetPackages\EntityFramework.6.1.3\lib\net45\EntityFramework.SqlServer.dll</HintPath>
+      <HintPath>..\..\NugetPackages\Edge.js.6.5.1\lib\net40\EdgeJs.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="Microsoft.Diagnostics.Tracing.EventSource">
       <HintPath>..\..\NugetPackages\Microsoft.Diagnostics.Tracing.EventSource.Redist.1.1.28\lib\net40\Microsoft.Diagnostics.Tracing.EventSource.dll</HintPath>
-    </Reference>
-    <Reference Include="Microsoft.Practices.ServiceLocation, Version=1.3.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
-      <HintPath>..\..\NugetPackages\CommonServiceLocator.1.3\lib\portable-net4+sl5+netcore45+wpa81+wp8\Microsoft.Practices.ServiceLocation.dll</HintPath>
-      <Private>True</Private>
     </Reference>
     <Reference Include="Microsoft.Practices.Unity, Version=4.0.0.0, Culture=neutral, PublicKeyToken=6d32ff45e0ccc69f, processorArchitecture=MSIL">
       <HintPath>..\..\NugetPackages\Unity.4.0.1\lib\net45\Microsoft.Practices.Unity.dll</HintPath>
@@ -111,15 +95,12 @@
     <Reference Include="System.ComponentModel.DataAnnotations" />
     <Reference Include="System.Configuration" />
     <Reference Include="System.Core" />
-    <Reference Include="System.Data.SqlServerCe, Version=4.0.0.0, Culture=neutral, PublicKeyToken=89845dcd8080cc91, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\SepehrCore\Sepehr.Core\Core.Cmn\bin\Debug\System.Data.SqlServerCe.dll</HintPath>
-    </Reference>
-    <Reference Include="System.Data.SqlServerCe.Entity, Version=4.0.0.0, Culture=neutral, PublicKeyToken=89845dcd8080cc91, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\SepehrCore\Sepehr.Core\Core.Cmn\bin\Debug\System.Data.SqlServerCe.Entity.dll</HintPath>
-    </Reference>
+    <Reference Include="System.Data.Linq" />
     <Reference Include="System.Drawing" />
+    <Reference Include="System.Linq.Dynamic, Version=1.0.6132.35681, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\..\NugetPackages\System.Linq.Dynamic.1.0.7\lib\net40\System.Linq.Dynamic.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
     <Reference Include="System.Net.Http" />
     <Reference Include="System.Net.Http.Formatting, Version=5.2.3.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
       <HintPath>..\..\NugetPackages\Microsoft.AspNet.WebApi.Client.5.2.3\lib\net45\System.Net.Http.Formatting.dll</HintPath>
@@ -156,6 +137,12 @@
     <Compile Include="Cache\CacheInfo.cs" />
     <Compile Include="Cache\CacheWCFTypeHelper.cs" />
     <Compile Include="Cache\ClientSideCacheServerService.cs" />
+    <Compile Include="Cache\IQueryableCacheDataProvider.cs" />
+    <Compile Include="Cache\SqlDependency\IImmediateSqlNotificationRegisterBase.cs" />
+    <Compile Include="Cache\SqlDependency\IImmediateSqlNotificationRegister.cs" />
+    <Compile Include="Cache\SqlDependency\ImmediateSqlNotificationRegister.cs" />
+    <Compile Include="Cache\SqlDependency\RegularlySqlNotificationRegister.cs" />
+    <Compile Include="DataSource\DataSource.cs" />
     <Compile Include="Cache\InfoForFillingNavigationProperty.cs" />
     <Compile Include="Cache\IRepositoryCache.cs" />
     <Compile Include="Cache\IServiceCache.cs" />
@@ -163,7 +150,9 @@
     <Compile Include="Cache\ServerSideCacheServerService.cs" />
     <Compile Include="CmnHelper.cs" />
     <Compile Include="ConfigHelper.cs" />
+    <Compile Include="DataSource\DataSourceInfo.cs" />
     <Compile Include="DependencyInjectionFactory.cs" />
+    <Compile Include="DependencyInjection\ParameterOverride.cs" />
     <Compile Include="DependencyInjection\UnityDependencyInjectionManager.cs" />
     <Compile Include="DiManager.cs" />
     <Compile Include="EdgeJs.cs" />
@@ -178,12 +167,12 @@
     <Compile Include="EntityBase\ModelBase.cs" />
     <Compile Include="EntityBase\ViewModelBuilder.cs" />
     <Compile Include="CustomEventArgs\SignInEventArgs.cs" />
-    <Compile Include="EventLogCreator.cs" />
-    <Compile Include="ExceptionEventLogCreator.cs" />
     <Compile Include="Extensions\ExceptionExt.cs" />
-    <Compile Include="Extensions\IBatchExtensions.cs" />
+    <Compile Include="Extensions\IDbContextExt.cs" />
+    <Compile Include="Extensions\Interfaces\IBatchExtensions.cs" />
     <Compile Include="Extensions\IEnumerableExt.cs" />
-    <Compile Include="Extensions\IQueryableExtensions.cs" />
+    <Compile Include="Extensions\Interfaces\IDbContextBaseExtentions.cs" />
+    <Compile Include="Extensions\Interfaces\IQueryableExtensions.cs" />
     <Compile Include="Extensions\QueryableExt.cs" />
     <Compile Include="Extensions\XElementExt.cs" />
     <Compile Include="FileHelper.cs" />
@@ -195,17 +184,14 @@
     <Compile Include="IDbContextFactory.cs" />
     <Compile Include="ImageHelper.cs" />
     <Compile Include="EncryptionUtil.cs" />
-    <Compile Include="ExceptionHandler.cs" />
     <Compile Include="Extensions\DateExt.cs" />
     <Compile Include="Extensions\EnumExtension.cs" />
     <Compile Include="Extensions\DictionaryExtension.cs" />
     <Compile Include="Cache\FunctionalCacheDataProvider.cs" />
-    <Compile Include="Extensions\FuncExt.cs" />
     <Compile Include="Extensions\TypeExt.cs" />
     <Compile Include="FarsiUtils\PersianCalendar.cs" />
     <Compile Include="Cache\ICacheDataProvider.cs" />
     <Compile Include="ILogService.cs" />
-    <Compile Include="IEventLog.cs" />
     <Compile Include="Interface\IDbChangeTrackerBase.cs" />
     <Compile Include="Interface\IDbContextBase.cs" />
     <Compile Include="Interface\IDbContextConfigurationBase.cs" />
@@ -215,11 +201,11 @@
     <Compile Include="Interface\IDbSetBase.cs" />
     <Compile Include="Interface\ITraceViewer.cs" />
     <Compile Include="IPAddressRange.cs" />
+    <Compile Include="Monitoring\Watch.cs" />
     <Compile Include="Report\IReportService.cs" />
     <Compile Include="IViewModelBase.cs" />
-    <Compile Include="LogObject.cs" />
     <Compile Include="Monitoring\ResourceMonitoring.cs" />
-    <Compile Include="EventLog.cs" />
+    <Compile Include="LogInfo.cs" />
     <Compile Include="PeriodicTaskFactory.cs" />
     <Compile Include="ExceptionHandlerBase.cs" />
     <Compile Include="ExceptionInfo.cs" />
@@ -252,7 +238,9 @@
     <Compile Include="UnitTesting\UnitTestBase.cs" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="App.config" />
+    <None Include="App.config">
+      <SubType>Designer</SubType>
+    </None>
     <None Include="edge\x64\edge_nativeclr.node">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>

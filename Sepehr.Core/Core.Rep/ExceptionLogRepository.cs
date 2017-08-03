@@ -26,7 +26,7 @@ namespace Core.Rep
                                 el =>
                                 new ExceptionLogDTO()
                                 {
-                                    ID = el.ID,
+                                    Id = el.Id,
                                     ExceptionType = el.ExceptionType,
                                     Message = el.Message,
                                     StackTrace = el.StackTrace,

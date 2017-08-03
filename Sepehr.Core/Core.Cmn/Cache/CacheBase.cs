@@ -25,7 +25,7 @@ namespace Core.Cmn.Cache
             {
                 if (!CacheService.TryGetCache<string>(cacheKeyFake, out fakeResult))
                 {
-                    if (cacheInfo.IsAutomaticallyAndPeriodicallyRefreshCache)
+                    if (cacheInfo.CacheRefreshingKind == CacheRefreshingKind.Slide)
                     {
                         CacheService.SetCache<string>(cacheKeyFake, "Fake value", expireCacheSecondTime * 10);
                     }
@@ -99,7 +99,7 @@ namespace Core.Cmn.Cache
                         {
                             if (nlst != null && nlst.Count > 0)
                             {
-                                var newItemToRemove = nlst.Cast<_EntityBase>().FirstOrDefault(item => item.LongId == record.DeletedEntityId);
+                                var newItemToRemove = nlst.Cast<_EntityBase>().FirstOrDefault(item => item.CacheId == record.DeletedEntityId);
                                 if (newItemToRemove != null)
                                 {
                                     nlst.Remove(newItemToRemove);
@@ -107,7 +107,7 @@ namespace Core.Cmn.Cache
                                 }
                             }
 
-                            var itemToRemove = oldEntityBaseLst.FirstOrDefault(item => item.LongId == record.DeletedEntityId);
+                            var itemToRemove = oldEntityBaseLst.FirstOrDefault(item => item.CacheId == record.DeletedEntityId);
                             if (itemToRemove != null)
                             {
                                 entitiesForDeletion.Add(itemToRemove);
@@ -399,7 +399,7 @@ namespace Core.Cmn.Cache
 
                     }
 
-                    CacheService.SetCache<T>(cacheExecution.GenerateCacheKey(), refreshCacheValue, cacheInfo.ExpireCacheSecondTime * (double)100000);
+                    CacheService.SetCache<T>(cacheExecution.GenerateCacheKey(), refreshCacheValue, cacheInfo.RefreshCacheTimeSeconds * (double)100000);
                     cacheInfo.NotYetGetCacheData = false;
                 }
 
@@ -413,23 +413,24 @@ namespace Core.Cmn.Cache
             catch (Exception ex)
             {
                 cacheInfo.ErrorCount = cacheInfo.ErrorCount + 1;
-                System.Diagnostics.StackTrace st = new System.Diagnostics.StackTrace(ex, true);
-                System.Diagnostics.StackFrame[] frames = st.GetFrames();
-                string x = "";
-                // Iterate over the frames extracting the information you need
-                foreach (System.Diagnostics.StackFrame frame in frames)
-                {
-                    //   x = ""+ frame.GetFileName()+"";
-                    x += "filename:" + frame.GetFileName() + "--methodname:" + frame.GetMethod().Name + "--linenumber:" + frame.GetFileLineNumber() + "--columnnumber:" + frame.GetFileColumnNumber();
-                }
+                //System.Diagnostics.StackTrace st = new System.Diagnostics.StackTrace(ex, true);
+                //System.Diagnostics.StackFrame[] frames = st.GetFrames();
+                //string x = "";
+                //// Iterate over the frames extracting the information you need
+                //foreach (System.Diagnostics.StackFrame frame in frames)
+                //{
+                //    //   x = ""+ frame.GetFileName()+"";
+                //    x += "filename:" + frame.GetFileName() + "--methodname:" + frame.GetMethod().Name + "--linenumber:" + frame.GetFileLineNumber() + "--columnnumber:" + frame.GetFileColumnNumber();
+                //}
                 CacheService.RemoveCache(cacheKeyFake);
-                var eLog = _logService.GetEventLogObj();
-                eLog.OccuredException = ex;
-                eLog.UserId = "dbContext Cache in Thread !";
-                eLog.CustomMessage = x;
-                _logService.Handle(eLog);
+                //var eLog = _logService.GetEventLogObj();
+                //eLog.OccuredException = ex;
+                //eLog.UserId = "dbContext Cache in Thread !";
+                //eLog.CustomMessage = x;
+                //_logService.Handle(eLog);
+
                 refreshCacheValue = default(T);
-                throw;
+                throw _logService.Handle(ex, "dbContext Cache in Thread !");
             }
         }
     }

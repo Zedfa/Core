@@ -51,7 +51,7 @@ namespace Core.UnitTesting.Repository
         public static void Initialize(TestContext testContext)
         {
             Core.Cmn.AppBase.LogService = new Core.Service.LogService(BuildNewContext());
-            Core.Cmn.AppBase.BuildEntityInfoDic(Core.Cmn.AppBase.GetAlltypes());
+            //Core.Cmn.AppBase.BuildEntityInfoDic(Core.Cmn.AppBase.GetAlltypes());
 
             
         }

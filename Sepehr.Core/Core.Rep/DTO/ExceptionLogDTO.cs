@@ -12,7 +12,7 @@ namespace Core.Rep.DTO
     public class ExceptionLogDTO : EntityBase<ExceptionLogDTO> , IDto
     {
         //[DataMember]
-        public System.Guid ID { get; set; }
+        public int Id { get; set; }
         
         //[DataMember]
         public string ExceptionType { get; set; }
@@ -30,7 +30,7 @@ namespace Core.Rep.DTO
         public bool   HasChildren { get; set; }
 
         //[DataMember]
-        public Guid?  ParentId { get; set; }
+        public int?  ParentId { get; set; }
         //public ExceptionLogDTO ExceptionLog { get; set; }
     }
 }

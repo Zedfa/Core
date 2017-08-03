@@ -16,7 +16,7 @@ namespace Core.Mvc.Controller
     {
         public ApiControllerBase()
         {
-            GetCurrentCulture();
+
         }
 
         private List<Message> _messageStrore;
@@ -58,8 +58,12 @@ namespace Core.Mvc.Controller
         }
         protected override void Initialize(HttpControllerContext controllerContext)
         {
-
             base.Initialize(controllerContext);
+            GetCurrentCulture();
+        }
+        protected override void Dispose(bool disposing)
+        {
+            base.Dispose(disposing);
         }
     }
 

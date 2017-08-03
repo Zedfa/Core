@@ -21,7 +21,7 @@ namespace Core.UnitTesting.Service
     {
         protected override IConstantService ConstructService()
         {
-            IDbContextBase ctx = Mock.MockHelperBase.BuildMockContext();            
+            IDbContextBase ctx = Mock.MockHelperBase.BuildMockContext();
 
             return new ConstantService(ctx);
         }
@@ -35,18 +35,15 @@ namespace Core.UnitTesting.Service
             }
         }
 
-        [ClassInitialize]
-        public static void Initialize(TestContext testContext)
+
+        public override void Initialize(TestContext testContext)
         {
-            List<Type> allTypes = Core.Cmn.AppBase.GetAlltypes().ToList();
-            Core.Cmn.AppBase.DependencyInjectionManager = new UnityDependencyInjectionManager(allTypes);
-            //Core.Cmn.AppBase.LogService = new Core.Service.LogService(ServiceBase.DependencyInjectionFactory.CreateContextInstance());
-            Core.Cmn.AppBase.BuildEntityInfoDic(Core.Cmn.AppBase.GetAlltypes());            
+            Core.Cmn.AppBase.StartApplication();         
         }
 
         [TestInitialize]
         public void TestInitialize()
-        {            
+        {
             EntityUnitTestHelper.SeedData();
         }
 
@@ -222,7 +219,7 @@ namespace Core.UnitTesting.Service
             foreach (Constant constant in all)
             {
                 // act
-                List<Constant> list1 = service.GetConstantByNameOfCategory(constant.ConstantCategory.Name, false);
+                List<Constant> list1 = service.GetConstantByNameOfCategory(constant.ConstantCategory.Name, true, false);
 
                 // assert
                 List<Constant> list2 = service.GetConstantByNameOfCategoryAndCulture(constant.ConstantCategory.Name, service.CurrentCulture.Name, false);
@@ -233,7 +230,7 @@ namespace Core.UnitTesting.Service
                     Assert.IsNotNull(list2);
                 }
 
-                CollectionAssert.AreEqual(list2, list1);                
+                CollectionAssert.AreEqual(list2, list1);
             }
         }
 
@@ -258,7 +255,7 @@ namespace Core.UnitTesting.Service
                 {
                     Assert.AreEqual(constant.ConstantCategory.Name, c.ConstantCategory.Name);
                     Assert.AreEqual(constant.Culture, c.Culture);
-                }                
+                }
             }
         }
 
@@ -267,7 +264,7 @@ namespace Core.UnitTesting.Service
         public void TryGetValueByKeyOneConstantTest()
         {
             // assemble
-            IConstantService service = ConstructService();            
+            IConstantService service = ConstructService();
 
             Constant entity = EntityUnitTestHelper.CreateSampleEntity();
             entity = service.Create(entity);
@@ -297,7 +294,7 @@ namespace Core.UnitTesting.Service
         public void TryGetValueByKeyMoreConstantsTest()
         {
             // assemble
-            IConstantService service = ConstructService();            
+            IConstantService service = ConstructService();
             IList<Constant> list = EntityUnitTestHelper.CreateSampleEntityList(CultureCount, CultureCount);
             for (int i = 0; i < list.Count; i++)
             {
@@ -333,7 +330,7 @@ namespace Core.UnitTesting.Service
         {
             // assemble
             IConstantService service = ConstructService();
-            
+
             Constant entity = EntityUnitTestHelper.CreateSampleEntity();
             entity.ConstantCategory = ConstantCategoryUnitTestHelper.GENERAL_CONFIG_CONSTANT_CATEGORY;
             entity.ConstantCategoryID = ConstantCategoryUnitTestHelper.GENERAL_CONFIG_CONSTANT_CATEGORY.ID;
@@ -366,7 +363,7 @@ namespace Core.UnitTesting.Service
         {
             // assemble
             IConstantService service = ConstructService();
-                        
+
             IList<Constant> list = EntityUnitTestHelper.CreateSampleEntityList(CultureCount, CultureCount);
             for (int i = 0; i < list.Count; i++)
             {
@@ -402,9 +399,9 @@ namespace Core.UnitTesting.Service
         public void TryGetValueByKeyAndCategoryAndCultureTest()
         {
             // assemble
-            IConstantService service = ConstructService();            
+            IConstantService service = ConstructService();
 
-            Constant entity = EntityUnitTestHelper.CreateSampleEntity();                    
+            Constant entity = EntityUnitTestHelper.CreateSampleEntity();
 
             entity = service.Create(entity);
 
@@ -419,7 +416,7 @@ namespace Core.UnitTesting.Service
 
             // assemble
             service.Delete(entity);
-            
+
             // act
             tryResult = service.TryGetValue(entity.Key, entity.ConstantCategory.Name, entity.Culture, out value, false);
             Assert.IsFalse(tryResult);

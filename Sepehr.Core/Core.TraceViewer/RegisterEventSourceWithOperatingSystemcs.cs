@@ -7,17 +7,14 @@ using System.Windows.Forms;
 
 namespace Core.TraceViewer
 {
-    static class RegisterEventSourceWithOperatingSystem
+    static class RegisterEventLogSourceWithOperatingSystem
     {
-      
-        private static void CreateManifestFiles(string locationManifest)
-        {
-           Process.Start(new ProcessStartInfo($"{locationManifest}\\eventRegister.exe", $"{locationManifest}\\Core.Service.dll") { Verb = "runAs" }).WaitForExit();
-
-        }
-
+        //private static string _eventSourceName = "TraceViewerService";
+        //private static string _logName = Assembly.GetExecutingAssembly().GetName().Name;
         internal static void SimulateInstall(string windowsEventFolder)
         {
+           //  CheckEventLogExist();
+
             var sourceFolder = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
             CreateManifestFiles(sourceFolder);
 
@@ -29,7 +26,7 @@ namespace Core.TraceViewer
             }
 
             Directory.CreateDirectory(windowsEventFolder);
-          
+
             foreach (var filename in Directory.GetFiles(sourceFolder, "*.etwManifest.???"))
             {
                 var destPath = Path.Combine(windowsEventFolder, Path.GetFileName(filename));
@@ -55,11 +52,13 @@ namespace Core.TraceViewer
 
         }
 
-      
-        internal static void SimulateUninstall(/*string eventSourceName*/ string windowsEventFolder)
+        //    }
+        //}
+        internal static void SimulateUninstall( string windowsEventFolder)
         {
             // run wevtutil elevated to unregister the ETW manifests
-
+            // try
+            //{
             foreach (var filename in Directory.GetFiles(windowsEventFolder, "*.etwManifest.man"))
             {
                 var commandArgs = string.Format("um {0}", filename);
@@ -73,7 +72,44 @@ namespace Core.TraceViewer
             // a command prompt in that directory or visual studio.If all else fails, rebooting should fix this.  
             if (Directory.Exists(windowsEventFolder))
                 Directory.Delete(windowsEventFolder, true);
+            //}
+            //finally
+            //{
+            //    DeleteEventLog();
+
+            //}
+
 
         }
+
+        private static void CreateManifestFiles(string locationManifest)
+        {
+            Process.Start(new ProcessStartInfo($"{locationManifest}\\eventRegister.exe", $"{locationManifest}\\Core.Service.dll") { Verb = "runAs" }).WaitForExit();
+
+        }
+        //private static void CheckEventLogExist()
+        //{
+
+        //    EventLog eventLog = new EventLog(_logName);
+        //    eventLog.Source = _eventSourceName;
+        //    //eventLog.MaximumKilobytes = 8388608;//1GB
+
+        //    if (!EventLog.SourceExists(_eventSourceName))
+        //    {
+        //        EventLog.CreateEventSource(_eventSourceName, _logName);
+
+        //    }
+        //}
+
+        //private static void DeleteEventLog() {
+
+        //    if (EventLog.SourceExists(_eventSourceName))
+        //    {
+        //        EventLog.DeleteEventSource(_eventSourceName);
+        //    }
+
+        //    if (EventLog.Exists(_logName))
+        //    {
+        //        EventLog.Delete(_logName);
     }
 }

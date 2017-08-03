@@ -54,13 +54,14 @@
                         if (_serializeItemList == null)
                         {
                             int count = CountOfWritableProperties;
-                            _serializeItemList = new BinaryConverterBase[count];
+                            var serializeItemList = new BinaryConverterBase[count];
                             var writableProperties = WritableProperties.ToList();
                             for (int i = 0; i < count; i++)
                             {
                                 if (IsSerializablePropertyByIndexList[i])
-                                    _serializeItemList[i] = BinaryConverterBase.GetBinaryConverter(writableProperties[i].Value.PropertyType);
+                                    serializeItemList[i] = BinaryConverterBase.GetBinaryConverter(writableProperties[i].Value.PropertyType);
                             };
+                            _serializeItemList = serializeItemList;
                         }
                     }
                 }
@@ -91,11 +92,12 @@
                     {
                         if (_defaultValueForWritablePropertyList == null)
                         {
-                            _defaultValueForWritablePropertyList = new List<object>();
+                            var defaultValueForWritablePropertyList = new List<object>();
                             WritableProperties.ToList().ForEach(item =>
                             {
-                                _defaultValueForWritablePropertyList.Add(item.Value.PropertyType.GetDefaultValue());
+                                defaultValueForWritablePropertyList.Add(item.Value.PropertyType.GetDefaultValue());
                             });
+                            _defaultValueForWritablePropertyList = defaultValueForWritablePropertyList;
                         }
                     }
                 }
@@ -115,7 +117,7 @@
                         if (_isSerializablePropertyByIndexList == null)
                         {
                             int count = CountOfWritableProperties;
-                            _isSerializablePropertyByIndexList = new bool[count];
+                            var isSerializablePropertyByIndexList = new bool[count];
                             var hasDataContractAtt = Attribute.IsDefined(ObjectType, typeof(DataContractAttribute));
                             var writableProperties = WritableProperties.ToList();
 
@@ -124,13 +126,14 @@
                                 if (hasDataContractAtt)
                                 {
                                     var dataMemberAttribute = Attribute.GetCustomAttribute(writableProperties[i].Value, typeof(DataMemberAttribute));
-                                    _isSerializablePropertyByIndexList[i] = dataMemberAttribute != null;
+                                    isSerializablePropertyByIndexList[i] = dataMemberAttribute != null;
                                 }
                                 else
                                 {
-                                    _isSerializablePropertyByIndexList[i] = true;
+                                    isSerializablePropertyByIndexList[i] = true;
                                 }
                             };
+                            _isSerializablePropertyByIndexList = isSerializablePropertyByIndexList;
                         }
                     }
                 }
@@ -186,14 +189,15 @@
                     {
                         if (_properties == null)
                         {
-                            _properties = new Dictionary<string, PropertyInfo>();
+                            var properties = new Dictionary<string, PropertyInfo>();
                             foreach (PropertyInfo propInfo in
                                 ObjectType.GetProperties()
                                 .Where(prop => prop.GetIndexParameters().Count() == 0)
                                 .OrderBy(prop => prop.Name).ToList())
                             {
-                                _properties.Add(propInfo.Name, propInfo);
+                                properties.Add(propInfo.Name, propInfo);
                             }
+                            _properties = properties;
                         }
                     }
                 }
@@ -213,13 +217,14 @@
                     {
                         if (_writableMappedProperties == null)
                         {
-                            _writableMappedProperties = new Dictionary<string, PropertyInfo>();
+                            var writableMappedProperties = new Dictionary<string, PropertyInfo>();
                             WritableProperties.ToList().ForEach(item =>
                             {
                                 var notMappedAttribute = Attribute.GetCustomAttribute(item.Value, typeof(NotMappedAttribute));
                                 if (notMappedAttribute == null)
-                                    _writableMappedProperties.Add(item.Key, item.Value);
+                                    writableMappedProperties.Add(item.Key, item.Value);
                             });
+                            _writableMappedProperties = writableMappedProperties;
                         }
                     }
                 }
@@ -238,11 +243,12 @@
                     {
                         if (_writableProperties == null)
                         {
-                            _writableProperties = new Dictionary<string, PropertyInfo>();
+                            var writableProperties = new Dictionary<string, PropertyInfo>();
                             Properties.Where(prop => prop.Value.CanWrite).ToList().ForEach(item =>
                               {
-                                  _writableProperties.Add(item.Key, item.Value);
+                                  writableProperties.Add(item.Key, item.Value);
                               });
+                            _writableProperties = writableProperties;
                         }
                     }
                 }
@@ -261,11 +267,12 @@
                     {
                         if (_writablePropertyList == null)
                         {
-                            _writablePropertyList = new List<PropertyInfo>();
+                            var writablePropertyList = new List<PropertyInfo>();
                             WritableProperties.ToList().ForEach(item =>
                             {
-                                _writablePropertyList.Add(item.Value);
+                                writablePropertyList.Add(item.Value);
                             });
+                            _writablePropertyList = writablePropertyList;
                         }
                     }
                 }
@@ -284,13 +291,14 @@
                     {
                         if (_writablePropertyNames == null)
                         {
-                            _writablePropertyNames = new Dictionary<string, int>();
+                            var writablePropertyNames = new Dictionary<string, int>();
                             var i = 0;
                             WritableProperties.ToList().ForEach(item =>
                           {
-                              _writablePropertyNames.Add(item.Key, i);
+                              writablePropertyNames.Add(item.Key, i);
                               i++;
                           });
+                            _writablePropertyNames = writablePropertyNames;
                         }
                     }
                 }

@@ -9,6 +9,11 @@ using System.Linq;
 using System.Linq.Expressions;
 using System.Threading;
 using System.Threading.Tasks;
+using Core.Cmn;
+using System.Data.SqlClient;
+using System.Data.Entity.Core.Objects;
+using System.Data.Entity.Core.EntityClient;
+using System.Data.Entity.Infrastructure;
 
 namespace Core.Ef.Extensions
 {
@@ -2261,6 +2266,7 @@ namespace Core.Ef.Extensions
         //     'await' to ensure that any asynchronous operations have completed before calling
         //     another method on this context.
         public Task ForEachAsync<T>(IQueryable<T> source, Action<T> action, CancellationToken cancellationToken) { throw new NotImplementedException(); }
+
         //
         // Summary:
         //     Specifies the related objects to include in the query results.
@@ -5019,5 +5025,108 @@ namespace Core.Ef.Extensions
 
         public Task<List<TSource>> ToListAsync<TSource>(IQueryable<TSource> source, CancellationToken cancellationToken) { throw new NotImplementedException(); }
 
+
+        /// <summary>
+        /// Return the ObjectQuery directly or convert the DbQuery to ObjectQuery.
+        /// </summary>
+        public  ObjectQuery GetObjectQuery<TEntity>(IDbContextBase context, IQueryable query)
+            where TEntity : class
+        {
+            if (query is ObjectQuery)
+                return query as ObjectQuery;
+
+            if (context == null)
+                throw new ArgumentException("Paramter cannot be null", "context");
+
+            // Use the DbContext to create the ObjectContext
+            ObjectContext objectContext = ((IObjectContextAdapter)context).ObjectContext;
+            // Use the DbSet to create the ObjectSet and get the appropriate provider.
+            IQueryable iqueryable = objectContext.CreateObjectSet<TEntity>() as IQueryable;
+            IQueryProvider provider = iqueryable.Provider;
+
+            // Use the provider and expression to create the ObjectQuery.
+            return provider.CreateQuery(query.Expression) as ObjectQuery;
+        }
+
+        /// <summary>
+        /// Use ObjectQuery to get SqlConnection and SqlCommand.
+        /// </summary>
+        public void GetSqlCommand<TEntity>(IDbContextBase context, IQueryable query, ref SqlConnection connection, ref SqlCommand command) where TEntity : class
+        {
+            var queryobject = GetObjectQuery<TEntity>(context, query);
+
+            if (queryobject == null)
+                throw new System.ArgumentException("Paramter cannot be null", "queryobject");
+
+            if (connection == null)
+            {
+                connection = new SqlConnection(GetConnectionString(queryobject));
+            }
+
+            if (command == null)
+            {
+                command = new SqlCommand(GetSqlString(queryobject), connection);
+
+                // Add all the paramters used in query.
+                foreach (ObjectParameter parameter in queryobject.Parameters)
+                {
+                    command.Parameters.AddWithValue(parameter.Name, parameter.Value);
+                }
+            }
+        }
+
+        /// <summary>
+        /// Use ObjectQuery to get SqlConnection and SqlCommand.
+        /// </summary>
+        public void GetSqlCommand(ObjectQuery query, ref SqlConnection connection, ref SqlCommand command)
+        {
+            if (query == null)
+                throw new System.ArgumentException("Paramter cannot be null", "query");
+
+            if (connection == null)
+            {
+                connection = new SqlConnection(GetConnectionString(query));
+            }
+
+            if (command == null)
+            {
+                command = new SqlCommand(GetSqlString(query), connection);
+
+                // Add all the paramters used in query.
+                foreach (ObjectParameter parameter in query.Parameters)
+                {
+                    command.Parameters.AddWithValue(parameter.Name, parameter.Value);
+                }
+            }
+        }
+
+        /// <summary>
+        /// Use ObjectQuery to get the connection string.
+        /// </summary>
+        public  String GetConnectionString(ObjectQuery query)
+        {
+            if (query == null)
+            {
+                throw new ArgumentException("Paramter cannot be null", "query");
+            }
+
+            EntityConnection connection = query.Context.Connection as EntityConnection;
+            return connection.StoreConnection.ConnectionString;
+        }
+
+        /// <summary>
+        /// Use ObjectQuery to get the Sql string.
+        /// </summary>
+        public  String GetSqlString(ObjectQuery query)
+        {
+            if (query == null)
+            {
+                throw new ArgumentException("Paramter cannot be null", "query");
+            }
+
+            string s = query.ToTraceString();
+
+            return s;
+        }
     }
 }

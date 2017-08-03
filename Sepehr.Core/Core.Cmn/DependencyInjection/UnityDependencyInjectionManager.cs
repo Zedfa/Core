@@ -21,15 +21,19 @@ namespace Core.Cmn.DependencyInjection
                 return result;
             }).Where(item => item.Value != null).ToList();
 
-            foreach (var item in allInjectableKeyValuePaires)
+            var allGroupedInjectableTypes = allInjectableKeyValuePaires.GroupBy(kv => kv.Value.InterfaceType);
+
+            foreach (var groupedItem in allGroupedInjectableTypes)
             {
-                var interfaceType = Reflection.ReflectionHelpers.GetType(item.Value.InterfaceType.FullName);
-                var injectableItem = Reflection.ReflectionHelpers.GetType(item.Key.FullName);
+                var item = groupedItem.OrderByDescending(g => g.Value.Version).First();
+                var interfaceType = item.Value.InterfaceType;
+                var injectableItem = item.Key;
                 var lifetime = GetLifetimeStateInstance(item.Value.LifeTime);
-                this.RegisterType(interfaceType, injectableItem,lifetime );
+                this.RegisterType(interfaceType, injectableItem, lifetime);
             }
         }
-        private LifetimeManager GetLifetimeStateInstance( LifetimeManagement lifetime) {
+        private LifetimeManager GetLifetimeStateInstance(LifetimeManagement lifetime)
+        {
 
             switch (lifetime)
             {
@@ -57,7 +61,7 @@ namespace Core.Cmn.DependencyInjection
         private void RegisterType(Type InterfaceType, Type InjectableType, LifetimeManager lifetime)
         {
             (DiContainer as UnityContainer)
-                .RegisterType(InterfaceType, InjectableType,lifetime);
+                .RegisterType(InterfaceType, InjectableType, lifetime);
 
         }
 
@@ -99,6 +103,12 @@ namespace Core.Cmn.DependencyInjection
         public T Resolve<T>()
         {
             return (DiContainer as UnityContainer).Resolve<T>();
+        }
+
+        public object Resolve(Type type, params ParameterOverride[] constructorsParams)
+        {
+            var parameters = constructorsParams.Select(param => new Microsoft.Practices.Unity.ParameterOverride(param.ParamName, param.ParamValue)).ToArray();
+            return UnityContainerExtensions.Resolve((DiContainer as UnityContainer), type, parameters);
         }
     }
 }

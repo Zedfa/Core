@@ -7,81 +7,82 @@ using System.Data.Entity.Infrastructure;
 using System.Linq;
 using Core.Cmn.Attributes;
 using System.ComponentModel.DataAnnotations.Schema;
+using System.Data.Entity;
+using EntityFramework.MappingAPI.Extensions;
+using System.Collections.Generic;
+using Core.Cmn.Extensions.Interfaces;
 
 namespace Core.Ef.Extensions
 {
-    public static class IDbContextExt
+    [Injectable(InterfaceType = typeof(IDbContextBaseExtentions))]
+    public class IDbContextBaseExtentionsForEf : IDbContextBaseExtentions
     {
-        public static string GetTableName<T>(this IDbContextBase context) where T : Core.Cmn.EntityBase<T>
+        public List<string> GetKeyColumnNames<T>(IDbContextBase context) where T : EntityBase<T>
         {
-            string tableNameResult = null;
-            ObjectContext objectContext = ((IObjectContextAdapter)context).ObjectContext;
-            Type entityType = typeof(T);
-
-            if (entityType.BaseType != null && entityType.Namespace == "System.Data.Entity.DynamicProxies")
-                entityType = entityType.BaseType;
-
-            string entityTypeName = entityType.Name;
-
-            EntityContainer container =
-                objectContext.MetadataWorkspace.GetEntityContainer(objectContext.DefaultContainerName, DataSpace.CSpace);
-            var entitySet = (from meta in container.BaseEntitySets
-                             where meta.ElementType.Name == entityTypeName
-                             select meta).First();
-            if (entitySet.MetadataProperties.Contains("Configuration") && entitySet.MetadataProperties["Configuration"].Value != null)
-            {
-                var tableName = ((entitySet.MetadataProperties["Configuration"].Value)).ToDictionary()["TableName"];
-                if (tableName == null)
-                    tableNameResult = entitySet.Name;
-                else
-                    tableNameResult = tableName.ToString();
-            }
-            else
-            {
-                tableNameResult = entityType.Name;
-            }
-
-            return tableNameResult;
+            return (context as DbContext).Db(typeof(T)).Pks.Select(p => p.ColumnName).ToList();
         }
 
-        public static string GetSchemaName<T>(this IDbContextBase context) where T : Core.Cmn.EntityBase<T>
+        public string GetSchemaName<T>(IDbContextBase context) where T : EntityBase<T>
         {
+            var schemaName = (context as DbContext).Db(typeof(T)).Schema;
+            //ObjectContext objectContext = ((IObjectContextAdapter)context).ObjectContext;
+            //Type entityType = typeof(T);
 
-            ObjectContext objectContext = ((IObjectContextAdapter)context).ObjectContext;
-            Type entityType = typeof(T);
+            //if (entityType.BaseType != null && entityType.Namespace == "System.Data.Entity.DynamicProxies")
+            //    entityType = entityType.BaseType;
 
-            if (entityType.BaseType != null && entityType.Namespace == "System.Data.Entity.DynamicProxies")
-                entityType = entityType.BaseType;
+            //string entityTypeName = entityType.Name;
 
-            string entityTypeName = entityType.Name;
+            //EntityContainer container =
+            //    objectContext.MetadataWorkspace.GetEntityContainer(objectContext.DefaultContainerName, DataSpace.CSpace);
+            //var entitySetName = (from meta in container.BaseEntitySets
+            //                     where meta.ElementType.Name == entityTypeName
+            //                     select meta).First();
 
-            EntityContainer container =
-                objectContext.MetadataWorkspace.GetEntityContainer(objectContext.DefaultContainerName, DataSpace.CSpace);
-            var entitySetName = (from meta in container.BaseEntitySets
-                                 where meta.ElementType.Name == entityTypeName
-                                 select meta).First();
+            //var schemaName = "dbo";
 
-            var schemaName = "dbo";
-
-            if (entitySetName.MetadataProperties.Contains("Configuration") && entitySetName.MetadataProperties["Configuration"].Value != null)
-            {
-                var schema = ((entitySetName.MetadataProperties["Configuration"].Value)).ToDictionary()["SchemaName"];
-                if (schema == null)
-                    schemaName = "dbo";
-                else
-                    schemaName = schema.ToString();
-            }
+            //if (entitySetName.MetadataProperties.Contains("Configuration") && entitySetName.MetadataProperties["Configuration"].Value != null)
+            //{
+            //    var schema = ((entitySetName.MetadataProperties["Configuration"].Value)).ToDictionary()["SchemaName"];
+            //    if (schema == null)
+            //        schemaName = "dbo";
+            //    else
+            //        schemaName = schema.ToString();
+            //}
             return schemaName;
         }
-        public static string GetKeyColumnName<T>(this IDbContextBase context) where T : Core.Cmn.EntityBase<T>
+
+        public string GetTableName<T>(IDbContextBase context) where T : EntityBase<T>
         {
-            System.Data.Entity.Core.Objects.ObjectContext objectContext = ((IObjectContextAdapter)context).ObjectContext;
-            var set = objectContext.CreateObjectSet<T>();
-            return set.EntitySet.ElementType
-                        .KeyMembers
-                         .Select(k => k.Name).FirstOrDefault();
+            var tableNameResult = (context as DbContext).Db(typeof(T)).TableName;
+            //string tableNameResult = null;
+            //ObjectContext objectContext = ((IObjectContextAdapter)context).ObjectContext;
+            //Type entityType = typeof(T);
 
+            //if (entityType.BaseType != null && entityType.Namespace == "System.Data.Entity.DynamicProxies")
+            //    entityType = entityType.BaseType;
 
+            //string entityTypeName = entityType.Name;
+
+            //EntityContainer container =
+            //    objectContext.MetadataWorkspace.GetEntityContainer(objectContext.DefaultContainerName, DataSpace.CSpace);
+            //var entitySet = (from meta in container.BaseEntitySets
+            //                 where meta.ElementType.Name == entityTypeName
+            //                 select meta).First();
+            //if (entitySet.MetadataProperties.Contains("Configuration") && entitySet.MetadataProperties["Configuration"].Value != null)
+            //{
+            //    var tableName = ((entitySet.MetadataProperties["Configuration"].Value)).ToDictionary()["TableName"];
+            //    if (tableName == null)
+            //        tableNameResult = entitySet.Name;
+            //    else
+            //        tableNameResult = tableName.ToString();
+            //}
+            //else
+            //{
+            //    tableNameResult = entityType.Name;
+            //}
+
+            return tableNameResult;
         }
     }
 }

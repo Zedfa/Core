@@ -28,7 +28,11 @@ namespace Core.Cmn.Extensions
 
         public static string SerializeObjectIntoXML<T>(object toConvertToXmlObj)
         {
-            var ser = new XmlSerializer(typeof(T), SerializationExtensions.TargetNamespace);
+            return toConvertToXmlObj.SerializeObjectToXML();
+        }
+        public static string SerializeObjectToXML(this object toConvertToXmlObj)
+        {
+            var ser = new XmlSerializer(toConvertToXmlObj.GetType(), SerializationExtensions.TargetNamespace);
             var memStream = new MemoryStream();
             var xmlWriter = new XmlTextWriter(memStream, Encoding.UTF8);
             xmlWriter.Namespaces = true;
@@ -75,6 +79,18 @@ namespace Core.Cmn.Extensions
             stringReader.Close();
 
             return obj;
+        }
+
+        public static T DeSerializeXMLToObject<T>(this string xmlConvertedString)
+        {
+            var ser = new XmlSerializer(typeof(T));
+            var stringReader = new StringReader(xmlConvertedString);
+            var xmlReader = new XmlTextReader(stringReader);
+            object obj = ser.Deserialize(xmlReader);
+            xmlReader.Close();
+            stringReader.Close();
+
+            return (T)obj;
         }
 
         public static string StoreViewElementIntoXML(object viewElementComplexTypeObj)

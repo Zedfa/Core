@@ -2,11 +2,8 @@
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
-using System.Linq;
 using System.Reflection;
 using System.Runtime.Serialization;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Core.Cmn.Cache
 {
@@ -23,32 +20,46 @@ namespace Core.Cmn.Cache
 
         [DataMember]
         public string Name { get; set; }
+
         [DataMember]
         public int BasicKey { get; set; }
+
         [DataMember]
-        public int ExpireCacheSecondTime { get; set; }
+        public int RefreshCacheTimeSeconds { get; set; }
+
         [IgnoreDataMember]
         public MethodInfo MethodInfo { get; set; }
+
         [IgnoreDataMember]
         public IRepositoryCache Repository { get; set; }
+
         [IgnoreDataMember]
         public IServiceCache Service { get; set; }
+
         [IgnoreDataMember]
         public object Func { get; set; }
+
         [DataMember]
         public DateTime CreateDateTime { get; set; }
+
         [DataMember]
         public int FrequencyOfUsing { get; set; }
+
         [DataMember]
         public int FrequencyOfBuilding { get; set; }
+
         [DataMember]
         public TimeSpan BuildingTime { get; set; }
+
         [DataMember]
         public TimeSpan UsingTime { get; set; }
+
         [DataMember]
         public DateTime LastBuildDateTime { get; set; }
+
         [DataMember]
         public DateTime LastUseDateTime { get; set; }
+
         [DataMember]
         public TimeSpan AverageTimeToBuild
         {
@@ -62,6 +73,7 @@ namespace Core.Cmn.Cache
                 /// just for wcf serialization error.
             }
         }
+
         [DataMember]
         public TimeSpan AverageTimeToUse
         {
@@ -75,8 +87,10 @@ namespace Core.Cmn.Cache
                 /// just for wcf serialization error.
             }
         }
+
         [DataMember]
         public int ErrorCount { get; set; }
+
         [DataMember]
         public bool EnableUseCacheServer { get; set; }
 
@@ -85,52 +99,73 @@ namespace Core.Cmn.Cache
 
         [DataMember]
         public UInt64 MaxTimeStampUintForDeletedRecord { get; set; }
+
         /// <summary>
         /// this copy of MaxTimeStampUintForDeletedRecord is for covering problem that has occurred when we had concurrent deletion and modification,
         ///in this situation cache first delete item from cache and added again for modifying it.
         /// </summary>
         [DataMember]
         public UInt64 MaxTimeStampUintForDeletedRecord2 { get; set; }
+
         [DataMember]
         [Timestamp]
         public byte[] MaxTimeStampCopy { get; set; }
+
         [DataMember]
         [Timestamp]
         public byte[] MaxTimeStamp { get; set; }
+
         [DataMember]
         public UInt64 MaxTimeStampUint { get; set; }
+
         [DataMember]
         public UInt64 MaxTimeStampUintCopy { get; set; }
+
         [DataMember]
         public ConcurrentDictionary<string, UInt64> MaxTimeStamesDic { get; set; }
+
         [DataMember]
         public bool EnableToFetchOnlyChangedDataFromDB { get; set; }
+
         [DataMember]
         public string NameOfNavigationPropsForFetchingOnlyChangedDataFromDB { get; set; }
+
         [DataMember]
         public ConcurrentDictionary<string, string> WhereClauseForFetchingOnlyChangedDataFromDB_Dic { get; set; }
+
         [DataMember]
         public string LastQueryStringOnlyForQueryableCache { get; set; }
+
         [DataMember]
-        public bool IsAutomaticallyAndPeriodicallyRefreshCache { get; set; }
+        public CacheRefreshingKind CacheRefreshingKind { get; set; }
+
         [DataMember]
         public bool DisableToSyncDeletedRecord_JustIfEnableToFetchOnlyChangedDataFromDB { get; set; }
+
         public int CountOfWaitingThreads { get; set; }
+
         [IgnoreDataMember]
         public ConcurrentDictionary<InfoForFillingNavigationProperty, ConcurrentBag<_EntityBase>> InfoAndEntityListForFillingNavigationPropertyDic { get; set; }
+
         [DataMember]
         public bool DisableCache { get; set; }
+
         [DataMember]
         public bool IsFunctionalCache { get; set; }
+
         [DataMember]
         public bool EnableCoreSerialization { get; set; }
+
         [DataMember]
         public bool EnableSaveCacheOnHDD { get; set; }
+
         [DataMember]
         public int LastRecordCount { get; set; }
+
         public bool NotYetGetCacheData { get; internal set; }
 
         public event EventHandler<CacheChangeEventArgs> OnAddEntities;
+
         public event EventHandler<CacheChangeEventArgs> OnDeleteEntities;
 
         public void CallOnAddEntities(List<_EntityBase> changedEntities)
@@ -150,7 +185,6 @@ namespace Core.Cmn.Cache
                 tmp(this, new CacheChangeEventArgs() { ChangedEntities = changedEntities });
             }
         }
-
     }
 
     public class CacheChangeEventArgs : EventArgs
@@ -158,4 +192,10 @@ namespace Core.Cmn.Cache
         public List<_EntityBase> ChangedEntities { get; set; }
     }
 
+    public enum CacheRefreshingKind
+    {
+        OnRequestToGetCache,
+        Slide,
+        SqlDependency
+    }
 }

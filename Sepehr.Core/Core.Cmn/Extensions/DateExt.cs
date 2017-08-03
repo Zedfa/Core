@@ -10,6 +10,13 @@ namespace Core.Cmn.Extensions
     public static class DateExt
     {
         private static ILogService _logService = AppBase.LogService;
+
+        public static IEnumerable<DateTime> EachDay(DateTime from, DateTime thru)
+        {
+            for (var day = from.Date; day.Date <= thru.Date; day = day.AddDays(1))
+                yield return day;
+        }
+
         public static int ConvertToNumber(this DateTime dateTime)
         {
             string timeString24Hour = dateTime.ToString("HH:mm", CultureInfo.CurrentCulture);
@@ -86,22 +93,23 @@ namespace Core.Cmn.Extensions
             }
             catch (Exception ex)
             {
-                System.Threading.Thread.CurrentThread.CurrentCulture = currentCulture;
+                //System.Threading.Thread.CurrentThread.CurrentCulture = currentCulture;
 
-                System.Diagnostics.StackTrace st = new System.Diagnostics.StackTrace(ex, true);
-                System.Diagnostics.StackFrame[] frames = st.GetFrames();
-                string x = "";
-                // Iterate over the frames extracting the information you need
-                foreach (System.Diagnostics.StackFrame frame in frames)
-                {
-                    //   x = ""+ frame.GetFileName()+"";
-                    x += "    ** FileName:" + frame.GetFileName() + "** MethodName:" + frame.GetMethod().Name + "** LineNumber:" + frame.GetFileLineNumber() + "** ColumnNumber:" + frame.GetFileColumnNumber();
-                }
-                var eLog = _logService.GetEventLogObj();
-                eLog.OccuredException = ex;
-                eLog.UserId = "---";
-                eLog.CustomMessage = String.Format("Incomming parameter: {0} in ToArabYearMonth,{1}", dateTime, x);
-                _logService.Handle(eLog);
+                //System.Diagnostics.StackTrace st = new System.Diagnostics.StackTrace(ex, true);
+                //System.Diagnostics.StackFrame[] frames = st.GetFrames();
+                //string x = "";
+                //// Iterate over the frames extracting the information you need
+                //foreach (System.Diagnostics.StackFrame frame in frames)
+                //{
+                //    //   x = ""+ frame.GetFileName()+"";
+                //    x += "    ** FileName:" + frame.GetFileName() + "** MethodName:" + frame.GetMethod().Name + "** LineNumber:" + frame.GetFileLineNumber() + "** ColumnNumber:" + frame.GetFileColumnNumber();
+                //}
+                //var eLog = _logService.GetEventLogObj();
+                //eLog.OccuredException = ex;
+                //eLog.UserId = "---";
+                //eLog.CustomMessage = String.Format("Incomming parameter: {0} in ToArabYearMonth,{1}", dateTime, x);
+                //_logService.Handle(eLog);
+                _logService.Handle(ex, String.Format("Incomming parameter: {0} in ToArabYearMonth", dateTime));
 
                 return String.Empty;
             }

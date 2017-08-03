@@ -1,45 +1,16 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Linq.Dynamic;
-using System.Data;
-
-using System.ServiceModel;
-using System.Runtime.Serialization;
-
+﻿using Core.Serialization;
+using System;
 using System.Collections;
 using System.Collections.Concurrent;
-using Core.Serialization;
+using System.Collections.Generic;
+using System.Data;
+using System.Linq;
+using System.Linq.Dynamic;
+using System.Runtime.Serialization;
+using System.ServiceModel;
 
 namespace Core.Cmn.Cache
 {
-    public class CustomCacheFaultedException : Exception
-    {
-        public CustomCacheFaultedException(ExceptionDetail exceptionDetail)
-            : base(exceptionDetail.Message, exceptionDetail.InnerException == null ?
-            new CustomCacheFaultedException() : new CustomCacheFaultedException(exceptionDetail.InnerException))
-        {
-            _stackTrace = exceptionDetail.StackTrace;
-        }
-
-        private CustomCacheFaultedException()
-            : base()
-        {
-            _stackTrace = string.Empty;
-        }
-
-        private string _stackTrace;
-        public override string StackTrace
-        {
-            get
-            {
-                return _stackTrace;
-            }
-        }
-
-    }
-
-
     [DataContract]
     public abstract class CacheDataProvider : ICacheDataProvider
     {
@@ -49,6 +20,7 @@ namespace Core.Cmn.Cache
         {
             TimeStamps = new ConcurrentDictionary<int, string[]>();
         }
+
         public CacheDataProvider(CacheInfo cacheInfo)
         {
             CacheInfo = cacheInfo;
@@ -56,6 +28,189 @@ namespace Core.Cmn.Cache
 
         [DataMember]
         public CacheInfo CacheInfo { get; set; }
+
+        /// <summary>
+        ///
+        /// </summary>
+        /// <param name="resultList"></param>
+        /// <param name="cacheInfo"></param>
+        /// <param name="isForServerSide">this is 'true' if must excecute in cache server...</param>
+        public static void CalcAllTimeStampAndSet(IEnumerable resultList, CacheInfo cacheInfo, bool isForServerSide)
+        {
+            var dataLst = resultList.Cast<_EntityBase>().ToList();
+            if (dataLst.Count > 0 && cacheInfo.EnableToFetchOnlyChangedDataFromDB)
+            {
+                CalcTimeStampAndSet(cacheInfo, resultList.Cast<_EntityBase>().ToList(), null, isForServerSide);
+                if (!string.IsNullOrWhiteSpace(cacheInfo.NameOfNavigationPropsForFetchingOnlyChangedDataFromDB))
+                {
+                    var navigationPropsForGettingChangedData = cacheInfo.NameOfNavigationPropsForFetchingOnlyChangedDataFromDB.Split(',');
+                    foreach (var prop in navigationPropsForGettingChangedData)
+                    {
+                        CalcTimeStampAndSet(cacheInfo, resultList.Cast<_EntityBase>().ToList(), prop, isForServerSide);
+                    }
+                }
+            }
+        }
+
+        /// <summary>
+        ///
+        /// </summary>
+        /// <param name="cacheInfo"></param>
+        /// <param name="resultList"></param>
+        /// <param name="key"></param>
+        /// <param name="isForServerSide">this is 'true' if must excecute in cache server...</param>
+        public static void CalcTimeStampAndSet(CacheInfo cacheInfo, List<_EntityBase> resultList, string key, bool isForServerSide)
+        {
+            ulong maxTimeStampUnit = 0;
+            byte[] maxTimeStamp = null;
+            if (key == null)
+            {
+                CalcTimeStamp(resultList, out maxTimeStampUnit, out maxTimeStamp);
+
+                if (cacheInfo.MaxTimeStampUint < maxTimeStampUnit)
+                {
+                    cacheInfo.MaxTimeStampUint = maxTimeStampUnit;
+                    cacheInfo.MaxTimeStamp = maxTimeStamp;
+                }
+            }
+            else
+            {
+                IEnumerable<_EntityBase> navData = resultList;
+                var WhereClauseForFetchingOnlyChangedDataFromDB = " or ({0} {1}) ";
+                var props = string.Empty;
+                foreach (var prop in key.Split('.'))
+                {
+                    if (navData.Count() == 0)
+                    {
+                        WhereClauseForFetchingOnlyChangedDataFromDB = null;
+                        return;
+                    }
+
+                    var firstItem = navData.FirstOrDefault(item => item[prop] != null);
+
+                    if (firstItem == null)
+                    {
+                        WhereClauseForFetchingOnlyChangedDataFromDB = null;
+                        return;
+                    }
+
+                    var whereClause_CheckingNotNullPart = string.Empty;
+
+                    if ((typeof(IEnumerable)).IsAssignableFrom(firstItem[prop].GetType()))
+                    {
+                        props = prop;
+                        navData = navData.Where(itm => itm[prop] != null).SelectMany(item => ((IEnumerable)item[prop]).Cast<_EntityBase>());
+                        //  WhereClauseForFetchingOnlyChangedDataFromDB = string.Format(WhereClauseForFetchingOnlyChangedDataFromDB, props + " != null and ", prop + ".Any( {0}  {1} )");
+                        WhereClauseForFetchingOnlyChangedDataFromDB = string.Format(WhereClauseForFetchingOnlyChangedDataFromDB, "", prop + ".Any( {0}  {1} )");
+
+                        props = string.Empty;
+                    }
+                    else
+                    {
+                        props += prop;
+                        navData = navData.Where(itm => itm[prop] != null).Select(item => (_EntityBase)item[prop]);
+                        WhereClauseForFetchingOnlyChangedDataFromDB = string.Format(WhereClauseForFetchingOnlyChangedDataFromDB, props + " != null and {0}", prop + ".{1}");
+                    }
+
+                    if (!string.IsNullOrEmpty(props))
+                        props += ".";
+                }
+
+                string timeSatmpCondition;
+                if (isForServerSide)
+                    timeSatmpCondition = "TimeStamp == @{0}";
+                else
+                    timeSatmpCondition = "TimeStampUnit > @{0}";
+
+                if (WhereClauseForFetchingOnlyChangedDataFromDB != null)
+                {
+                    //WhereClauseForFetchingOnlyChangedDataFromDB = WhereClauseForFetchingOnlyChangedDataFromDB.Replace(".{0}", "{0}");
+                    WhereClauseForFetchingOnlyChangedDataFromDB = string.Format(WhereClauseForFetchingOnlyChangedDataFromDB, string.Empty, timeSatmpCondition);
+                    if (navData.Count() == 0)
+                        return;
+                    CalcTimeStamp(navData.ToList(), out maxTimeStampUnit, out maxTimeStamp);
+                    maxTimeStamp = BitConverter.GetBytes(maxTimeStampUnit).Reverse().ToArray();
+                    ulong oldMaxTimeStampUnit;
+                    if (cacheInfo.MaxTimeStamesDic.TryGetValue(key, out oldMaxTimeStampUnit))
+                    {
+                        if (maxTimeStampUnit > oldMaxTimeStampUnit)
+                            cacheInfo.MaxTimeStamesDic[key] = maxTimeStampUnit;
+                    }
+                    else
+                    {
+                        cacheInfo.MaxTimeStamesDic[key] = maxTimeStampUnit;
+                    }
+
+                    cacheInfo.WhereClauseForFetchingOnlyChangedDataFromDB_Dic[key] = WhereClauseForFetchingOnlyChangedDataFromDB;
+                }
+            }
+        }
+
+        /// <summary>
+        ///
+        /// </summary>
+        /// <param name="result"></param>
+        /// <param name="cacheInfo"></param>
+        /// <param name="isForServerSide">this is 'true' if must excecute in cache server...</param>
+        /// <returns></returns>
+        public static IQueryable MakeQueryableForFetchingOnleyChangedDataFromDB(IQueryable result, CacheInfo cacheInfo, bool isForServerSide)
+        {
+            if (cacheInfo.EnableToFetchOnlyChangedDataFromDB && cacheInfo.MaxTimeStamp != null)
+            {
+                var parames = new List<object>();
+                string whereConditionString;
+                if (isForServerSide)
+                    whereConditionString = "@0 == TimeStamp";
+                else
+                    whereConditionString = "@0 < TimeStampUnit";
+
+                var counter = 0;
+
+                if (isForServerSide)
+                    parames.Add(cacheInfo.MaxTimeStamp);
+                else
+                    parames.Add(cacheInfo.MaxTimeStampUint);
+
+                var strTimeStampForDic = ConvertToStringFromTimeStamp(cacheInfo.MaxTimeStamp);
+                var strTimeStampLst = new List<string>();
+                strTimeStampLst.Add(strTimeStampForDic);
+                if (!string.IsNullOrWhiteSpace(cacheInfo.NameOfNavigationPropsForFetchingOnlyChangedDataFromDB))
+                {
+                    foreach (var propStr in cacheInfo.NameOfNavigationPropsForFetchingOnlyChangedDataFromDB.Split(','))
+                    {
+                        ulong timeStamp;
+                        if (cacheInfo.MaxTimeStamesDic.TryGetValue(propStr, out timeStamp))
+                        {
+                            counter++;
+                            whereConditionString += string.Format(cacheInfo.WhereClauseForFetchingOnlyChangedDataFromDB_Dic[propStr], counter);
+                            var ts = BitConverter.GetBytes(timeStamp).Reverse().ToArray();
+                            if (isForServerSide)
+                                parames.Add(ts);
+                            else
+                                parames.Add(timeStamp);
+
+                            var strTimeStampForDic1 = ConvertToStringFromTimeStamp(ts);
+                            strTimeStampLst.Add(strTimeStampForDic1);
+                        }
+                    }
+
+                    //  var result1 = result.ToList().AsQueryable();
+                    //  var a = result1.Where(whereConditionString, parames.ToArray());
+                }
+
+                result = result.Where(whereConditionString, parames.ToArray());
+
+                if (isForServerSide)
+                    TimeStamps[result.ToString().GetHashCode()] = strTimeStampLst.ToArray();
+            }
+            return result;
+        }
+
+        public virtual string GenerateCacheKey()
+        {
+            return CacheInfo.BasicKey.ToString();
+        }
+
         public object GetDataFromCacheServer()
         {
             if (CacheInfo.EnableUseCacheServer)
@@ -66,6 +221,23 @@ namespace Core.Cmn.Cache
                 }
             }
             return null;
+        }
+
+        public virtual void SetFunc(object func)
+        {
+        }
+
+        protected abstract object DeserializeCacheData(byte[] result);
+
+        private static void CalcTimeStamp(List<_EntityBase> resultList, out ulong maxTimeStampUnit, out byte[] maxTimeStamp)
+        {
+            maxTimeStampUnit = resultList.Max(item => item.TimeStampUnit);
+            maxTimeStamp = BitConverter.GetBytes(maxTimeStampUnit).Reverse().ToArray();
+        }
+
+        private static string ConvertToStringFromTimeStamp(byte[] timeStamp)
+        {
+            return "0x" + BitConverter.ToString(timeStamp).Replace("-", string.Empty);
         }
 
         private object GetDataFromCacheServerViaWCF()
@@ -109,240 +281,42 @@ namespace Core.Cmn.Cache
                     if (exc is System.ServiceModel.FaultException<System.ServiceModel.ExceptionDetail>)
                     {
                         var customEx = new CustomCacheFaultedException((exc as FaultException<ExceptionDetail>).Detail);
-                        var eLog = logerService.GetEventLogObj();
-                        eLog.OccuredException = customEx;
-                        eLog.UserId = "Cache";
-                        eLog.CustomMessage = "cache server error report in client side!";
-                        logerService.Handle(eLog);
+                        //var eLog = logerService.GetEventLogObj();
+                        //eLog.OccuredException = customEx;
+                        //eLog.UserId = "Cache";
+                        //eLog.CustomMessage = "cache server error report in client side!";
+                        //logerService.Handle(eLog);
+
                         proxy.Abort();
-                        throw customEx;
+                        throw logerService.Handle(customEx, "cache server error report in client side!", true, "Cache");
+
+                        //throw customEx;
                     }
                     else
                     {
-                        var eLog = logerService.GetEventLogObj();
-                        eLog.OccuredException = exc;
-                        eLog.UserId = "Cache";
-                        eLog.CustomMessage = "cache server error report in client side!";
-                        logerService.Handle(eLog);
+                        //var eLog = logerService.GetEventLogObj();
+                        //eLog.OccuredException = exc;
+                        //eLog.UserId = "Cache";
+                        //eLog.CustomMessage = "cache server error report in client side!";
+                        //logerService.Handle(eLog);
                         proxy.Abort();
-                        throw exc;
-                    }
+                        throw logerService.Handle(exc, "cache server error report in client side!", true, "Cache");
 
+                        //throw exc;
+                    }
                 }
                 catch (Exception ex)
                 {
-                    var eLog = logerService.GetEventLogObj();
-                    eLog.OccuredException = ex;
-                    eLog.UserId = "Cache";
-                    eLog.CustomMessage = "cache server error report in client side!";
-                    logerService.Handle(eLog);
+                    //var eLog = logerService.GetEventLogObj();
+                    //eLog.OccuredException = ex;
+                    //eLog.UserId = "Cache";
+                    //eLog.CustomMessage = "cache server error report in client side!";
+                    //logerService.Handle(eLog);
                     proxy.Abort();
-                    throw ex;
+                    //throw ex;
+                    throw logerService.Handle(ex, "cache server error report in client side!", true, "Cache");
                 }
             }
-        }
-
-        protected abstract object DeserializeCacheData(byte[] result);
-
-        public virtual string GenerateCacheKey()
-        {
-            return CacheInfo.BasicKey.ToString();
-        }
-        public virtual void SetFunc(object func)
-        {
-        }
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="result"></param>
-        /// <param name="cacheInfo"></param>
-        /// <param name="isForServerSide">this is 'true' if must excecute in cache server...</param>
-        /// <returns></returns>
-        public static IQueryable MakeQueryableForFetchingOnleyChangedDataFromDB(IQueryable result, CacheInfo cacheInfo, bool isForServerSide)
-        {
-            if (cacheInfo.EnableToFetchOnlyChangedDataFromDB && cacheInfo.MaxTimeStamp != null)
-            {
-                var parames = new List<object>();
-                string whereConditionString;
-                if (isForServerSide)
-                    whereConditionString = "@0 == TimeStamp";
-                else
-                    whereConditionString = "@0 < TimeStampUnit";
-
-
-                var counter = 0;
-
-                if (isForServerSide)
-                    parames.Add(cacheInfo.MaxTimeStamp);
-                else
-                    parames.Add(cacheInfo.MaxTimeStampUint);
-
-                var strTimeStampForDic = ConvertToStringFromTimeStamp(cacheInfo.MaxTimeStamp);
-                var strTimeStampLst = new List<string>();
-                strTimeStampLst.Add(strTimeStampForDic);
-                if (!string.IsNullOrWhiteSpace(cacheInfo.NameOfNavigationPropsForFetchingOnlyChangedDataFromDB))
-                {
-                    foreach (var propStr in cacheInfo.NameOfNavigationPropsForFetchingOnlyChangedDataFromDB.Split(','))
-                    {
-
-                        ulong timeStamp;
-                        if (cacheInfo.MaxTimeStamesDic.TryGetValue(propStr, out timeStamp))
-                        {
-                            counter++;
-                            whereConditionString += string.Format(cacheInfo.WhereClauseForFetchingOnlyChangedDataFromDB_Dic[propStr], counter);
-                            var ts = BitConverter.GetBytes(timeStamp).Reverse().ToArray();
-                            if (isForServerSide)
-                                parames.Add(ts);
-                            else
-                                parames.Add(timeStamp);
-
-                            var strTimeStampForDic1 = ConvertToStringFromTimeStamp(ts);
-                            strTimeStampLst.Add(strTimeStampForDic1);
-                        }
-                    }
-
-                    //  var result1 = result.ToList().AsQueryable();
-                    //  var a = result1.Where(whereConditionString, parames.ToArray());
-                }
-
-                result = result.Where(whereConditionString, parames.ToArray());
-
-                if (isForServerSide)
-                    TimeStamps[result.ToString().GetHashCode()] = strTimeStampLst.ToArray();
-            }
-            return result;
-        }
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="resultList"></param>
-        /// <param name="cacheInfo"></param>
-        /// <param name="isForServerSide">this is 'true' if must excecute in cache server...</param>
-        public static void CalcAllTimeStampAndSet(IEnumerable resultList, CacheInfo cacheInfo, bool isForServerSide)
-        {
-            var dataLst = resultList.Cast<_EntityBase>().ToList();
-            if (dataLst.Count > 0 && cacheInfo.EnableToFetchOnlyChangedDataFromDB)
-            {
-                CalcTimeStampAndSet(cacheInfo, resultList.Cast<_EntityBase>().ToList(), null, isForServerSide);
-                if (!string.IsNullOrWhiteSpace(cacheInfo.NameOfNavigationPropsForFetchingOnlyChangedDataFromDB))
-                {
-                    var navigationPropsForGettingChangedData = cacheInfo.NameOfNavigationPropsForFetchingOnlyChangedDataFromDB.Split(',');
-                    foreach (var prop in navigationPropsForGettingChangedData)
-                    {
-                        CalcTimeStampAndSet(cacheInfo, resultList.Cast<_EntityBase>().ToList(), prop, isForServerSide);
-                    }
-                }
-            }
-        }
-
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="cacheInfo"></param>
-        /// <param name="resultList"></param>
-        /// <param name="key"></param>
-        /// <param name="isForServerSide">this is 'true' if must excecute in cache server...</param>
-        public static void CalcTimeStampAndSet(CacheInfo cacheInfo, List<_EntityBase> resultList, string key, bool isForServerSide)
-        {
-
-            ulong maxTimeStampUnit = 0;
-            byte[] maxTimeStamp = null;
-            if (key == null)
-            {
-                CalcTimeStamp(resultList, out maxTimeStampUnit, out maxTimeStamp);
-
-                if (cacheInfo.MaxTimeStampUint < maxTimeStampUnit)
-                {
-                    cacheInfo.MaxTimeStampUint = maxTimeStampUnit;
-                    cacheInfo.MaxTimeStamp = maxTimeStamp;
-                }
-
-            }
-            else
-            {
-                IEnumerable<_EntityBase> navData = resultList;
-                var WhereClauseForFetchingOnlyChangedDataFromDB = " or ({0} {1}) ";
-                var props = string.Empty;
-                foreach (var prop in key.Split('.'))
-                {
-
-                    if (navData.Count() == 0)
-                    {
-                        WhereClauseForFetchingOnlyChangedDataFromDB = null;
-                        return;
-                    }
-
-                    var firstItem = navData.FirstOrDefault(item => item[prop] != null);
-
-                    if (firstItem == null)
-                    {
-                        WhereClauseForFetchingOnlyChangedDataFromDB = null;
-                        return;
-                    }
-
-                    var whereClause_CheckingNotNullPart = string.Empty;
-
-                    if ((typeof(IEnumerable)).IsAssignableFrom(firstItem[prop].GetType()))
-                    {
-                        props = prop;
-                        navData = navData.Where(itm => itm[prop] != null).SelectMany(item => ((IEnumerable)item[prop]).Cast<_EntityBase>());
-                        //  WhereClauseForFetchingOnlyChangedDataFromDB = string.Format(WhereClauseForFetchingOnlyChangedDataFromDB, props + " != null and ", prop + ".Any( {0}  {1} )");
-                        WhereClauseForFetchingOnlyChangedDataFromDB = string.Format(WhereClauseForFetchingOnlyChangedDataFromDB, "", prop + ".Any( {0}  {1} )");
-
-                        props = string.Empty;
-
-                    }
-                    else
-                    {
-                        props += prop;
-                        navData = navData.Where(itm => itm[prop] != null).Select(item => (_EntityBase)item[prop]);
-                        WhereClauseForFetchingOnlyChangedDataFromDB = string.Format(WhereClauseForFetchingOnlyChangedDataFromDB, props + " != null and {0}", prop + ".{1}");
-
-                    }
-
-                    if (!string.IsNullOrEmpty(props))
-                        props += ".";
-                }
-
-                string timeSatmpCondition;
-                if (isForServerSide)
-                    timeSatmpCondition = "TimeStamp == @{0}";
-                else
-                    timeSatmpCondition = "TimeStampUnit > @{0}";
-
-                if (WhereClauseForFetchingOnlyChangedDataFromDB != null)
-                {
-                    //WhereClauseForFetchingOnlyChangedDataFromDB = WhereClauseForFetchingOnlyChangedDataFromDB.Replace(".{0}", "{0}");
-                    WhereClauseForFetchingOnlyChangedDataFromDB = string.Format(WhereClauseForFetchingOnlyChangedDataFromDB, string.Empty, timeSatmpCondition);
-                    if (navData.Count() == 0)
-                        return;
-                    CalcTimeStamp(navData.ToList(), out maxTimeStampUnit, out maxTimeStamp);
-                    maxTimeStamp = BitConverter.GetBytes(maxTimeStampUnit).Reverse().ToArray();
-                    ulong oldMaxTimeStampUnit;
-                    if (cacheInfo.MaxTimeStamesDic.TryGetValue(key, out oldMaxTimeStampUnit))
-                    {
-                        if (maxTimeStampUnit > oldMaxTimeStampUnit)
-                            cacheInfo.MaxTimeStamesDic[key] = maxTimeStampUnit;
-                    }
-                    else
-                    {
-                        cacheInfo.MaxTimeStamesDic[key] = maxTimeStampUnit;
-                    }
-
-                    cacheInfo.WhereClauseForFetchingOnlyChangedDataFromDB_Dic[key] = WhereClauseForFetchingOnlyChangedDataFromDB;
-                }
-            }
-        }
-
-        private static void CalcTimeStamp(List<_EntityBase> resultList, out ulong maxTimeStampUnit, out byte[] maxTimeStamp)
-        {
-            maxTimeStampUnit = resultList.Max(item => item.TimeStampUnit);
-            maxTimeStamp = BitConverter.GetBytes(maxTimeStampUnit).Reverse().ToArray();
-        }
-
-        private static string ConvertToStringFromTimeStamp(byte[] timeStamp)
-        {
-            return "0x" + BitConverter.ToString(timeStamp).Replace("-", string.Empty);
         }
     }
 
@@ -353,10 +327,7 @@ namespace Core.Cmn.Cache
         {
             CacheInfo = cacheInfo;
         }
-        protected override object DeserializeCacheData(byte[] result)
-        {
-            return BinaryConverter.Deserialize<T>(result);
-        }
+
         public T GetFreshData()
         {
             T resultList;
@@ -384,11 +355,17 @@ namespace Core.Cmn.Cache
             return resultList;
         }
 
+        protected override object DeserializeCacheData(byte[] result)
+        {
+            return BinaryConverter.Deserialize<T>(result);
+        }
+        protected abstract T ExcecuteCacheMethod();
+
         protected virtual bool TryGetDataFromHDD(out T cacheData)
         {
+            var cacheFilePath = string.Format(System.AppDomain.CurrentDomain.BaseDirectory + @"/Cache/{0}.Cache", CacheInfo.Name);
             try
             {
-                var cacheFilePath = string.Format(System.AppDomain.CurrentDomain.BaseDirectory + @"/Cache/{0}.Cache", CacheInfo.Name);
                 if (System.IO.File.Exists(cacheFilePath))
                 {
                     var text = System.IO.File.ReadAllBytes(cacheFilePath);
@@ -401,30 +378,70 @@ namespace Core.Cmn.Cache
             }
             catch (Exception ex)
             {
+                AppBase.LogService.Handle(ex, $"On load cache from HDD an error occured.CacheName is: {CacheInfo.Name} and cache file path in HDD is: {cacheFilePath}");
                 cacheData = default(T);
                 return false;
             }
         }
-
-        protected abstract T ExcecuteCacheMethod();
     }
 
-
-    [DataContract]
-    public class QueryableCacheDataProvider<T> : CacheDataProvider<List<T>>
+    public class CustomCacheFaultedException : Exception
     {
+        private string _stackTrace;
 
+        public CustomCacheFaultedException(ExceptionDetail exceptionDetail)
+                    : base(exceptionDetail.Message, exceptionDetail.InnerException == null ?
+            new CustomCacheFaultedException() : new CustomCacheFaultedException(exceptionDetail.InnerException))
+        {
+            _stackTrace = exceptionDetail.StackTrace;
+        }
+
+        private CustomCacheFaultedException()
+            : base()
+        {
+            _stackTrace = string.Empty;
+        }
+        public override string StackTrace
+        {
+            get
+            {
+                return _stackTrace;
+            }
+        }
+    }
+    [DataContract]
+    public class QueryableCacheDataProvider<T> : CacheDataProvider<List<T>>, IQueryableCacheDataProvider
+    {
         public QueryableCacheDataProvider(CacheInfo cacheInfo)
             : base(cacheInfo)
         {
             CacheInfo = cacheInfo;
         }
 
+        private IDbContextBase _dbContext;
+        public IDbContextBase DbContext
+        {
+            get
+            {
+                if (_dbContext == null)
+                    _dbContext = AppBase.DependencyInjectionFactory.CreateContextInstance();
+                return _dbContext;
+            }
+            set
+            {
+                _dbContext = value;
+            }
+        }
+
+        public virtual IQueryable GetQuery()
+        {
+            return (IQueryable)CacheInfo.MethodInfo.Invoke(null, new object[] { CacheInfo.Repository.GetQueryableForCahce(DbContext) });
+        }
 
         protected override List<T> ExcecuteCacheMethod()
         {
             List<T> resultList;
-            var result = CacheInfo.MethodInfo.Invoke(null, new object[] { CacheInfo.Repository.GetQueryableForCahce() }) as IQueryable<T>;
+            IQueryable<T> result = (IQueryable<T>)GetQuery();
             result = MakeQueryableForFetchingOnleyChangedDataFromDB(result, CacheInfo, true) as IQueryable<T>;
             CacheInfo.LastQueryStringOnlyForQueryableCache = result.ToString();
             CacheInfo.MaxTimeStampCopy = CacheInfo.Repository.GetMaxTimeStamp();
@@ -438,12 +455,11 @@ namespace Core.Cmn.Cache
                 resultList = result.ToList();
             return resultList;
         }
-
+        //Todo:Caches with parameters must be saved on HDD. Use a dictionary for them and serialize then deserialize, after that restor on cache again.
         protected override bool TryGetDataFromHDD(out List<T> cacheData)
         {
             if (base.TryGetDataFromHDD(out cacheData))
             {
-
                 return true;
             }
             else
@@ -452,47 +468,32 @@ namespace Core.Cmn.Cache
     }
 
     [DataContract]
-    public class QueryableCacheDataProvider<T, P1> : CacheDataProvider<List<T>>
+    public class QueryableCacheDataProvider<T, P1> : QueryableCacheDataProvider<T>
     {
-        [DataMember]
-        public P1 Param1 { get; set; }
         public QueryableCacheDataProvider(CacheInfo cacheInfo, P1 param1)
             : base(cacheInfo)
         {
             CacheInfo = cacheInfo;
             Param1 = param1;
         }
+
+        [DataMember]
+        public P1 Param1 { get; set; }
         public override string GenerateCacheKey()
         {
             return $"{base.GenerateCacheKey()}_{Param1}";
         }
 
-        protected override List<T> ExcecuteCacheMethod()
+        public override IQueryable GetQuery()
         {
-            List<T> resultList;
-            var result = CacheInfo.MethodInfo.Invoke(null, new object[] { CacheInfo.Repository.GetQueryableForCahce(), Param1 }) as IQueryable<T>;
-            result = MakeQueryableForFetchingOnleyChangedDataFromDB(result, CacheInfo, true) as IQueryable<T>;
-            CacheInfo.LastQueryStringOnlyForQueryableCache = result.ToString();
-            CacheInfo.MaxTimeStampCopy = CacheInfo.Repository.GetMaxTimeStamp();
-            if (CacheInfo.MaxTimeStampCopy.Count() < 8)
-                CacheInfo.MaxTimeStampUintCopy = 0;
-            else
-                CacheInfo.MaxTimeStampUintCopy = BitConverter.ToUInt64(CacheInfo.MaxTimeStampCopy.Reverse().ToArray(), 0);
-            if (CacheInfo.MaxTimeStampUintCopy == CacheInfo.MaxTimeStampUint && string.IsNullOrEmpty(CacheInfo.NameOfNavigationPropsForFetchingOnlyChangedDataFromDB))
-                resultList = new List<T>();
-            else
-                resultList = result.ToList();
-            return resultList;
+            var result = (IQueryable)CacheInfo.MethodInfo.Invoke(null, new object[] { CacheInfo.Repository.GetQueryableForCahce(DbContext), Param1 });
+            return result;
         }
     }
 
     [DataContract]
-    public class QueryableCacheDataProvider<T, P1, P2> : CacheDataProvider<List<T>>
+    public class QueryableCacheDataProvider<T, P1, P2> : QueryableCacheDataProvider<T>
     {
-        [DataMember]
-        public P1 Param1 { get; set; }
-        [DataMember]
-        public P2 Param2 { get; set; }
         public QueryableCacheDataProvider(CacheInfo cacheInfo, P1 param1, P2 param2)
             : base(cacheInfo)
         {
@@ -500,38 +501,27 @@ namespace Core.Cmn.Cache
             Param1 = param1;
             Param2 = param2;
         }
-        protected override List<T> ExcecuteCacheMethod()
-        {
-            List<T> resultList;
-            var result = CacheInfo.MethodInfo.Invoke(null, new object[] { CacheInfo.Repository.GetQueryableForCahce(), Param1, Param2 }) as IQueryable<T>;
-            result = MakeQueryableForFetchingOnleyChangedDataFromDB(result, CacheInfo, true) as IQueryable<T>;
-            CacheInfo.LastQueryStringOnlyForQueryableCache = result.ToString();
-            CacheInfo.MaxTimeStampCopy = CacheInfo.Repository.GetMaxTimeStamp();
-            if (CacheInfo.MaxTimeStampCopy.Count() < 8)
-                CacheInfo.MaxTimeStampUintCopy = 0;
-            else
-                CacheInfo.MaxTimeStampUintCopy = BitConverter.ToUInt64(CacheInfo.MaxTimeStampCopy.Reverse().ToArray(), 0);
-            if (CacheInfo.MaxTimeStampUintCopy == CacheInfo.MaxTimeStampUint && string.IsNullOrEmpty(CacheInfo.NameOfNavigationPropsForFetchingOnlyChangedDataFromDB))
-                resultList = new List<T>();
-            else
-                resultList = result.ToList();
-            return resultList;
-        }
+
+        [DataMember]
+        public P1 Param1 { get; set; }
+
+        [DataMember]
+        public P2 Param2 { get; set; }
         public override string GenerateCacheKey()
         {
             return $"{base.GenerateCacheKey()}_{Param1}_{Param2}";
         }
+
+        public override IQueryable GetQuery()
+        {
+            var result = (IQueryable)CacheInfo.MethodInfo.Invoke(null, new object[] { CacheInfo.Repository.GetQueryableForCahce(DbContext), Param1, Param2 });
+            return result;
+        }
     }
 
     [DataContract]
-    public class QueryableCacheDataProvider<T, P1, P2, P3> : CacheDataProvider<List<T>>
+    public class QueryableCacheDataProvider<T, P1, P2, P3> : QueryableCacheDataProvider<T>
     {
-        [DataMember]
-        public P1 Param1 { get; set; }
-        [DataMember]
-        public P2 Param2 { get; set; }
-        [DataMember]
-        public P3 Param3 { get; set; }
         public QueryableCacheDataProvider(CacheInfo cacheInfo, P1 param1, P2 param2, P3 param3)
             : base(cacheInfo)
         {
@@ -540,41 +530,30 @@ namespace Core.Cmn.Cache
             Param2 = param2;
             Param3 = param3;
         }
-        protected override List<T> ExcecuteCacheMethod()
-        {
-            List<T> resultList;
-            var result = CacheInfo.MethodInfo.Invoke(null, new object[] { CacheInfo.Repository.GetQueryableForCahce(), Param1, Param2, Param3 }) as IQueryable<T>;
-            result = MakeQueryableForFetchingOnleyChangedDataFromDB(result, CacheInfo, true) as IQueryable<T>;
-            CacheInfo.LastQueryStringOnlyForQueryableCache = result.ToString();
-            CacheInfo.MaxTimeStampCopy = CacheInfo.Repository.GetMaxTimeStamp();
-            if (CacheInfo.MaxTimeStampCopy.Count() < 8)
-                CacheInfo.MaxTimeStampUintCopy = 0;
-            else
-                CacheInfo.MaxTimeStampUintCopy = BitConverter.ToUInt64(CacheInfo.MaxTimeStampCopy.Reverse().ToArray(), 0);
-            if (CacheInfo.MaxTimeStampUintCopy == CacheInfo.MaxTimeStampUint && string.IsNullOrEmpty(CacheInfo.NameOfNavigationPropsForFetchingOnlyChangedDataFromDB))
-                resultList = new List<T>();
-            else
-                resultList = result.ToList();
-            return resultList;
-        }
 
+        [DataMember]
+        public P1 Param1 { get; set; }
+
+        [DataMember]
+        public P2 Param2 { get; set; }
+
+        [DataMember]
+        public P3 Param3 { get; set; }
         public override string GenerateCacheKey()
         {
             return $"{base.GenerateCacheKey()}_{Param1}_{Param2}_{Param3}";
         }
+
+        public override IQueryable GetQuery()
+        {
+            var result = (IQueryable)CacheInfo.MethodInfo.Invoke(null, new object[] { CacheInfo.Repository.GetQueryableForCahce(DbContext), Param1, Param2, Param3 });
+            return result;
+        }
     }
 
     [DataContract]
-    public class QueryableCacheDataProvider<T, P1, P2, P3, P4> : CacheDataProvider<List<T>>
+    public class QueryableCacheDataProvider<T, P1, P2, P3, P4> : QueryableCacheDataProvider<T>
     {
-        [DataMember]
-        public P1 Param1 { get; set; }
-        [DataMember]
-        public P2 Param2 { get; set; }
-        [DataMember]
-        public P3 Param3 { get; set; }
-        [DataMember]
-        public P4 Param4 { get; set; }
         public QueryableCacheDataProvider(CacheInfo cacheInfo, P1 param1, P2 param2, P3 param3, P4 param4)
             : base(cacheInfo)
         {
@@ -584,28 +563,27 @@ namespace Core.Cmn.Cache
             Param3 = param3;
             Param4 = param4;
         }
-        protected override List<T> ExcecuteCacheMethod()
-        {
-            List<T> resultList;
-            var result = CacheInfo.MethodInfo.Invoke(null, new object[] { CacheInfo.Repository.GetQueryableForCahce(), Param1, Param2, Param3, Param4 }) as IQueryable<T>;
-            result = MakeQueryableForFetchingOnleyChangedDataFromDB(result, CacheInfo, true) as IQueryable<T>;
-            CacheInfo.LastQueryStringOnlyForQueryableCache = result.ToString();
-            CacheInfo.MaxTimeStampCopy = CacheInfo.Repository.GetMaxTimeStamp();
-            if (CacheInfo.MaxTimeStampCopy.Count() < 8)
-                CacheInfo.MaxTimeStampUintCopy = 0;
-            else
-                CacheInfo.MaxTimeStampUintCopy = BitConverter.ToUInt64(CacheInfo.MaxTimeStampCopy.Reverse().ToArray(), 0);
-            if (CacheInfo.MaxTimeStampUintCopy == CacheInfo.MaxTimeStampUint && string.IsNullOrEmpty(CacheInfo.NameOfNavigationPropsForFetchingOnlyChangedDataFromDB))
-                resultList = new List<T>();
-            else
-                resultList = result.ToList();
-            return resultList;
-        }
 
+        [DataMember]
+        public P1 Param1 { get; set; }
+
+        [DataMember]
+        public P2 Param2 { get; set; }
+
+        [DataMember]
+        public P3 Param3 { get; set; }
+
+        [DataMember]
+        public P4 Param4 { get; set; }
         public override string GenerateCacheKey()
         {
             return $"{base.GenerateCacheKey()}_{Param1}_{Param2}_{Param3}_{Param4}";
         }
-    }
 
+        public override IQueryable GetQuery()
+        {
+            var result = (IQueryable)CacheInfo.MethodInfo.Invoke(null, new object[] { CacheInfo.Repository.GetQueryableForCahce(DbContext), Param1, Param2, Param3, Param4 });
+            return result;
+        }
+    }
 }

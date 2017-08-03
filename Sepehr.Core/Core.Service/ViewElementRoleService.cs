@@ -13,17 +13,17 @@ namespace Core.Service
     public class ViewElementRoleService : ServiceBase<ViewElementRole>, IViewElementRoleService
     {
 
-      
+
         private IUserService UserService { get; set; }
-        private IUserRoleService UserRoleService { get; set; }                  
+        private IUserRoleService UserRoleService { get; set; }
         private ICompanyChartRoleService CompanyChartRoleService { get; set; }
-        
+
 
         public ViewElementRoleService(IDbContextBase dbContextBase, IUserRoleService userRoleService, IUserService userService, ICompanyChartRoleService companyChartRoleService)//,IViewElementService viewElementService)
             : base(dbContextBase)
         {
 
-        
+
             _repositoryBase = new ViewElementRoleRepository(ContextBase);
             UserService = userService;
             UserRoleService = userRoleService;
@@ -47,7 +47,7 @@ namespace Core.Service
         }
         public IQueryable<ViewElement> GetRootViewElementsBasedOnCompany(int? id)
         {
-            return (_repositoryBase as ViewElementRoleRepository).GetRootViewElementsBasedOnCompany(id,appBase.CompanyId);
+            return (_repositoryBase as ViewElementRoleRepository).GetRootViewElementsBasedOnCompany(id, appBase.CompanyId);
         }
         public int Create(List<int> addedViewElementRole, List<int> deletedviewElementRole, int roleId, bool allowSaveChange = true)
         {
@@ -99,7 +99,7 @@ namespace Core.Service
             }
         }
 
-        [Cacheable(EnableSaveCacheOnHDD = true, ExpireCacheSecondTime = 60)]
+        [Cacheable(ExpireCacheSecondTime = 60)]
         public static IList<ViewElementInfo> GetViewElementGrantedToUserCache(int userId)
         {
             var viewElementRoleService = ServiceBase.DependencyInjectionFactory.CreateInjectionInstance<IViewElementRoleService>();

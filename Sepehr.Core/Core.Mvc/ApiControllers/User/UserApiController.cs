@@ -134,7 +134,7 @@ namespace Core.Mvc.ApiControllers
                     //_userService.Delete(user);
                 }
 
-                catch (Exception ex)
+                catch 
                 {
                     return Request.CreateResponse("این رکورد مورد استفاده است.");
                 }

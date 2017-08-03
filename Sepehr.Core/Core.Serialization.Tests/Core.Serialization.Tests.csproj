@@ -46,6 +46,7 @@
       <Private>True</Private>
     </Reference>
     <Reference Include="System" />
+    <Reference Include="System.ComponentModel.DataAnnotations" />
     <Reference Include="System.Runtime.Caching" />
     <Reference Include="System.Runtime.Serialization" />
     <Reference Include="WindowsBase">
@@ -65,6 +66,8 @@
     </Otherwise>
   </Choose>
   <ItemGroup>
+    <Compile Include="Constant.cs" />
+    <Compile Include="ConstantCategory.cs" />
     <Compile Include="IRole.cs" />
     <Compile Include="IUserRole.cs" />
     <Compile Include="ObjectMetadataTests.cs" />
@@ -73,6 +76,10 @@
     <Compile Include="TypeExtTests.cs" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\Core.Cmn\Core.Cmn.csproj">
+      <Project>{9632df26-f002-453f-b9f3-8c6fc35d92b0}</Project>
+      <Name>Core.Cmn</Name>
+    </ProjectReference>
     <ProjectReference Include="..\Core.Serialization\Core.Serialization.csproj">
       <Project>{5324964c-6ed2-44c3-a457-141b0eeb081d}</Project>
       <Name>Core.Serialization</Name>

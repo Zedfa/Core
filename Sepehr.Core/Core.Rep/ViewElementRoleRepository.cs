@@ -19,7 +19,7 @@ namespace Core.Rep
             viewElementRepository = new ViewElementRepository(dbContext);
 
         }
-        
+
 
         [Cacheable(EnableSaveCacheOnHDD = true, EnableUseCacheServer = false, ExpireCacheSecondTime = 60)]
         public static IQueryable<ViewElementRole> AllViewElementsCache(IQueryable<ViewElementRole> query)
@@ -307,9 +307,9 @@ namespace Core.Rep
         {
             return AllCache().Include(item => item.Role).Include(item => item.ViewElement);
         }
-        public IQueryable<ViewElement> GetRootViewElementsBasedOnCompany(int? id,int companyId)
+        public IQueryable<ViewElement> GetRootViewElementsBasedOnCompany(int? id, int companyId)
         {
-           
+
             var allViewElementsBasedOnCompany = All_ViewElement_Role()
                 .Where(viewElementRole => viewElementRole.Role.CurrentCompanyId == companyId &&
                     viewElementRole.ViewElement.ParentId == id &&

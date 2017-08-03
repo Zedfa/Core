@@ -17,16 +17,17 @@ namespace Core.UnitTesting.Repository
         where TEntity : EntityBase<TEntity>, new()
         where TRepository : IRepositoryBase<TEntity>
 
-    {        
+    {
         protected abstract EntityUnitTestHelperBase<TEntity> EntityUnitTestHelper { get; }
-        protected abstract IDbContextBase CreateNewContext();        
-        protected abstract TRepository BuildRepository();            
+        protected abstract IDbContextBase CreateNewContext();
+        protected abstract TRepository BuildRepository();
         protected abstract string GetTableName();
-        protected abstract string GetSchemaName();        
+        protected abstract string GetSchemaName();
 
         protected RepositoryUnitTestBase()
-        {            
+        {
         }
+
 
         public virtual void ConstructorTest()
         {
@@ -203,7 +204,7 @@ namespace Core.UnitTesting.Repository
                 bool contains = repository.Contains(EntityUnitTestHelper.GetFindByIdPredicate(entity));
 
                 // assert
-                Assert.IsTrue(contains);                
+                Assert.IsTrue(contains);
             }
         }
 
@@ -231,7 +232,7 @@ namespace Core.UnitTesting.Repository
             using (TRepository repository = BuildRepository())
             {
                 //assemble
-                TEntity entity = EntityUnitTestHelper.CreateSampleEntity();                
+                TEntity entity = EntityUnitTestHelper.CreateSampleEntity();
                 entity = repository.Create(entity);
 
                 // act
@@ -247,7 +248,7 @@ namespace Core.UnitTesting.Repository
         {
             // assemble
             using (TRepository repository = BuildRepository())
-            {              
+            {
 
                 TEntity entity = EntityUnitTestHelper.CreateSampleEntity();
 
@@ -258,7 +259,7 @@ namespace Core.UnitTesting.Repository
                 // assert
                 Assert.IsNotNull(found);
                 EntityUnitTestHelper.AssertEntitiesAreEqual(entity, found);
-               
+
             }
         }
         public virtual void CreateListTest()
@@ -278,7 +279,7 @@ namespace Core.UnitTesting.Repository
                     // assert
                     Assert.IsNotNull(found);
                     EntityUnitTestHelper.AssertEntitiesAreEqual(entity, found);
-                }                
+                }
             }
         }
 
@@ -296,7 +297,7 @@ namespace Core.UnitTesting.Repository
 
                 // assert
                 TEntity found = repository.Find(EntityUnitTestHelper.GetFindByIdPredicate(entity));
-                Assert.IsNull(found);                
+                Assert.IsNull(found);
             }
         }
 
@@ -325,7 +326,7 @@ namespace Core.UnitTesting.Repository
 
                     repository.Delete(EntityUnitTestHelper.GetFindByIdPredicate(entity));
                 };
-                
+
             }
         }
 
@@ -346,7 +347,7 @@ namespace Core.UnitTesting.Repository
                 {
                     TEntity found = repository.Find(EntityUnitTestHelper.GetFindByIdPredicate(entity));
                     Assert.IsNull(found);
-                }                
+                }
             }
         }
 
@@ -364,7 +365,7 @@ namespace Core.UnitTesting.Repository
 
                 // assert
                 TEntity found = repository.Find(EntityUnitTestHelper.GetFindByIdPredicate(entity));
-                Assert.IsNull(found);               
+                Assert.IsNull(found);
             }
         }
 
@@ -384,7 +385,7 @@ namespace Core.UnitTesting.Repository
                 int countAfterAdd = repository.Count;
 
                 // assert
-                Assert.AreEqual(countBeforeAdd + 1, countAfterAdd);                
+                Assert.AreEqual(countBeforeAdd + 1, countAfterAdd);
             }
         }
 
@@ -404,7 +405,7 @@ namespace Core.UnitTesting.Repository
                 TEntity found = repository.Find(EntityUnitTestHelper.GetFindPredicate(entity));
 
                 // assert
-                EntityUnitTestHelper.AssertEntitiesAreEqual(entity, found);                
+                EntityUnitTestHelper.AssertEntitiesAreEqual(entity, found);
             }
         }
 
@@ -431,7 +432,7 @@ namespace Core.UnitTesting.Repository
                 TEntity found = repository2.Find(EntityUnitTestHelper.GetFindByIdPredicate(edited));
 
                 // assert
-                EntityUnitTestHelper.AssertEntitiesAreEqual(edited, found);                
+                EntityUnitTestHelper.AssertEntitiesAreEqual(edited, found);
             }
         }
     }

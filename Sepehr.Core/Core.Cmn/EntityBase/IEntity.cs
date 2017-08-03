@@ -11,6 +11,6 @@ namespace Core.Cmn
     {
         [IgnoreDataMember]
         object this[string propertyName] { get; set; }
-        event PropertyChangedEventHandler NavigationPropertyCahngedByCache;
+        event PropertyChangedEventHandler NavigationPropertyChangedByCache;
     }
 }

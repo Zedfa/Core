@@ -15,14 +15,14 @@ namespace Core.Service
 {
     [Injectable(InterfaceType = typeof(IViewElementService), DomainName = "core")]
     public class ViewElementService : ServiceBase<ViewElement>, IViewElementService
-    {     
+    {
         private IUserService UserService { get; set; }
-      
+
         private IUserProfileService UserProfileService { get; set; }
-      
+
         private ICompanyChartRoleService CompanyChartRoleService { get; set; }
 
-       
+
         private IViewElementRoleService ViewElementRoleService { get; set; }
 
 
@@ -143,7 +143,7 @@ namespace Core.Service
             var viewElements = ViewElementRoleService.GetViewElementGrantedToUserByUserId(userId);
             currentUser = new UserViewElement { UserId = userId, ViewElements = viewElements };
             appBase.ViewElementsGrantedToUser.TryAdd(userId, currentUser);
-           
+
 
             var accessVElement = currentUser.ViewElements;
 
@@ -189,24 +189,23 @@ namespace Core.Service
 
         public bool HasAnonymousAccess(string requestedUrl)
         {
+
             //if (appBase.ViewElementsGrantedToAnonymousUser == null)
             //{
-                //var userProfileService = ServiceBase.DependencyInjectionFactory.CreateInjectionInstance<IUserProfileService>();
-                // var viewElementRoleService = ServiceBase.DependencyInjectionFactory.CreateInjectionInstance<IViewElementRoleService>();
+            //var userProfileService = ServiceBase.DependencyInjectionFactory.CreateInjectionInstance<IUserProfileService>();
+            // var viewElementRoleService = ServiceBase.DependencyInjectionFactory.CreateInjectionInstance<IViewElementRoleService>();
 
-              //  var userProfile = UserProfileService.Filter(entity => entity.Id.Equals(2)).FirstOrDefault();
-              // 2 => Anonymous userProfile
-                var viewElements = ViewElementRoleService.GetViewElementGrantedToUserByUserId(2);
+            //  var userProfile = UserProfileService.Filter(entity => entity.Id.Equals(2)).FirstOrDefault();
+            // 2 => Anonymous userProfile
+            var viewElements = ViewElementRoleService.GetViewElementGrantedToUserByUserId(2);
 
-                appBase.ViewElementsGrantedToAnonymousUser = new UserViewElement { UserId = 2, ViewElements = viewElements };
+            appBase.ViewElementsGrantedToAnonymousUser = new UserViewElement { UserId = 2, ViewElements = viewElements };
             //}
 
-            foreach (var element in appBase.ViewElementsGrantedToAnonymousUser.ViewElements)
-            {
-                if (HasRequestedUrlAccessInViewElement(element, requestedUrl))
-                    return true;
-            }
-            return false;
+            var elementWithAccess = appBase.ViewElementsGrantedToAnonymousUser.ViewElements.FirstOrDefault(element => HasRequestedUrlAccessInViewElement(element, requestedUrl));
+            if (elementWithAccess == null)
+                return false;
+            else return true;
         }
         public List<ViewElementDTO> GetAccessibleViewElements(int userId)
         {
@@ -214,13 +213,13 @@ namespace Core.Service
 
         }
 
-        [Cacheable(EnableSaveCacheOnHDD = true, ExpireCacheSecondTime = 10)]
+        [Cacheable(ExpireCacheSecondTime = 10)]
         public static List<ViewElementDTO> GetViewElementByUserId(int userId)
         {
             var roleList = new List<Role>();
             var ViewElementDTOList = new List<ViewElementDTO>();
 
-            
+
             var roles = DependencyInjectionFactory.CreateInjectionInstance<IUserService>().FindUserRoles(userId);
             if (roles.Any())
                 roleList = roles.ToList();

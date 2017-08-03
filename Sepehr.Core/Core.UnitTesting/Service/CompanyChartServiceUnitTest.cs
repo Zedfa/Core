@@ -18,7 +18,7 @@ namespace Core.UnitTesting.Service
         {
             IDbContextBase ctx = Mock.MockHelperBase.BuildMockContext();            
 
-            return new CompanyChartService(ctx, null, null);
+            return new CompanyChartService(ctx, null);
         }
 
         private EntityUnitTestHelperBase<CompanyChart> _entityUnitTestHelper;
@@ -34,7 +34,7 @@ namespace Core.UnitTesting.Service
         public static void Initialize(TestContext testContext)
         {            
            // Core.Cmn.AppBase.LogService = new LogService(Core.Service.ServiceBase.DependencyInjectionFactory.CreateContextInstance());
-            Core.Cmn.AppBase.BuildEntityInfoDic(Core.Cmn.AppBase.GetAlltypes());            
+            //Core.Cmn.AppBase.BuildEntityInfoDic(Core.Cmn.AppBase.GetAlltypes());            
         }
 
         [TestInitialize]

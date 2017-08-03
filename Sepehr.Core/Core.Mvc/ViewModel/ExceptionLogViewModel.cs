@@ -31,15 +31,15 @@ namespace Core.Mvc.ViewModel
         }
 
         [DataMember]
-        public System.Guid Id
+        public int Id
         {
             get
             {
-                return Model.ID;
+                return Model.Id;
             }
             set
             {
-                Model.ID = value;
+                Model.Id = value;
             }
         }
 
@@ -111,7 +111,7 @@ namespace Core.Mvc.ViewModel
         }
 
         [DataMember]
-        public Guid? ParentId 
+        public int? ParentId 
         {
             get
             {

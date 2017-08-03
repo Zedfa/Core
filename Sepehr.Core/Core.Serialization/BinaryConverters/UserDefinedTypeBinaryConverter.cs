@@ -12,15 +12,12 @@ namespace Core.Serialization.BinaryConverters
 
         public object UserDefinedObject { get; private set; }
 
-        protected BinaryConverterBase[] BinaryConverters { get; private set; }
-
         public override BinaryConverterBase Copy(Type type)
         {
             var binaryConverter = new UserDefinedTypeBinaryConverter();
             binaryConverter.Init(type);
             binaryConverter.ObjectType = type;
             binaryConverter.EntityMetaData = ObjectMetaData.GetEntityMetaData(type);
-            binaryConverter.BinaryConverters = binaryConverter.EntityMetaData.BinaryConverterList;
             return binaryConverter;
         }
 
@@ -42,7 +39,7 @@ namespace Core.Serialization.BinaryConverters
                 if (entityMetaData.IsSerializablePropertyByIndexList[i])
                 {
                     var type = entityMetaData.WritablePropertyList[i].PropertyType;
-                    EntityMetaData.ReflectionEmitPropertyAccessor.EmittedWritablePropertySetters[i](result, BinaryConverters[i].Deserialize(reader, type, context));
+                    EntityMetaData.ReflectionEmitPropertyAccessor.EmittedWritablePropertySetters[i](result, EntityMetaData.BinaryConverterList[i].Deserialize(reader, type, context));
                 }
             }
             return result;
@@ -55,7 +52,7 @@ namespace Core.Serialization.BinaryConverters
                 if (EntityMetaData.IsSerializablePropertyByIndexList[i])
                 {
                     var currentObjToSerialize = EntityMetaData.ReflectionEmitPropertyAccessor.EmittedWritablePropertyGetters[i](objectItem);
-                    BinaryConverters[i].Serialize(currentObjToSerialize, writer, context);
+                    EntityMetaData.BinaryConverterList[i].Serialize(currentObjToSerialize, writer, context);
                 }
             }
         }

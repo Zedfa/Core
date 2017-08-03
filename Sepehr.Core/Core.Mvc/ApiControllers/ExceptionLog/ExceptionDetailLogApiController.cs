@@ -15,7 +15,7 @@ namespace Core.Mvc.ApiControllers.ExceptionLog
 {
     public class ExceptionDetailLogApiController : Core.Mvc.Controller.ApiControllerBase
     {
-        public HttpResponseMessage GetAllExceptionDetailLogs([System.Web.Http.ModelBinding.ModelBinder(typeof(Core.Mvc.ModelBinders.DataSourceRequestModelBinder))]DataSourceRequest request, Guid? ID)
+        public HttpResponseMessage GetAllExceptionDetailLogs([System.Web.Http.ModelBinding.ModelBinder(typeof(Core.Mvc.ModelBinders.DataSourceRequestModelBinder))]DataSourceRequest request, int? ID)
         {
 
             if (ID.HasValue)
@@ -33,12 +33,12 @@ namespace Core.Mvc.ApiControllers.ExceptionLog
         }
 
 
-        private HttpResponseMessage GetExceptionLogOfCorrespondentExceptionLog(Guid ID)
+        private HttpResponseMessage GetExceptionLogOfCorrespondentExceptionLog(int Id)
         {
 
             var exceptionLogService = new LogService();
 
-            var exceptionLog = exceptionLogService.GetExceptionLogOfCorrespondentExceptionLog(ID);
+            var exceptionLog = exceptionLogService.GetExceptionLogOfCorrespondentExceptionLog(Id);
 
             return Request.CreateResponse(HttpStatusCode.OK, exceptionLog);
         }
@@ -51,8 +51,8 @@ namespace Core.Mvc.ApiControllers.ExceptionLog
                 if (filterVals["ID"] != null)
                 {
                     var exceptionLogService = new LogService();
-                    Guid logId;
-                    if (Guid.TryParse(filterVals["ID"].ToString(), out logId))
+                    int logId;
+                    if (Int32.TryParse(filterVals["ID"].ToString(), out logId))
                     {
                         var exceptionLog = exceptionLogService.GetExceptionLogOfCorrespondentLog(logId);
                         return Request.CreateResponse(HttpStatusCode.OK, exceptionLog);

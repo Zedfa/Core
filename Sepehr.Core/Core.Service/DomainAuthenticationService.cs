@@ -85,7 +85,7 @@ namespace Core.Service
             }
             catch (Exception ex)
             {
-                Core.Cmn.AppBase.LogService.Handle(ex, "DomainAuthrnticationService=>ValidateUser", $"validate user: {info.UserName} in domain:{info.DCName} was failed.");
+                Core.Cmn.AppBase.LogService.Handle(ex, $"validate user: {info.UserName} in domain:{info.DCName} was failed.");
             }
             return result;
         }

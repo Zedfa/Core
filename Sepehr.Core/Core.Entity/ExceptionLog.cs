@@ -5,6 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Core.Cmn;
+using System.ComponentModel.DataAnnotations;
 
 namespace Core.Entity
 {
@@ -12,8 +13,8 @@ namespace Core.Entity
 
     public class ExceptionLog : EntityBase<ExceptionLog>
     {
-        [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
-        public System.Guid ID { get; set; }
+       
+        public int Id { get; set; }
         public string ExceptionType { get; set; }
         public string Message { get; set; }
         public String StackTrace { get; set; }

@@ -9,10 +9,11 @@ using System.Web.Http;
 namespace Core.Cmn.DependencyInjection
 {
     public interface IDependencyInjectionManager
-    {         
+    {
         object GetDependencyResolverForMvc();
         object GetDependencyResolverForWebApi();
         T Resolve<T>();
+        object Resolve(Type type, params ParameterOverride[] constructorsParams);
         object DiContainer { get; }
     }
 }

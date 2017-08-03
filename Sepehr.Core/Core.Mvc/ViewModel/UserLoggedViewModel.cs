@@ -45,22 +45,22 @@ namespace Core.Mvc.ViewModel
             set { Model.UserId = value; }
         }
 
-        [DataMember]
-        private string _logType;
-        [DataMember]
-        public string LogType
-        {
-            get
-            {
-                if (string.IsNullOrEmpty(_logType))
-                    return Model.LogType != null ? Model.LogType.GetDescriptionEnum() : null;
-                return _logType;
-            }
-            set
-            {
-                _logType = value;
-            }
-        }
+        //[DataMember]
+        //private string _logType;
+        //[DataMember]
+        //public string LogType
+        //{
+        //    get
+        //    {
+        //        if (string.IsNullOrEmpty(_logType))
+        //            return Model.LogType != null ? Model.LogType.GetDescriptionEnum() : null;
+        //        return _logType;
+        //    }
+        //    set
+        //    {
+        //        _logType = value;
+        //    }
+        //}
 
         public int? TableNameId
         {
@@ -165,7 +165,7 @@ namespace Core.Mvc.ViewModel
                                 new Column {Field="UserIdInUserLog", Visible=false , Hidden=true }, 
                                 new Column { Title="نام کاربر" , Field="FullName"  , Encoded=true , Visible=true , Width="50px",Filterable = false,Sortable = false }, 
                                 new Column { Title="نام جدول" , Field="TableName"  , Encoded=true , Visible=true , Width="50px",Filterable = false,Sortable = false }, 
-                                new Column { Title="نوع عملیات" , Field="LogType"  , Encoded=true , Visible=true , Width="50px",Filterable = false,Sortable = false },
+                               // new Column { Title="نوع عملیات" , Field="LogType"  , Encoded=true , Visible=true , Width="50px",Filterable = false,Sortable = false },
                                 new Column { Title="تاریخ عملیات" , Field="DateTime"  , Encoded=true , Visible=true , Width="50px" ,Filterable = false,Sortable = false},
                                 new Column { Title="IP" , Field="Ip"  , Encoded=true , Hidden=true , Width="50px" ,Filterable = false,Sortable = false},
                                 new Column { Field="TableNameId" , Visible=false , Hidden=true} 
