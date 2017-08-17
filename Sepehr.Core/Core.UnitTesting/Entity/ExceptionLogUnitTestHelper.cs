@@ -1,14 +1,13 @@
 ﻿using Core.Entity;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System;
 using System.Collections.Generic;
 using System.Linq.Expressions;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace Core.UnitTesting.Entity
 {
     public class ExceptionLogUnitTestHelper : EntityUnitTestHelperBase<ExceptionLog>
     {
-
         public override string TableName { get { return "core.ExceptionLogs"; } }
 
         public override void AssertEntitiesAreEqual(ExceptionLog expected, ExceptionLog actual)
@@ -56,7 +55,7 @@ namespace Core.UnitTesting.Entity
             entity.ExceptionType = GetRandomString();
             entity.Message = GetRandomString();
             entity.StackTrace = GetRandomString();
-            entity.Source = GetRandomString();            
+            entity.Source = GetRandomString();
         }
 
         public override Expression<Func<ExceptionLog, ExceptionLog>> GetUpdatePredicate(ExceptionLog entity)
@@ -72,11 +71,9 @@ namespace Core.UnitTesting.Entity
 
         protected override void SeedMockEntityList(IList<ExceptionLog> mockEntityList)
         {
-
             IList<ExceptionLog> createdList = CreateSampleEntityList(10, 100);
             for (int i = 0; i < createdList.Count; i++)
             {
-               
                 mockEntityList.Add(createdList[i]);
             }
         }

@@ -5,6 +5,7 @@ using Core.Cmn.Extensions;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using Core.Cmn.Exceptions;
 
 namespace Core.Rep
 {
@@ -63,7 +64,16 @@ namespace Core.Rep
         {
             DependencyInjectionFactory.CreateContextInstance().Database.ExecuteSqlCommand(string.Format(QueryToCreateTriggerForDeletedRecords, tableName, DateTime.Now.ToString(), pK));
         }
-
+        public void CheckServiceBrokerOnDb()
+        {
+            var dbName = DependencyInjectionFactory.CreateContextInstance().Database.Connection.Database;
+            var query = $"Select is_broker_enabled from sys.databases where name = '{dbName}'";
+            var isServiceBrokerEnabled = DependencyInjectionFactory.CreateContextInstance().Database.SqlQueryForSingleResult<bool>(query);
+            if (!isServiceBrokerEnabled)
+            {
+                throw new ServiceBrokerIsNotEnabledException(dbName);
+            }
+        }
 
         public int Delete()
         {

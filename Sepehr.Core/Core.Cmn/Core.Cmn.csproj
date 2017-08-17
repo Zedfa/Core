@@ -142,7 +142,6 @@
     <Compile Include="Cache\SqlDependency\IImmediateSqlNotificationRegister.cs" />
     <Compile Include="Cache\SqlDependency\ImmediateSqlNotificationRegister.cs" />
     <Compile Include="Cache\SqlDependency\RegularlySqlNotificationRegister.cs" />
-    <Compile Include="DataSource\DataSource.cs" />
     <Compile Include="Cache\InfoForFillingNavigationProperty.cs" />
     <Compile Include="Cache\IRepositoryCache.cs" />
     <Compile Include="Cache\IServiceCache.cs" />
@@ -150,7 +149,6 @@
     <Compile Include="Cache\ServerSideCacheServerService.cs" />
     <Compile Include="CmnHelper.cs" />
     <Compile Include="ConfigHelper.cs" />
-    <Compile Include="DataSource\DataSourceInfo.cs" />
     <Compile Include="DependencyInjectionFactory.cs" />
     <Compile Include="DependencyInjection\ParameterOverride.cs" />
     <Compile Include="DependencyInjection\UnityDependencyInjectionManager.cs" />
@@ -167,6 +165,8 @@
     <Compile Include="EntityBase\ModelBase.cs" />
     <Compile Include="EntityBase\ViewModelBuilder.cs" />
     <Compile Include="CustomEventArgs\SignInEventArgs.cs" />
+    <Compile Include="Exceptions\CoreExceptionBase.cs" />
+    <Compile Include="Exceptions\ServiceBrokerIsNotEnabledException.cs" />
     <Compile Include="Extensions\ExceptionExt.cs" />
     <Compile Include="Extensions\IDbContextExt.cs" />
     <Compile Include="Extensions\Interfaces\IBatchExtensions.cs" />
@@ -251,7 +251,6 @@
   </ItemGroup>
   <ItemGroup>
     <Folder Include="DomManipulation\" />
-    <Folder Include="Exceptions\" />
   </ItemGroup>
   <ItemGroup>
     <WCFMetadata Include="Service References\" />

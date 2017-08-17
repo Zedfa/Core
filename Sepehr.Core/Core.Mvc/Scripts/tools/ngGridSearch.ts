@@ -32,7 +32,7 @@ class ngSearchObj {
     cancelCallback;
     title;
     winSearchId;
-
+    filterSeperator = "|";
 
     constructor(dom, scope, $compile, immAncesstorGridId, ngOkCallback, ngCancelOrCloseCallback, title, seWinWidth, seWinHeight) {
         this.scope = scope;
@@ -176,9 +176,7 @@ class ngSearchObj {
             schemaInfo = null,
             loc = "";
         $.each(that.schemaTypes, (schemaField, info) => {
-            //if (schemaField == field &&
-            //    ((info.custType.toLowerCase() == "lookup") || //info.lookupInfo.bindingName == field) ||
-            //        (info.custType.toLowerCase() == "dropdown"))) {//info.dropdownInfo.propertyNameForBinding == field)) {
+
             if ((info.custType.toLowerCase() == "lookup" && info.lookupInfo.bindingName == field) ||
                 (info.custType.toLowerCase() == "dropdown" && info.dropdownInfo.propertyNameForBinding == field)) {
 
@@ -225,7 +223,7 @@ class ngSearchObj {
                 break;
             case "dropdown":
             case "lookup":
-                valueInfo.value = typeof (val) == "string" ? val.split(",")[0] : val;
+                valueInfo.value = typeof (val) == "string" ? val.split(this.filterSeperator)[0] : val;
                 break;
             default:
                 valueInfo.text = val,
@@ -784,7 +782,7 @@ class ngSearchObj {
                 result = that.createLookupTemplate(that.getLookupPropertyValue(dataItem.fld.columnId.LId), dataItem);
                 break;
             case "dropdown":
-            
+                debugger;
                 result = that.createDropDownTemplate(that.getDropDownPropertyValue(dataItem.fld.columnId.LId), dataItem);
                 break;
             case "currency":
@@ -810,10 +808,10 @@ class ngSearchObj {
 
         var currentGrid = ngSearchHelper.getActiveGridSearch();
 
-        
-           
+
+
         model.lookupDblClick = (args) => {
-           
+
             ngSearchHelper.setActiveGridSearch(currentGrid)
 
         };
@@ -870,22 +868,22 @@ class ngSearchObj {
         }
 
         if (typeName == "datetime" || typeName == "date") {
-            record.val.value += ",dt";
+            record.val.value += this.filterSeperator+"dt";
         }
         else if (typeName == "persiandate") {
-            record.val.value += ",pdt";
+            record.val.value += this.filterSeperator +"pdt";
         }
 
         else if (typeName === "lookup") {
             var lookupObj = this.getLookupPropertyValue(record.fld.columnId.LId);
 
-            record.val.value += ",lkp:" + lookupObj.bindingName;
+            record.val.value += this.filterSeperator +"lkp:" + lookupObj.bindingName;
         }
         else if (typeName === "dropdown") {
 
             var dropdownInfo = this.getDropDownPropertyValue(record.fld.columnId.LId);
 
-            record.val.value += ",ddl:" + dropdownInfo.propertyNameForBinding;
+            record.val.value += this.filterSeperator +"ddl:" + dropdownInfo.propertyNameForBinding;
         }
         else if (typeName === "currency") {
             record.val.value = record.val.value;
@@ -947,14 +945,14 @@ class ngSearchObj {
 
 
         $.each(alreadyInsertedCond, (index, record) => {
-           
+
             var filterItem = that.makeFilterItem(record);
             that.createFiltersTree(filterItem, record.andor.andorId, mainFilters);
 
         });
 
 
-      
+
         return mainFilters;
     }
 
@@ -1090,7 +1088,7 @@ class ngSearchObj {
                     $(cont).parents('[kendo-grid]').data("kendoGrid").dataSource.getByUid(uid).val.value = widget.sender.value();
                     $(cont).parents('[kendo-grid]').data("kendoGrid").dataSource.getByUid(uid).val.text = widget.sender.text();
                 }
-             
+
                 var dropDownListElement = "<drop-down-list id=search_" + columnCriteria.columnId.TId
                     + " display-name=" + dropdowInfo.displayName
                     + " value-name=" + dropdowInfo.valueName
@@ -1111,16 +1109,16 @@ class ngSearchObj {
                 var lookup = that.getLookupPropertyValue(columnCriteria.columnId.TId),
                     lkpIndx = cont.parent('tr').index(),
                     currentInstance = ngSearchHelper.getActiveGridSearch();
-                
+
                 this.scope.lookupDblClick = (args, parentRowId) => {
                     currentInstance.scope["grdSearch" + that.cGId].dataSource.getByUid(parentRowId).val.value = args.scope.valueName,
                         currentInstance.scope["grdSearch" + that.cGId].dataSource.getByUid(parentRowId).val.text = args.scope.displayName;
                     ngSearchHelper.setActiveGridSearch(currentInstance)
                     //var currentGrid = ngSearchHelper.getActiveGridSearch().scope["grdSearch" + that.cGId],
                     //    parentRowId = $(cont).parent("tr").attr("data-uid");
-                   
+
                     // $(cont).text(args.scope.displayName);
-                    
+
 
                 };
 

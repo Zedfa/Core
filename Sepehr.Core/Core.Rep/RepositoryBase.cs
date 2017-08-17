@@ -174,7 +174,7 @@ namespace Core.Rep
             {
                 if (string.IsNullOrEmpty(_keyName))
                 {
-                    ContextBase.GetKeyColumnNames<TObject>().First();
+                    _keyName = ContextBase.GetKeyColumnNames<TObject>().First();
                 }
                 return _keyName;
             }
@@ -461,7 +461,7 @@ namespace Core.Rep
                 var cacheKey = func.Method.GetHashCode().ToString();
                 var cacheInfo = CacheConfig.CacheInfoDic[cacheKey];
                 var queryableCacheExecution = new QueryableCacheDataProvider<T>(cacheInfo);
-                IQueryable<T> result = queryableCacheExecution.Cache<List<T>>(cacheInfo, cacheInfo.RefreshCacheTimeSeconds, cacheKey, canUseCacheIfPossible).AsQueryable();
+                IQueryable<T> result = queryableCacheExecution.Cache<List<T>>(cacheInfo, cacheInfo.AutoRefreshInterval, cacheKey, canUseCacheIfPossible).AsQueryable();
                 Stopwatch.Stop();
                 cacheInfo.UsingTime += TimeSpan.FromTicks(Stopwatch.ElapsedTicks);
                 return result;
@@ -481,7 +481,7 @@ namespace Core.Rep
                 var cacheInfo = CacheConfig.CacheInfoDic[cacheKey];
                 cacheKey += param1;
                 var queryableCacheExecution = new QueryableCacheDataProvider<T, P1>(cacheInfo, param1);
-                IQueryable<T> result = queryableCacheExecution.Cache<List<T>>(cacheInfo, cacheInfo.RefreshCacheTimeSeconds, cacheKey, canUseCacheIfPossible).AsQueryable();
+                IQueryable<T> result = queryableCacheExecution.Cache<List<T>>(cacheInfo, cacheInfo.AutoRefreshInterval, cacheKey, canUseCacheIfPossible).AsQueryable();
                 Stopwatch.Stop();
                 cacheInfo.UsingTime += TimeSpan.FromTicks(Stopwatch.ElapsedTicks);
                 return result;
@@ -500,7 +500,7 @@ namespace Core.Rep
                 var cacheInfo = CacheConfig.CacheInfoDic[cacheKey];
                 cacheKey = cacheKey + param1 + param2;
                 var queryableCacheExecution = new QueryableCacheDataProvider<T, P1, P2>(cacheInfo, param1, param2);
-                IQueryable<T> result = queryableCacheExecution.Cache<List<T>>(cacheInfo, cacheInfo.RefreshCacheTimeSeconds, cacheKey, canUseCacheIfPossible).AsQueryable();
+                IQueryable<T> result = queryableCacheExecution.Cache<List<T>>(cacheInfo, cacheInfo.AutoRefreshInterval, cacheKey, canUseCacheIfPossible).AsQueryable();
                 Stopwatch.Stop();
                 cacheInfo.UsingTime += TimeSpan.FromTicks(Stopwatch.ElapsedTicks);
                 return result;
@@ -520,7 +520,7 @@ namespace Core.Rep
                 var cacheInfo = CacheConfig.CacheInfoDic[cacheKey];
                 cacheKey = cacheKey + param1 + param2 + param3;
                 var queryableCacheExecution = new QueryableCacheDataProvider<T, P1, P2, P3>(cacheInfo, param1, param2, param3);
-                IQueryable<T> result = queryableCacheExecution.Cache<List<T>>(cacheInfo, cacheInfo.RefreshCacheTimeSeconds, cacheKey, canUseCacheIfPossible).AsQueryable();
+                IQueryable<T> result = queryableCacheExecution.Cache<List<T>>(cacheInfo, cacheInfo.AutoRefreshInterval, cacheKey, canUseCacheIfPossible).AsQueryable();
                 Stopwatch.Stop();
                 cacheInfo.UsingTime += TimeSpan.FromTicks(Stopwatch.ElapsedTicks);
                 return result;
@@ -541,7 +541,7 @@ namespace Core.Rep
                 var cacheInfo = CacheConfig.CacheInfoDic[cacheKey];
                 // cacheKey = cacheKey + param1 + param2 + param3 + param4;
                 var queryableCacheExecution = new QueryableCacheDataProvider<T, P1, P2, P3, P4>(cacheInfo, param1, param2, param3, param4);
-                IQueryable<T> result = queryableCacheExecution.Cache<List<T>>(cacheInfo, cacheInfo.RefreshCacheTimeSeconds, queryableCacheExecution.GenerateCacheKey(), canUseCacheIfPossible).AsQueryable();
+                IQueryable<T> result = queryableCacheExecution.Cache<List<T>>(cacheInfo, cacheInfo.AutoRefreshInterval, queryableCacheExecution.GenerateCacheKey(), canUseCacheIfPossible).AsQueryable();
                 Stopwatch.Stop();
                 cacheInfo.UsingTime += TimeSpan.FromTicks(Stopwatch.ElapsedTicks);
                 return result;

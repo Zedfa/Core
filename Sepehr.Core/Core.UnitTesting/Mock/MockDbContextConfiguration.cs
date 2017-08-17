@@ -1,7 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Data.Common;
-using Core.Cmn;
+﻿using Core.Cmn;
 
 namespace Core.UnitTesting.Mock
 {
@@ -9,32 +6,32 @@ namespace Core.UnitTesting.Mock
     {
         public bool AutoDetectChangesEnabled
         {
-            get;set;
+            get; set;
         }
 
         public bool EnsureTransactionsForFunctionsAndCommands
         {
-            get;set;
+            get; set;
         }
 
         public bool LazyLoadingEnabled
         {
-            get;set;
+            get; set;
         }
 
         public bool ProxyCreationEnabled
         {
-            get;set;
+            get; set;
         }
 
         public bool UseDatabaseNullSemantics
         {
-            get;set;
+            get; set;
         }
 
         public bool ValidateOnSaveEnabled
         {
-            get;set;
+            get; set;
         }
     }
 }

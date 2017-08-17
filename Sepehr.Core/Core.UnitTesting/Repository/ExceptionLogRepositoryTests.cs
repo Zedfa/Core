@@ -1,27 +1,24 @@
-﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
-using Core.Rep;
-using Core.Entity;
-
-using Core.UnitTesting.Entity;
+﻿using Core.Cmn;
 using Core.Cmn.Attributes;
-using Core.Cmn;
+using Core.Entity;
+using Core.Rep;
+using Core.UnitTesting.Entity;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace Core.UnitTesting.Repository
 {
-
     [TestClass()]
     public class ExceptionLogRepositoryTests : RepositoryUnitTestBase<IExceptionLogRepository, ExceptionLog>
-    {      
-
+    {
         private static IDbContextBase BuildNewContext()
         {
             return Mock.MockHelperBase.BuildMockContext();
         }
-                
+
         protected override IExceptionLogRepository BuildRepository()
         {
             return new ExceptionLogRepository(CreateNewContext());
-        }        
+        }
 
         protected override IDbContextBase CreateNewContext()
         {
@@ -36,27 +33,28 @@ namespace Core.UnitTesting.Repository
         protected override string GetSchemaName()
         {
             return "core";
-        }        
+        }
 
         private EntityUnitTestHelperBase<ExceptionLog> _entityUnitTestHelper;
+
         protected override EntityUnitTestHelperBase<ExceptionLog> EntityUnitTestHelper
         {
             get
             {
                 return _entityUnitTestHelper ?? (_entityUnitTestHelper = new ExceptionLogUnitTestHelper());
             }
-        }        
+        }
 
         [ClassInitialize]
         public static void Initialize(TestContext testContext)
         {
             Core.Cmn.AppBase.LogService = new Core.Service.LogService(BuildNewContext());
-           // Core.Cmn.AppBase.BuildEntityInfoDic(Core.Cmn.AppBase.GetAlltypes());            
+            // Core.Cmn.AppBase.BuildEntityInfoDic(Core.Cmn.AppBase.GetAlltypes());
         }
 
         [TestInitialize]
         public void TestInitialize()
-        {           
+        {
             EntityUnitTestHelper.SeedData();
         }
 
@@ -69,7 +67,6 @@ namespace Core.UnitTesting.Repository
         [ClassCleanup]
         public static void CleanUp()
         {
-
         }
 
         [UnitTest]
@@ -144,7 +141,7 @@ namespace Core.UnitTesting.Repository
 
                 // assert
                 Assert.IsNotNull(found);
-                EntityUnitTestHelper.AssertEntitiesAreEqual(exceptionLog, found);                
+                EntityUnitTestHelper.AssertEntitiesAreEqual(exceptionLog, found);
             }
         }
 
@@ -195,7 +192,6 @@ namespace Core.UnitTesting.Repository
         public override void UpdateByEntityTest()
         {
             base.UpdateByEntityTest();
-        }        
-        
+        }
     }
 }

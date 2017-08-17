@@ -20,7 +20,7 @@ using Core.Ef.Exceptions;
 namespace Core.Ef
 {
     [Injectable(DomainName = "core", InterfaceType = typeof(IDbContextBase), Version = -1)]
-    public class DbContextBase : DbContext, IDbContextBase
+    public class DbContextBase : DbContext, IDbContextBase, IDbContextInternal
     {
         static DbContextBase()
         {
@@ -31,31 +31,50 @@ namespace Core.Ef
             DbInterception.Add(new DbCommandInfoProvider());
             System.Data.Entity.Database.SetInitializer<DbContext>(null);
         }
-        // FKK EDIT BEGIN
-        //public DbContextBase()
-        //    : base("Name=CoreDbContext")
-        //{
-
-        //}
-        public DbContextBase()
-            : base("Name=Sepehr360Context")
-        {
-
-        }
-        // FKK EDIT END
 
         public DbContextBase(string connectionString)
             : base(connectionString)
         {
-
             Configuration.LazyLoadingEnabled = false;
             Configuration.ProxyCreationEnabled = false;
-
-            //if (System.Diagnostics.Debugger.IsAttached == false)
-            //    System.Diagnostics.Debugger.Launch();
+            string connectionName = "";
+            TryGetConnectionName(connectionString, out connectionName);
+            if (!ConfigHelper.TryGetConnectionString(connectionName, out _connectionString))
+            {
+                _connectionString = connectionString;
+            }
         }
 
+        public static bool TryGetConnectionName(string nameOrConnectionString, out string name)
+        {
 
+            // No '=' at all means just treat the whole string as a name
+            var firstEquals = nameOrConnectionString.IndexOf('=');
+            if (firstEquals < 0)
+            {
+                name = nameOrConnectionString;
+                return true;
+            }
+
+            // More than one equals means treat the whole thing as a connection string
+            if (nameOrConnectionString.IndexOf('=', firstEquals + 1) >= 0)
+            {
+                name = null;
+                return false;
+            }
+
+            // If the keyword before the single '=' is "name" then return the name value
+            if (nameOrConnectionString.Substring(0, firstEquals).Trim().Equals(
+                "name", StringComparison.OrdinalIgnoreCase))
+            {
+                name = nameOrConnectionString.Substring(firstEquals + 1).Trim();
+                return true;
+            }
+
+            // Otherwise it is just a connection string.
+            name = null;
+            return false;
+        }
 
 
 
@@ -151,7 +170,14 @@ namespace Core.Ef
             set;
         }
 
-
+        private string _connectionString;
+        public string ConnectionString
+        {
+            get
+            {
+                return _connectionString;
+            }
+        }
 
         private static void CheckConstraint(DbUpdateConcurrencyException dbUpdateEx)
         {

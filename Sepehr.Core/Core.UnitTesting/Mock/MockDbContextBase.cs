@@ -26,11 +26,13 @@ namespace Core.UnitTesting.Mock
             typeof(ExceptionLog),
             typeof(Log),
         };
+
         private MethodInfo _addEntityMethod;
         private IDbContextConfigurationBase _configuration;
         private IDatabase _database;
         private MethodInfo _deleteEntityMethod;
         private MethodInfo _updateEntityMethod;
+
         public MockDbContextBase()
         {
             DisableExceptionLogger = true;
@@ -71,6 +73,7 @@ namespace Core.UnitTesting.Mock
         }
 
         public IDictionary<object, EntityState> StateMap { get { return _stateMap; } }
+
         protected MethodInfo AddEntityMethod
         {
             get
@@ -78,6 +81,7 @@ namespace Core.UnitTesting.Mock
                 return _addEntityMethod ?? (_addEntityMethod = typeof(MockDbContextBase).GetMethod("AddEntity", BindingFlags.Instance | BindingFlags.NonPublic));
             }
         }
+
         protected MethodInfo DeleteEntityMethod
         {
             get
@@ -93,6 +97,7 @@ namespace Core.UnitTesting.Mock
                 return _updateEntityMethod ?? (_updateEntityMethod = typeof(MockDbContextBase).GetMethod("UpdateEntity", BindingFlags.Instance | BindingFlags.NonPublic));
             }
         }
+
         public void Dispose()
         {
         }
@@ -241,7 +246,7 @@ namespace Core.UnitTesting.Mock
         {
             return EntityUnitTestHelperBase<TEntity>.GetMockData();
             // will be overridden in child classes
-          //  return null;
+            //  return null;
         }
 
         protected virtual bool HandleAddEntity(object entity)

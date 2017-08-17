@@ -267,7 +267,7 @@ namespace Core.Service
                 var queryableCacheExecution = new FunctionalCacheDataProvider<ReturnT>(cacheInfo);
                 if (canUseCacheIfPossible)
                 {
-                    ReturnT result = CacheBase.Cache<ReturnT>(queryableCacheExecution, cacheInfo, cacheInfo.RefreshCacheTimeSeconds, cacheKey, canUseCacheIfPossible);
+                    ReturnT result = CacheBase.Cache<ReturnT>(queryableCacheExecution, cacheInfo, cacheInfo.AutoRefreshInterval, cacheKey, canUseCacheIfPossible);
                     return result;
                 }
                 else
@@ -305,7 +305,7 @@ namespace Core.Service
                 if (canUseCacheIfPossible)
                 {
                     cacheKey = queryableCacheExecution.GenerateCacheKey();
-                    R result = CacheBase.Cache<R>(queryableCacheExecution, cacheInfo, cacheInfo.RefreshCacheTimeSeconds, cacheKey, canUseCacheIfPossible);
+                    R result = CacheBase.Cache<R>(queryableCacheExecution, cacheInfo, cacheInfo.AutoRefreshInterval, cacheKey, canUseCacheIfPossible);
                     return result;
                 }
                 else
@@ -332,7 +332,7 @@ namespace Core.Service
                 if (canUseCacheIfPossible)
                 {
                     cacheKey = queryableCacheExecution.GenerateCacheKey();
-                    R result = CacheBase.Cache<R>(queryableCacheExecution, cacheInfo, cacheInfo.RefreshCacheTimeSeconds, cacheKey, canUseCacheIfPossible);
+                    R result = CacheBase.Cache<R>(queryableCacheExecution, cacheInfo, cacheInfo.AutoRefreshInterval, cacheKey, canUseCacheIfPossible);
                     return result;
                 }
                 else
@@ -359,7 +359,7 @@ namespace Core.Service
                 if (canUseCacheIfPossible)
                 {
                     cacheKey = queryableCacheExecution.GenerateCacheKey();
-                    R result = CacheBase.Cache<R>(queryableCacheExecution, cacheInfo, cacheInfo.RefreshCacheTimeSeconds, cacheKey, canUseCacheIfPossible);
+                    R result = CacheBase.Cache<R>(queryableCacheExecution, cacheInfo, cacheInfo.AutoRefreshInterval, cacheKey, canUseCacheIfPossible);
                     return result;
                 }
                 else
@@ -387,7 +387,7 @@ namespace Core.Service
                 cacheKey = queryableCacheExecution.GenerateCacheKey();
                 if (canUseCacheIfPossible)
                 {
-                    R result = CacheBase.Cache<R>(queryableCacheExecution, cacheInfo, cacheInfo.RefreshCacheTimeSeconds, cacheKey, canUseCacheIfPossible);
+                    R result = CacheBase.Cache<R>(queryableCacheExecution, cacheInfo, cacheInfo.AutoRefreshInterval, cacheKey, canUseCacheIfPossible);
                     return result;
                 }
                 else
@@ -415,7 +415,7 @@ namespace Core.Service
                 cacheKey = queryableCacheExecution.GenerateCacheKey();
                 if (canUseCacheIfPossible)
                 {
-                    R result = CacheBase.Cache<R>(queryableCacheExecution, cacheInfo, cacheInfo.RefreshCacheTimeSeconds, cacheKey, canUseCacheIfPossible);
+                    R result = CacheBase.Cache<R>(queryableCacheExecution, cacheInfo, cacheInfo.AutoRefreshInterval, cacheKey, canUseCacheIfPossible);
                     return result;
                 }
                 else

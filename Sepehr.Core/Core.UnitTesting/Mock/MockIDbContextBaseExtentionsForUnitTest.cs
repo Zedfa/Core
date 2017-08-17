@@ -1,11 +1,7 @@
 ﻿using Core.Cmn;
 using Core.Cmn.Attributes;
 using Core.Cmn.Extensions.Interfaces;
-using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Core.UnitTesting.Mock
 {

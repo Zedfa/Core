@@ -22,6 +22,8 @@ namespace Kendo.Mvc.Extensions
     /// </summary>
     public static class QueryableExtensions
     {
+        private static string _filterSeperator = "|";
+
         private static DataSourceResult ToDataSourceResult(this DataTableWrapper enumerable, DataSourceRequest request)
         {
             var filters = new List<IFilterDescriptor>();
@@ -303,7 +305,7 @@ namespace Kendo.Mvc.Extensions
                 (filterDescriptor as FilterDescriptor).Value = filterVal;
 
                 #region Geregorian Date
-                if (filterVal.EndsWith(",dt"))
+                if (filterVal.EndsWith($"{_filterSeperator}dt"))
                 {
                     switch (fItem.Operator)
                     {
@@ -326,7 +328,7 @@ namespace Kendo.Mvc.Extensions
                 #endregion
 
                 #region persian Date
-                else if (filterVal.EndsWith(",pdt"))
+                else if (filterVal.EndsWith($"{_filterSeperator}pdt"))
                 {
                     switch (fItem.Operator)
                     {
@@ -349,13 +351,13 @@ namespace Kendo.Mvc.Extensions
                 #endregion
 
                 #region navigation property
-                else if (filterVal.Contains(",nv"))
+                else if (filterVal.Contains($"{_filterSeperator}nv"))
                 {
                     //TODO:
                     //1.Update both of "ConvertedValue" and "Value" Properties to the desired value from currently multi secion data of these fields.
                     //2.Update "Member" Property value.
                     retVal = new FilterDescriptor();
-                    var newValue = fItem.ConvertedValue.ToString().Split(',');//.Split(":")
+                    var newValue = fItem.ConvertedValue.ToString().Split(Convert.ToChar(_filterSeperator));
                     fItem.Member = newValue[1].Split(':')[1];
                     //fItem.ConvertedValue = newValue[0];
                     fItem.Value = newValue[0];
@@ -364,10 +366,10 @@ namespace Kendo.Mvc.Extensions
                 #endregion 
 
                 #region lookup and dropdownList
-                else if (filterVal.Contains(",lkp") || filterVal.Contains(",ddl"))
+                else if (filterVal.Contains($"{_filterSeperator}lkp") || filterVal.Contains($"{_filterSeperator}ddl"))
                 {
                     retVal = new FilterDescriptor();
-                    var newValue = fItem.ConvertedValue.ToString().Split(',');
+                    var newValue = fItem.ConvertedValue.ToString().Split(Convert.ToChar(_filterSeperator));
                     fItem.Member = newValue[1].Split(':')[1];
                     //fItem.ConvertedValue = newValue[0];
                     fItem.Value = newValue[0];
@@ -391,14 +393,14 @@ namespace Kendo.Mvc.Extensions
 
         private static CompositeFilterDescriptor getDateRangeCompositeFilterConditionForInEquality(FilterDescriptor fItem, string filterVal)
         {
-            var dateTimeValue = PersianDateConverter.ToGregorianDateTime(filterVal.Split(',')[0] + " 00:00 Þ.Ù");
+            var dateTimeValue = PersianDateConverter.ToGregorianDateTime(filterVal.Split(Convert.ToChar( _filterSeperator))[0] + " 00:00 Þ.Ù");
             //dateTimeValue.Date
             fItem.Operator = FilterOperator.IsLessThan;
             fItem.Value = dateTimeValue;
             var compositeFilter = new CompositeFilterDescriptor();
             var secondFilterRule = new FilterDescriptor();
             secondFilterRule.Operator = FilterOperator.IsGreaterThan;
-            secondFilterRule.Value = ((DateTime)PersianDateConverter.ToGregorianDateTime(filterVal.Split(',')[0] + " 00:00 Þ.Ù")).Add(new TimeSpan(23, 59, 59));
+            secondFilterRule.Value = ((DateTime)PersianDateConverter.ToGregorianDateTime(filterVal.Split(Convert.ToChar(_filterSeperator))[0] + " 00:00 Þ.Ù")).Add(new TimeSpan(23, 59, 59));
             secondFilterRule.Member = fItem.Member;
             compositeFilter.LogicalOperator = FilterCompositionLogicalOperator.Or;
             compositeFilter.FilterDescriptors.Add(fItem);
@@ -407,43 +409,43 @@ namespace Kendo.Mvc.Extensions
         }
         private static void GePersiantDateRangeFilterForNotEquality(FilterDescriptor fItem, string filterVal)
         {
-            var dateTimeValue = filterVal.Split(',')[0];//.AddDays(-1);
+            var dateTimeValue = filterVal.Split(Convert.ToChar(_filterSeperator))[0];//.AddDays(-1);
             fItem.Value = dateTimeValue;
         }
 
         private static void getDateRangeCompositeFilterConditionForLessThan(FilterDescriptor fItem, string filterVal)
         {
-            var dateTimeValue = PersianDateConverter.ToGregorianDateTime(filterVal.Split(',')[0] + " 00:00 Þ.Ù");//.AddDays(-1);
+            var dateTimeValue = PersianDateConverter.ToGregorianDateTime(filterVal.Split(Convert.ToChar(_filterSeperator))[0] + " 00:00 Þ.Ù");//.AddDays(-1);
             fItem.Value = dateTimeValue;
         }
         private static void GetPersianDateRangeFilterForLessThan(FilterDescriptor fItem, string filterVal)
         {
-            var dateTimeValue = filterVal.Split(',')[0];//.AddDays(-1);
+            var dateTimeValue = filterVal.Split(Convert.ToChar(_filterSeperator))[0];//.AddDays(-1);
             fItem.Value = dateTimeValue;
         }
 
         private static void getDateRangeCompositeFilterConditionForGreaterThan(FilterDescriptor fItem, string filterVal)
         {
-            var dateTimeValue = PersianDateConverter.ToGregorianDateTime(filterVal.Split(',')[0] + " 00:00 Þ.Ù").Add(new TimeSpan(23, 59, 59));
+            var dateTimeValue = PersianDateConverter.ToGregorianDateTime(filterVal.Split(Convert.ToChar(_filterSeperator))[0] + " 00:00 Þ.Ù").Add(new TimeSpan(23, 59, 59));
             fItem.Value = dateTimeValue;
 
         }
         private static void GetPersianDateRangeFilterForGreaterThan(FilterDescriptor fItem, string filterVal)
         {
-            var dateTimeValue = filterVal.Split(',')[0];
+            var dateTimeValue = filterVal.Split(Convert.ToChar(_filterSeperator))[0];
             fItem.Value = dateTimeValue;
 
         }
 
         private static CompositeFilterDescriptor getDateRangeCompositeFilterConditionForEquality(FilterDescriptor fItem, string filterVal)
         {
-            var dateTimeValue = PersianDateConverter.ToGregorianDateTime(filterVal.Split(',')[0] + " 00:00 Þ.Ù");
+            var dateTimeValue = PersianDateConverter.ToGregorianDateTime(filterVal.Split(Convert.ToChar(_filterSeperator))[0] + " 00:00 Þ.Ù");
             fItem.Operator = FilterOperator.IsGreaterThanOrEqualTo;
             fItem.Value = dateTimeValue;
             var compositeFilter = new CompositeFilterDescriptor();
             var secondFilterRule = new FilterDescriptor();
             secondFilterRule.Operator = FilterOperator.IsLessThan;
-            secondFilterRule.Value = ((DateTime)PersianDateConverter.ToGregorianDateTime(filterVal.Split(',')[0] + " 00:00 Þ.Ù")).Add(new TimeSpan(23, 59, 59));
+            secondFilterRule.Value = ((DateTime)PersianDateConverter.ToGregorianDateTime(filterVal.Split(Convert.ToChar(_filterSeperator))[0] + " 00:00 Þ.Ù")).Add(new TimeSpan(23, 59, 59));
             //secondFilterRule.Value
             secondFilterRule.Member = fItem.Member;
             compositeFilter.LogicalOperator = FilterCompositionLogicalOperator.And;
@@ -454,9 +456,8 @@ namespace Kendo.Mvc.Extensions
 
         private static void GetPersianDateRangeFilterForEquality(FilterDescriptor fItem, string filterVal)
         {
-            //var filterType = filterVal.Split(',')[1] == "pdt" ? typeof(PersianCalendar) : typeof(DateTime);
-            var dateTimeValue = filterVal.Split(',')[0];
-            //fItem.Operator = FilterOperator.IsEqualTo;
+           
+            var dateTimeValue = filterVal.Split(Convert.ToChar(_filterSeperator))[0];
             fItem.Value = dateTimeValue;
 
         }

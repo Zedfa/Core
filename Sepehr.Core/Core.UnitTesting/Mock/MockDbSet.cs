@@ -1,15 +1,11 @@
 ﻿using Core.Cmn;
 using System;
+using System.Collections;
 using System.Collections.Generic;
-using System.Data.Entity;
+using System.Collections.ObjectModel;
 using System.Linq;
 using System.Linq.Expressions;
-using System.Text;
-using System.Threading.Tasks;
-using System.Collections;
 using System.Reflection;
-using Core.Ef.Exceptions;
-using System.Collections.ObjectModel;
 
 namespace Core.UnitTesting.Mock
 {
@@ -23,8 +19,8 @@ namespace Core.UnitTesting.Mock
             return !string.IsNullOrEmpty(idPropertyName) ? entityType.GetProperty(idPropertyName) : (entityType.GetProperty("ID") ?? entityType.GetProperty("Id"));
         }
 
-
         public Type ElementType { get { return typeof(TEntity); } }
+
         public Expression Expression
         {
             get
@@ -32,6 +28,7 @@ namespace Core.UnitTesting.Mock
                 return MockEntityList.AsQueryable().Expression;
             }
         }
+
         public IQueryProvider Provider
         {
             get
@@ -56,7 +53,6 @@ namespace Core.UnitTesting.Mock
 
         private void MockDbSet_CollectionChanged(object sender, System.Collections.Specialized.NotifyCollectionChangedEventArgs e)
         {
-
         }
 
         public IEnumerator<TEntity> GetEnumerator()
@@ -80,7 +76,6 @@ namespace Core.UnitTesting.Mock
             MockEntityList.Add(entity);
             return entity;
         }
-
 
         private void SetEntityKey(PropertyInfo keyProperty, TEntity entity, ref long longId)
         {
@@ -178,7 +173,6 @@ namespace Core.UnitTesting.Mock
         //    return mockEntityList.SingleOrDefault(e=>e.LongId == (int)keyValues[0]);
         //}
 
-
         private bool CheckEntityKey<TKeyType>(object key, PropertyInfo keyProperty, object entity)
         {
             bool result = false;
@@ -261,6 +255,5 @@ namespace Core.UnitTesting.Mock
         {
             return this.MockEntityList.GetEnumerator();
         }
-
     }
 }

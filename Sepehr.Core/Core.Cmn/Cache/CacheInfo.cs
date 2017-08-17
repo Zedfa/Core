@@ -25,7 +25,7 @@ namespace Core.Cmn.Cache
         public int BasicKey { get; set; }
 
         [DataMember]
-        public int RefreshCacheTimeSeconds { get; set; }
+        public int AutoRefreshInterval { get; set; }
 
         [IgnoreDataMember]
         public MethodInfo MethodInfo { get; set; }

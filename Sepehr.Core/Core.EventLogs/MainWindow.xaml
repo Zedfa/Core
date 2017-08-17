@@ -1,0 +1,102 @@
+﻿<Window x:Class="Core.EventLogs.MainWindow"
+         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:EventLogs"
+         xmlns:dxg="http://schemas.devexpress.com/winfx/2008/xaml/grid"
+        xmlns:dxe="http://schemas.devexpress.com/winfx/2008/xaml/editors" 
+        xmlns:dxxe="clr-namespace:DevExpress.XtraEditors;assembly=DevExpress.Data.v15.2"
+        mc:Ignorable="d"
+        Title="MainWindow" 
+        Height="{Binding SystemParameters.PrimaryScreenHeight}" 
+        Width="{Binding SystemParameters.PrimaryScreenWidth}" >
+    <Grid >
+
+        <TabControl Background="AliceBlue">
+            <TabItem Header="Install/UnInstall EventLog">
+                <Grid  Margin="10">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*" />
+                    </Grid.ColumnDefinitions>
+                    <Grid.RowDefinitions >
+                        <RowDefinition Height="50">
+                        </RowDefinition >
+                        <RowDefinition Height="100">
+                        </RowDefinition>
+                    </Grid.RowDefinitions>
+                    <Button Width="200" Height="50" Grid.Column="0" Grid.Row="0"   Click="InstallEventLogButton_Click" >Install Event Log</Button>
+                    <Button Width="200" Height="50" Grid.Column="0" Grid.Row="1"   Click="UnInstallEventLogButton_Click">Uninstall EventLog</Button>
+
+                </Grid>
+            </TabItem>
+            <TabItem Header="EventLog Viewer">
+                <Grid Width="auto" >
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="250"/>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
+                    <TreeView x:Name="treeViewEventLogs"    
+                  SelectedItemChanged="treeViewEventLogs_SelectedItemChanged" Width="200" Grid.Column="0" HorizontalAlignment="Left" >
+                        <TreeView.ItemContainerStyle>
+                            <Style TargetType="{x:Type TreeViewItem}">
+                                <Setter Property="IsSelected" Value="{Binding IsSelected}"></Setter>
+                                <Setter Property="Template">
+                                    <Setter.Value>
+                                        <ControlTemplate TargetType="TreeViewItem">
+                                            <TextBlock  Text="{Binding Name}"></TextBlock>
+                                        </ControlTemplate>
+                                    </Setter.Value>
+                                </Setter>
+                                <Style.Triggers>
+                                    <Trigger Property="IsSelected" Value="True">
+                                        <!-- if you want to customize the appearance of a selected element do it here -->
+                                        <Setter Property="FontWeight" Value="Bold" />
+                                        <Setter Property="Foreground" Value="Salmon"/>
+                                    </Trigger>
+                                </Style.Triggers>
+                            </Style>
+                        </TreeView.ItemContainerStyle>
+
+                    </TreeView>
+                    <Grid Grid.Column="1">
+                        <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Top" Height="50" Margin="0,0,0,0">
+                            <Button Height="40" Width="50" HorizontalAlignment="Right" VerticalAlignment="Top"  Click="RefreshLogs">Refresh</Button>
+                            <Button Height="40" Width="100"  VerticalAlignment="Top"  Click="SaveLogGridConfig">Save Grid Config</Button>
+                        </StackPanel>
+                        <dxg:GridControl Margin="0,50,0,0"  x:Name="eventLogGrid" Width="auto" Height="auto" HorizontalAlignment="Center" 
+                           >
+                            <dxg:GridControl.View>
+                                <dxg:TableView AllowPerPixelScrolling="True" ShowTotalSummary="True" AllowEditing="False">
+                                </dxg:TableView>
+                            </dxg:GridControl.View>
+                            <dxg:GridControl.Columns>
+                                <dxg:GridColumn Header="Level" Width="100"  >
+                                    <dxg:GridColumn.DisplayTemplate>
+                                        <ControlTemplate>
+                                            <StackPanel Orientation="Horizontal" Background="White">
+                                                <!--<Image Source="{Binding Path=RowData.Row.System.LevelIcon}" Loaded="Image_Loaded" Height="16" Width="16"  VerticalAlignment="Stretch"  HorizontalAlignment="Stretch"></Image>-->
+                                                <TextBlock Text="{Binding Path=RowData.Row.System.LevelText}" ></TextBlock>
+                                            </StackPanel>
+                                        </ControlTemplate>
+                                    </dxg:GridColumn.DisplayTemplate>
+                                </dxg:GridColumn>
+                                <dxg:GridColumn Header="TimeCreated" Width="150" Binding="{Binding Path=RowData.Row.System.TimeCreated.SystemTime}">
+                                    <dxg:GridColumn.EditSettings>
+                                        <dxe:TextEditSettings Mask="yyyy-MM-dd HH:mm:ss" MaskType="DateTime"
+                                              MaskUseAsDisplayFormat="True"/>
+                                    </dxg:GridColumn.EditSettings>
+                                </dxg:GridColumn>
+                                <dxg:GridColumn Header="Message" Width="500" Binding="{Binding Path=RowData.Row.Message}" AllowBestFit="true" BestFitMaxRowCount="1000" BestFitMode="Smart" />
+                                <dxg:GridColumn Header="TraceKey" Width="70" Binding="{Binding Path=RowData.Row.TraceKey}"/>
+                                <dxg:GridColumn Header="EventID" Width="50" Binding="{Binding Path=RowData.Row.System.EventID}" />
+                                <!--<dxg:GridColumn Header="RecordID" Width="50" Binding="{Binding Path=RowData.Row.System.RecordID}"/>-->
+                            </dxg:GridControl.Columns>
+                        </dxg:GridControl>
+                    </Grid>
+                </Grid>
+            </TabItem>
+        </TabControl>
+
+    </Grid>
+</Window>

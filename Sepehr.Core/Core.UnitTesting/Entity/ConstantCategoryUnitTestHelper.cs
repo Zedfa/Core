@@ -1,14 +1,13 @@
 ﻿using Core.Entity;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System;
 using System.Collections.Generic;
 using System.Linq.Expressions;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace Core.UnitTesting.Entity
 {
     public class ConstantCategoryUnitTestHelper : EntityUnitTestHelperBase<ConstantCategory>
     {
-
         public const string GENERAL_CONFIG_NAME = "GeneralConfig";
 
         public static readonly ConstantCategory GENERAL_CONFIG_CONSTANT_CATEGORY = new ConstantCategory
@@ -28,9 +27,9 @@ namespace Core.UnitTesting.Entity
 
         public override ConstantCategory CreateSampleEntity()
         {
-            ConstantCategory constantCategory = BuildSampleEntity<ConstantCategory>();            
+            ConstantCategory constantCategory = BuildSampleEntity<ConstantCategory>();
             return constantCategory;
-        }        
+        }
 
         public override Expression<Func<ConstantCategory, bool>> GetFindPredicate(ConstantCategory entity)
         {
@@ -67,8 +66,7 @@ namespace Core.UnitTesting.Entity
         }
 
         protected override void SeedMockEntityList(IList<ConstantCategory> mockEntityList)
-        {            
-
+        {
             IList<ConstantCategory> createdList = CreateSampleEntityList(10, 100);
             for (int i = 0; i < createdList.Count; i++)
             {

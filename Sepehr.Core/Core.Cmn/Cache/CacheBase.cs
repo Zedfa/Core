@@ -399,7 +399,7 @@ namespace Core.Cmn.Cache
 
                     }
 
-                    CacheService.SetCache<T>(cacheExecution.GenerateCacheKey(), refreshCacheValue, cacheInfo.RefreshCacheTimeSeconds * (double)100000);
+                    CacheService.SetCache<T>(cacheExecution.GenerateCacheKey(), refreshCacheValue, cacheInfo.AutoRefreshInterval * (double)100000);
                     cacheInfo.NotYetGetCacheData = false;
                 }
 

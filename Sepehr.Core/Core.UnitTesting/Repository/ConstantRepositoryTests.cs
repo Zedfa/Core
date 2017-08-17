@@ -1,37 +1,29 @@
-﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
+﻿using Core.Cmn;
+using Core.Cmn.Attributes;
+using Core.Cmn.DependencyInjection;
+using Core.Entity;
+using Core.Mvc.Helpers;
 using Core.Rep;
-
+using Core.UnitTesting.Entity;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 
-using Core.Entity;
-
-using Core.UnitTesting.Entity;
-using Core.Cmn.Attributes;
-
-using Core.Mvc.Helpers;
-
-using Core.Cmn;
-using Core.Ef.Exceptions;
-using System;
-using Core.Cmn.DependencyInjection;
-
 namespace Core.UnitTesting.Repository
 {
-
     [TestClass()]
     public class ConstantRepositoryTests : RepositoryUnitTestBase<IConstantRepository, Constant>
-    {      
-
+    {
         private static IDbContextBase BuildNewContext()
         {
             return Mock.MockHelperBase.BuildMockContext();
         }
-                
+
         protected override IConstantRepository BuildRepository()
         {
             return new ConstantRepository(CreateNewContext());
-        }        
+        }
 
         protected override IDbContextBase CreateNewContext()
         {
@@ -46,9 +38,10 @@ namespace Core.UnitTesting.Repository
         protected override string GetSchemaName()
         {
             return "core";
-        }        
+        }
 
         private EntityUnitTestHelperBase<Constant> _entityUnitTestHelper;
+
         protected override EntityUnitTestHelperBase<Constant> EntityUnitTestHelper
         {
             get
@@ -63,16 +56,13 @@ namespace Core.UnitTesting.Repository
             List<Type> allTypes = AppBase.GetAlltypes().ToList();
             AppBase.DependencyInjectionManager = new UnityDependencyInjectionManager(allTypes);
 
-
             Core.Cmn.AppBase.LogService = new Core.Service.LogService(BuildNewContext());
             //Core.Cmn.AppBase.BuildEntityInfoDic(Core.Cmn.AppBase.GetAlltypes());
-
-            
         }
 
         [TestInitialize]
         public void TestInitialize()
-        {           
+        {
             EntityUnitTestHelper.SeedData();
         }
 
@@ -85,7 +75,6 @@ namespace Core.UnitTesting.Repository
         [ClassCleanup]
         public static void CleanUp()
         {
-
         }
 
         [UnitTest]
@@ -160,7 +149,7 @@ namespace Core.UnitTesting.Repository
 
                 // assert
                 Assert.IsNotNull(found);
-                EntityUnitTestHelper.AssertEntitiesAreEqual(constant, found);                
+                EntityUnitTestHelper.AssertEntitiesAreEqual(constant, found);
             }
         }
 
@@ -213,19 +202,18 @@ namespace Core.UnitTesting.Repository
             base.UpdateByEntityTest();
         }
 
-
         [UnitTest]
         [TestMethod()]
         public void AllConstantCacheTest()
         {
-            // TODO: 
+            // TODO:
         }
 
         [UnitTest]
         [TestMethod()]
         public void GetConstantTest()
         {
-            // TODO: 
+            // TODO:
         }
 
         [UnitTest]

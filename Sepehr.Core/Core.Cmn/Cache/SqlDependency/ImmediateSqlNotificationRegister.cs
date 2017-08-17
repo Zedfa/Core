@@ -91,7 +91,7 @@ namespace Core.Cmn.Cache
         {
             try
             {
-                System.Data.SqlClient.SqlDependency.Start(context.Database.Connection.ConnectionString);
+                System.Data.SqlClient.SqlDependency.Start(((IDbContextInternal)context).ConnectionString);
             }
             catch (Exception ex)
             {
@@ -107,7 +107,7 @@ namespace Core.Cmn.Cache
         {
             try
             {
-                System.Data.SqlClient.SqlDependency.Stop(context.Database.Connection.ConnectionString);
+                System.Data.SqlClient.SqlDependency.Stop((((IDbContextInternal)context).ConnectionString));
             }
             catch (Exception ex)
             {

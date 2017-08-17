@@ -153,7 +153,7 @@ namespace Core.Cmn.Cache
         /// <param name="cacheInfo"></param>
         /// <param name="isForServerSide">this is 'true' if must excecute in cache server...</param>
         /// <returns></returns>
-        public static IQueryable MakeQueryableForFetchingOnleyChangedDataFromDB(IQueryable result, CacheInfo cacheInfo, bool isForServerSide)
+        public static IQueryable MakeQueryableForFetchingOnlyChangedDataFromDB(IQueryable result, CacheInfo cacheInfo, bool isForServerSide)
         {
             if (cacheInfo.EnableToFetchOnlyChangedDataFromDB && cacheInfo.MaxTimeStamp != null)
             {
@@ -332,15 +332,14 @@ namespace Core.Cmn.Cache
         {
             T resultList;
             T hDDResult;
-
+            if (CacheInfo.EnableSaveCacheOnHDD && CacheInfo.NotYetGetCacheData && (CacheInfo.CacheRefreshingKind != CacheRefreshingKind.SqlDependency || (CacheInfo.EnableToFetchOnlyChangedDataFromDB)) && TryGetDataFromHDD(out hDDResult))
+            {
+                resultList = hDDResult;
+            }
+            else
             if (CacheInfo.EnableUseCacheServer && !ConfigHelper.GetConfigValue<bool>("IsCacheServer"))
             {
                 resultList = (T)GetDataFromCacheServer();
-            }
-            else
-            if (CacheInfo.EnableSaveCacheOnHDD && CacheInfo.NotYetGetCacheData && TryGetDataFromHDD(out hDDResult))
-            {
-                resultList = hDDResult;
             }
             else
             {
@@ -359,6 +358,7 @@ namespace Core.Cmn.Cache
         {
             return BinaryConverter.Deserialize<T>(result);
         }
+
         protected abstract T ExcecuteCacheMethod();
 
         protected virtual bool TryGetDataFromHDD(out T cacheData)
@@ -401,6 +401,7 @@ namespace Core.Cmn.Cache
         {
             _stackTrace = string.Empty;
         }
+
         public override string StackTrace
         {
             get
@@ -409,16 +410,17 @@ namespace Core.Cmn.Cache
             }
         }
     }
+
     [DataContract]
     public class QueryableCacheDataProvider<T> : CacheDataProvider<List<T>>, IQueryableCacheDataProvider
     {
+        private IDbContextBase _dbContext;
+
         public QueryableCacheDataProvider(CacheInfo cacheInfo)
-            : base(cacheInfo)
+                    : base(cacheInfo)
         {
             CacheInfo = cacheInfo;
         }
-
-        private IDbContextBase _dbContext;
         public IDbContextBase DbContext
         {
             get
@@ -442,7 +444,7 @@ namespace Core.Cmn.Cache
         {
             List<T> resultList;
             IQueryable<T> result = (IQueryable<T>)GetQuery();
-            result = MakeQueryableForFetchingOnleyChangedDataFromDB(result, CacheInfo, true) as IQueryable<T>;
+            result = MakeQueryableForFetchingOnlyChangedDataFromDB(result, CacheInfo, true) as IQueryable<T>;
             CacheInfo.LastQueryStringOnlyForQueryableCache = result.ToString();
             CacheInfo.MaxTimeStampCopy = CacheInfo.Repository.GetMaxTimeStamp();
             if (CacheInfo.MaxTimeStampCopy.Count() < 8)
@@ -455,6 +457,7 @@ namespace Core.Cmn.Cache
                 resultList = result.ToList();
             return resultList;
         }
+
         //Todo:Caches with parameters must be saved on HDD. Use a dictionary for them and serialize then deserialize, after that restor on cache again.
         protected override bool TryGetDataFromHDD(out List<T> cacheData)
         {
@@ -479,6 +482,7 @@ namespace Core.Cmn.Cache
 
         [DataMember]
         public P1 Param1 { get; set; }
+
         public override string GenerateCacheKey()
         {
             return $"{base.GenerateCacheKey()}_{Param1}";
@@ -507,6 +511,7 @@ namespace Core.Cmn.Cache
 
         [DataMember]
         public P2 Param2 { get; set; }
+
         public override string GenerateCacheKey()
         {
             return $"{base.GenerateCacheKey()}_{Param1}_{Param2}";
@@ -539,6 +544,7 @@ namespace Core.Cmn.Cache
 
         [DataMember]
         public P3 Param3 { get; set; }
+
         public override string GenerateCacheKey()
         {
             return $"{base.GenerateCacheKey()}_{Param1}_{Param2}_{Param3}";
@@ -575,6 +581,7 @@ namespace Core.Cmn.Cache
 
         [DataMember]
         public P4 Param4 { get; set; }
+
         public override string GenerateCacheKey()
         {
             return $"{base.GenerateCacheKey()}_{Param1}_{Param2}_{Param3}_{Param4}";

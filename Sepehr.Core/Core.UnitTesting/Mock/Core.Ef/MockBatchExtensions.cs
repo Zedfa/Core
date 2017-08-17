@@ -1,10 +1,8 @@
 ﻿using Core.Cmn.Attributes;
 using Core.Cmn.Extensions;
 using System;
-using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
-using System.Text;
 using System.Threading.Tasks;
 
 namespace Core.UnitTesting.Mock.Core.Ef
@@ -62,6 +60,7 @@ namespace Core.UnitTesting.Mock.Core.Ef
         //     context.
         [Obsolete("The API was refactored to no longer need this extension method. Use query.Where(expression).Delete() syntax instead.")]
         public int Delete<T>(IQueryable<T> source, Expression<Func<T, bool>> filterExpression) where T : class { throw new NotImplementedException(); }
+
         //
         // Summary:
         //     Executes a delete statement asynchronously using the query to filter the rows
@@ -84,6 +83,7 @@ namespace Core.UnitTesting.Mock.Core.Ef
         //     be reflected on any entities that have already been materialized in the current
         //     context.
         public Task<int> DeleteAsync<T>(IQueryable<T> source) where T : class { throw new NotImplementedException(); }
+
         //
         // Summary:
         //     Executes a delete statement asynchronously using an expression to filter the
@@ -110,6 +110,7 @@ namespace Core.UnitTesting.Mock.Core.Ef
         //     context.
         [Obsolete("The API was refactored to no longer need this extension method. Use query.Where(expression).DeleteAsync() syntax instead.")]
         public Task<int> DeleteAsync<T>(IQueryable<T> source, Expression<Func<T, bool>> filterExpression) where T : class { throw new NotImplementedException(); }
+
         //
         // Summary:
         //     Executes an update statement using the query to filter the rows to be updated.
@@ -138,6 +139,7 @@ namespace Core.UnitTesting.Mock.Core.Ef
         {
             return 0;
         }
+
         //Update<TEntity>(this IQueryable<TEntity> source, Expression<Func<TEntity, TEntity>> updateExpression) where TEntity : class;
         //public int Update(IQueryable<T> source, Expression<Func<T, T>> updateExpression) where T : class
         //{
@@ -171,7 +173,11 @@ namespace Core.UnitTesting.Mock.Core.Ef
         //     be reflected on any entities that have already been materialized in the current
         //     context.
 
-        public int Update<T>(IQueryable<T> source, IQueryable<T> query, Expression<Func<T, T>> updateExpression) where T : class { throw new NotImplementedException(); }
+        public int Update<T>(IQueryable<T> source, IQueryable<T> query, Expression<Func<T, T>> updateExpression) where T : class
+        {
+            throw new NotImplementedException();
+        }
+
         //
         // Summary:
         //     Executes an update statement using an expression to filter the rows that are
@@ -200,7 +206,11 @@ namespace Core.UnitTesting.Mock.Core.Ef
         //     be reflected on any entities that have already been materialized in the current
         //     context.
 
-        public int Update<T>(IQueryable<T> source, Expression<Func<T, bool>> filterExpression, Expression<Func<T, T>> updateExpression) where T : class { throw new NotImplementedException(); }
+        public int Update<T>(IQueryable<T> source, Expression<Func<T, bool>> filterExpression, Expression<Func<T, T>> updateExpression) where T : class
+        {
+            throw new NotImplementedException();
+        }
+
         //
         // Summary:
         //     Executes an update statement asynchronously using the query to filter the rows
@@ -226,6 +236,7 @@ namespace Core.UnitTesting.Mock.Core.Ef
         //     be reflected on any entities that have already been materialized in the current
         //     context.
         public Task<int> UpdateAsync<T>(IQueryable<T> source, Expression<Func<T, T>> updateExpression) where T : class { throw new NotImplementedException(); }
+
         //
         // Summary:
         //     Executes an update statement asynchronously using an expression to filter the

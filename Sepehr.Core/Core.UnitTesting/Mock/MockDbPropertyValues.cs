@@ -1,7 +1,5 @@
-﻿using System;
+﻿using Core.Cmn;
 using System.Collections.Generic;
-using System.Data.Common;
-using Core.Cmn;
 using System.Linq;
 
 namespace Core.UnitTesting.Mock

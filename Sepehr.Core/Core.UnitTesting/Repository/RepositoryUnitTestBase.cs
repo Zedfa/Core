@@ -9,25 +9,26 @@ using System.Collections.Generic;
 
 using System.Linq;
 
-
 namespace Core.UnitTesting.Repository
 {
-
     public abstract class RepositoryUnitTestBase<TRepository, TEntity> : UnitTestBase
         where TEntity : EntityBase<TEntity>, new()
         where TRepository : IRepositoryBase<TEntity>
 
     {
         protected abstract EntityUnitTestHelperBase<TEntity> EntityUnitTestHelper { get; }
+
         protected abstract IDbContextBase CreateNewContext();
+
         protected abstract TRepository BuildRepository();
+
         protected abstract string GetTableName();
+
         protected abstract string GetSchemaName();
 
         protected RepositoryUnitTestBase()
         {
         }
-
 
         public virtual void ConstructorTest()
         {
@@ -180,7 +181,7 @@ namespace Core.UnitTesting.Repository
                 //repository.Delete(EntityUnitTestHelper.GetFindPredicate(entity));
                 //entity = repository.Create(entity);
 
-                //int total;                
+                //int total;
                 //IEnumerable<TEntity> filteredList = repository.Filter(EntityUnitTestHelper.GetFilterExpressionInfo(entity), out total);
 
                 //Assert.IsNotNull(filteredList);
@@ -249,7 +250,6 @@ namespace Core.UnitTesting.Repository
             // assemble
             using (TRepository repository = BuildRepository())
             {
-
                 TEntity entity = EntityUnitTestHelper.CreateSampleEntity();
 
                 // act
@@ -259,9 +259,9 @@ namespace Core.UnitTesting.Repository
                 // assert
                 Assert.IsNotNull(found);
                 EntityUnitTestHelper.AssertEntitiesAreEqual(entity, found);
-
             }
         }
+
         public virtual void CreateListTest()
         {
             // assemble
@@ -323,10 +323,8 @@ namespace Core.UnitTesting.Repository
                 // clean
                 foreach (TEntity entity in entityList)
                 {
-
                     repository.Delete(EntityUnitTestHelper.GetFindByIdPredicate(entity));
                 };
-
             }
         }
 

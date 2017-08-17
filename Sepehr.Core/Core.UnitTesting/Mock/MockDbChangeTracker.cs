@@ -1,7 +1,6 @@
-﻿using System;
+﻿using Core.Cmn;
+using System;
 using System.Collections.Generic;
-using System.Data.Common;
-using Core.Cmn;
 
 namespace Core.UnitTesting.Mock
 {
@@ -16,7 +15,6 @@ namespace Core.UnitTesting.Mock
 
         public void DetectChanges()
         {
-            
         }
 
         public IEnumerable<IDbEntityEntryBase> Entries()
@@ -36,7 +34,7 @@ namespace Core.UnitTesting.Mock
                 EntityState state = _context.StateMap[obj];
                 if (state == EntityState.Added || state == EntityState.Modified || state == EntityState.Deleted)
                 {
-                    return true;                    
+                    return true;
                 }
             }
 

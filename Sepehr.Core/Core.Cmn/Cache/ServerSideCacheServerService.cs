@@ -32,11 +32,11 @@ namespace Core.Cmn.Cache.Server
             else
                 genericType = serverCacheInfo.MethodInfo.ReturnType;
 
-            var result = (typeof(CacheBase)).GetMethod("Cache").MakeGenericMethod(genericType).Invoke(null, new object[] { cacheDataProvider, serverCacheInfo, serverCacheInfo.RefreshCacheTimeSeconds, cacheKey, true });
+            var result = (typeof(CacheBase)).GetMethod("Cache").MakeGenericMethod(genericType).Invoke(null, new object[] { cacheDataProvider, serverCacheInfo, serverCacheInfo.AutoRefreshInterval, cacheKey, true });
             if (clientCacheDataProvider.CacheInfo.EnableToFetchOnlyChangedDataFromDB)
             {
                 var resultlist = (result as IList);
-                var resultQueryable = QueryableCacheDataProvider<string>.MakeQueryableForFetchingOnleyChangedDataFromDB(resultlist.AsQueryable(), c, false);
+                var resultQueryable = QueryableCacheDataProvider<string>.MakeQueryableForFetchingOnlyChangedDataFromDB(resultlist.AsQueryable(), c, false);
                 List<object> lsttmp = new System.Collections.Generic.List<object>();
                 System.Diagnostics.Debug.WriteLine("server :" + resultlist.Count);
                 foreach (var item in resultQueryable)

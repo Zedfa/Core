@@ -1,14 +1,13 @@
 ﻿using Core.Entity;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System;
 using System.Collections.Generic;
 using System.Linq.Expressions;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace Core.UnitTesting.Entity
 {
     public class ConstantUnitTestHelper : EntityUnitTestHelperBase<Constant>
     {
-
         public override string TableName { get { return "core.Constants"; } }
 
         public override void AssertEntitiesAreEqual(Constant expected, Constant actual)
@@ -73,7 +72,7 @@ namespace Core.UnitTesting.Entity
             ConstantCategoryUnitTestHelper categoryHelper = new ConstantCategoryUnitTestHelper();
             IList<ConstantCategory> categoryList = categoryHelper.CreateSampleEntityList(2, 10);
 
-            for (int i = 0; i < categoryList.Count; i++)            
+            for (int i = 0; i < categoryList.Count; i++)
             {
                 ConstantCategory cat = categoryList[i];
                 cat.ID = i + 1;
@@ -88,7 +87,6 @@ namespace Core.UnitTesting.Entity
                 createdList[i].ConstantCategoryID = category.ID;
                 mockEntityList.Add(createdList[i]);
             }
-        }       
-
+        }
     }
 }

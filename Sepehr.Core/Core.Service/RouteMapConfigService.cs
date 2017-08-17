@@ -17,6 +17,11 @@ namespace Core.Service
         {
             _repositoryBase = new RouteMapConfigRepository();
         }
-     
+        public override IQueryable<RouteMapConfig> All(bool canUseCache = true)
+        {
+            return _repositoryBase.All(canUseCache);   
+        }
+
+
     }
 }

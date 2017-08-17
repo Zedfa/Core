@@ -3,15 +3,12 @@ using Core.Cmn.Attributes;
 using Core.Entity;
 using Core.Rep;
 using Core.Service;
+using Core.UnitTesting.Entity;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using Core.UnitTesting.Entity;
-using System.Configuration;
 using System.IO;
+using System.Linq;
 
 namespace Core.UnitTesting.Service
 {
@@ -21,6 +18,7 @@ namespace Core.UnitTesting.Service
         private static readonly object _locker = new object();
 
         private EntityUnitTestHelperBase<Log> _entityUnitTestHelper;
+
         protected override EntityUnitTestHelperBase<Log> EntityUnitTestHelper
         {
             get
@@ -28,6 +26,7 @@ namespace Core.UnitTesting.Service
                 return _entityUnitTestHelper ?? (_entityUnitTestHelper = new LogUnitTestHelper());
             }
         }
+
         //public string LogPath
         //{
         //    get
@@ -44,13 +43,12 @@ namespace Core.UnitTesting.Service
         //    }
         //}
 
-
         [TestMethod()]
         public override void ConstructorTest()
         {
             base.ConstructorTest();
         }
-       
+
         protected override LogService ConstructService()
         {
             IDbContextBase ctx = Mock.MockHelperBase.BuildMockContext();
@@ -63,10 +61,6 @@ namespace Core.UnitTesting.Service
         {
             base.AllTest();
         }
-
-
-
-
 
         [UnitTest]
         [TestMethod()]
@@ -100,8 +94,8 @@ namespace Core.UnitTesting.Service
 
             var registeredLog = service.Filter(log => log.CustomMessage.Equals(wrongMessage));
             Assert.IsFalse(registeredLog.Any());
-
         }
+
         [TestMethod]
         public void Handle_InDB_True_Test()
         {
@@ -116,6 +110,7 @@ namespace Core.UnitTesting.Service
             var registeredLog = service.Filter(log => log.CustomMessage.Equals(message));
             Assert.IsTrue(registeredLog.Any());
         }
+
         [TestMethod]
         [ExpectedException(typeof(NullReferenceException))]
         public void Handle_InDB_ThrowException_True_Test()
@@ -132,7 +127,6 @@ namespace Core.UnitTesting.Service
             Assert.IsTrue(registeredLog.Any());
         }
 
-
         [TestMethod]
         public void Handle_InDB_IP_False_Test()
         {
@@ -147,8 +141,8 @@ namespace Core.UnitTesting.Service
             //assert
             var registeredLog = service.Filter(log => log.IP.Equals("localhost"));
             Assert.IsFalse(registeredLog.Any());
-
         }
+
         [TestMethod]
         [ExpectedException(typeof(NotImplementedException))]
         public void Handle_InDB_IP_ThrowException_True_Test()
@@ -187,7 +181,6 @@ namespace Core.UnitTesting.Service
         [TestMethod()]
         public void Handle_InXMLFile_Test()
         {
-
             var date = DateTime.Now;
             var message = $"تست لاگ برداری در متد Handle_InXMLFile_Test در تاریخ {DateTime.Now.ToShortDateString()}";
 
@@ -202,14 +195,11 @@ namespace Core.UnitTesting.Service
             //assert
 
             Assert.IsTrue(File.Exists(service.XmlLogFileName) && File.GetLastWriteTime(service.XmlLogFileName) > date);
-
         }
-
 
         [TestMethod()]
         public void Handle_InXMLFile_InnerException6Level_Test()
         {
-
             var date = DateTime.Now;
             var message = $"تست لاگ برداری در متد Handle_InXMLFile_InnerException6Level_Test در تاریخ {DateTime.Now.ToShortDateString()}";
 
@@ -229,7 +219,6 @@ namespace Core.UnitTesting.Service
             //assert
 
             Assert.IsTrue(File.Exists(service.XmlLogFileName) && File.GetLastWriteTime(service.XmlLogFileName) > date);
-
         }
     }
 }

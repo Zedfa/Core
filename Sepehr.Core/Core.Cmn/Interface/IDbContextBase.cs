@@ -1,6 +1,6 @@
 
 using System;
-  
+
 namespace Core.Cmn
 {
     // Summary:
@@ -64,10 +64,10 @@ namespace Core.Cmn
     }
     public interface IDbContextBase : IDisposable
     {
-        IDatabase Database { get;}
+        IDatabase Database { get; }
         IDbContextConfigurationBase Configuration { get; }
         IDbSetBase<T> Set<T>() where T : EntityBase<T>, new();
-       // DbSetBase<T> Set<T>() where T : EntityBase<T>, new();
+        // DbSetBase<T> Set<T>() where T : EntityBase<T>, new();
         ///remark:DbSet Must be Implemented.
         //DbSet<T> Set<T>() where T : class;
 
@@ -75,9 +75,14 @@ namespace Core.Cmn
         //DbChangeTracker ChangeTracker;
         //IEnumerable<DbEntityValidationResult> GetValidationErrors();
         void SetContextState<T>(EntityBase<T> entity, EntityState entityState) where T : EntityBase<T>, new();
-       // DbEntityEntry<TEntity> Entry<TEntity>(TEntity entity) where TEntity : class;
+        // DbEntityEntry<TEntity> Entry<TEntity>(TEntity entity) where TEntity : class;
         bool DisableExceptionLogger { get; set; }
         IDbChangeTrackerBase ChangeTracker { get; }
 
+    }
+
+    internal interface IDbContextInternal
+    {
+        string ConnectionString { get; }
     }
 }

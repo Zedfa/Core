@@ -1,14 +1,13 @@
 ﻿using Core.Entity;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System;
 using System.Collections.Generic;
 using System.Linq.Expressions;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace Core.UnitTesting.Entity
 {
     public class CompanyChartUnitTestHelper : EntityUnitTestHelperBase<CompanyChart>
     {
-
         public override string TableName { get { return "core.CompanyCharts"; } }
 
         public override void AssertEntitiesAreEqual(CompanyChart expected, CompanyChart actual)
@@ -56,7 +55,7 @@ namespace Core.UnitTesting.Entity
             entity.Depth = GetRandomInt();
             entity.Level = GetRandomShortNullable();
             entity.Lineage = GetRandomString();
-            entity.Title = GetRandomString();            
+            entity.Title = GetRandomString();
         }
 
         public override Expression<Func<CompanyChart, CompanyChart>> GetUpdatePredicate(CompanyChart entity)
@@ -72,7 +71,6 @@ namespace Core.UnitTesting.Entity
 
         protected override void SeedMockEntityList(IList<CompanyChart> mockEntityList)
         {
-
             IList<CompanyChart> createdList = CreateSampleEntityList(10, 100);
             for (int i = 0; i < createdList.Count; i++)
             {

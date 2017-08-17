@@ -1,7 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Data.Common;
-using Core.Cmn;
+﻿using Core.Cmn;
 using System.Reflection;
 
 namespace Core.UnitTesting.Mock
@@ -10,6 +7,7 @@ namespace Core.UnitTesting.Mock
     {
         private MockDbPropertyValues _originalPropertyValues;
         private MockDbPropertyValues _currentPropertyValues;
+
         public IDbPropertyValuesBase CurrentValues
         {
             get
@@ -19,6 +17,7 @@ namespace Core.UnitTesting.Mock
         }
 
         private TEntity _entity;
+
         public object Entity
         {
             get
@@ -37,7 +36,7 @@ namespace Core.UnitTesting.Mock
 
         public EntityState State
         {
-            get;set;
+            get; set;
         }
 
         TEntity IDbEntityEntryBase<TEntity>.Entity
@@ -55,7 +54,7 @@ namespace Core.UnitTesting.Mock
             _originalPropertyValues = new MockDbPropertyValues();
             _currentPropertyValues = new MockDbPropertyValues();
             PropertyInfo[] properties = typeof(TEntity).GetProperties(BindingFlags.Public);
-            foreach(PropertyInfo propertyInfo in properties)
+            foreach (PropertyInfo propertyInfo in properties)
             {
                 object value = propertyInfo.GetValue(_entity);
                 _originalPropertyValues[propertyInfo.Name] = value;

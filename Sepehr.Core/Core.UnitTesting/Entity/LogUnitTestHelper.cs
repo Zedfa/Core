@@ -1,14 +1,13 @@
 ﻿using Core.Entity;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System;
 using System.Collections.Generic;
 using System.Linq.Expressions;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace Core.UnitTesting.Entity
 {
     public class LogUnitTestHelper : EntityUnitTestHelperBase<Log>
     {
-
         public override string TableName { get { return "core.Logs"; } }
 
         public override void AssertEntitiesAreEqual(Log expected, Log actual)
@@ -72,7 +71,6 @@ namespace Core.UnitTesting.Entity
 
         protected override void SeedMockEntityList(IList<Log> mockEntityList)
         {
-
             IList<Log> createdList = CreateSampleEntityList(10, 100);
             for (int i = 0; i < createdList.Count; i++)
             {

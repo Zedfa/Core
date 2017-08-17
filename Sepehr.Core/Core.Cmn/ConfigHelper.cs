@@ -54,6 +54,23 @@ namespace Core.Cmn
             }
         }
 
+        public static bool TryGetConnectionString(string key, out string connectionString)
+        {
+
+            var connectionStringConfig = System.Configuration.ConfigurationManager.ConnectionStrings[key];
+            if (connectionStringConfig != null)
+            {
+                connectionString = connectionStringConfig.ConnectionString;
+                return true;
+            }
+            else
+            {
+                connectionString = null;
+                return false;
+            }
+
+        }
+
         public static T GetSection<T>(string query)
         {
 

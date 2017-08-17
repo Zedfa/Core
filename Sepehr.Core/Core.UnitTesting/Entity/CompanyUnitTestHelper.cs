@@ -1,14 +1,13 @@
 ﻿using Core.Entity;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System;
 using System.Collections.Generic;
 using System.Linq.Expressions;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace Core.UnitTesting.Entity
 {
     public class CompanyUnitTestHelper : EntityUnitTestHelperBase<Company>
     {
-
         public override string TableName { get { return "core.Companies"; } }
 
         public override void AssertEntitiesAreEqual(Company expected, Company actual)
@@ -93,7 +92,6 @@ namespace Core.UnitTesting.Entity
 
         protected override void SeedMockEntityList(IList<Company> mockEntityList)
         {
-
             IList<Company> createdList = CreateSampleEntityList(10, 100);
             for (int i = 0; i < createdList.Count; i++)
             {

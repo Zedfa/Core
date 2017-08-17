@@ -1,6 +1,6 @@
-﻿using System;
+﻿using Core.Cmn.Extensions;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
-using Core.Cmn.Extensions;
+using System;
 using System.Drawing;
 using System.Text;
 
@@ -9,12 +9,13 @@ namespace Core.UnitTesting.Cmn
     [TestClass]
     public class TypeExtTests
     {
-        enum JustForTest
+        private enum JustForTest
         {
-            Test1 =100,
+            Test1 = 100,
             Test2,
             Test3
         }
+
         [TestMethod]
         public void IsSimple_Test_AllSimple_Type_And_Some_Complex()
         {

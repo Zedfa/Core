@@ -12,6 +12,7 @@ var ngSearchObj = (function () {
         this.seWinWidth = "900";
         this.seWinHeight = "250";
         this.cGId = "";
+        this.filterSeperator = "|";
         this.scope = scope;
         this.compile = $compile;
         this.outerDom = dom;
@@ -142,7 +143,7 @@ var ngSearchObj = (function () {
                 break;
             case "dropdown":
             case "lookup":
-                valueInfo.value = typeof (val) == "string" ? val.split(",")[0] : val;
+                valueInfo.value = typeof (val) == "string" ? val.split(this.filterSeperator)[0] : val;
                 break;
             default:
                 valueInfo.text = val,
@@ -557,6 +558,7 @@ var ngSearchObj = (function () {
                 result = that.createLookupTemplate(that.getLookupPropertyValue(dataItem.fld.columnId.LId), dataItem);
                 break;
             case "dropdown":
+                debugger;
                 result = that.createDropDownTemplate(that.getDropDownPropertyValue(dataItem.fld.columnId.LId), dataItem);
                 break;
             case "currency":
@@ -618,18 +620,18 @@ var ngSearchObj = (function () {
             record.val = record.keys;
         }
         if (typeName == "datetime" || typeName == "date") {
-            record.val.value += ",dt";
+            record.val.value += this.filterSeperator + "dt";
         }
         else if (typeName == "persiandate") {
-            record.val.value += ",pdt";
+            record.val.value += this.filterSeperator + "pdt";
         }
         else if (typeName === "lookup") {
             var lookupObj = this.getLookupPropertyValue(record.fld.columnId.LId);
-            record.val.value += ",lkp:" + lookupObj.bindingName;
+            record.val.value += this.filterSeperator + "lkp:" + lookupObj.bindingName;
         }
         else if (typeName === "dropdown") {
             var dropdownInfo = this.getDropDownPropertyValue(record.fld.columnId.LId);
-            record.val.value += ",ddl:" + dropdownInfo.propertyNameForBinding;
+            record.val.value += this.filterSeperator + "ddl:" + dropdownInfo.propertyNameForBinding;
         }
         else if (typeName === "currency") {
             record.val.value = record.val.value;

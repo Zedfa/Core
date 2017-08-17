@@ -16,14 +16,14 @@ namespace Core.Cmn.Attributes
         public bool DisableCache { get; set; }
 
         /// <summary>
-        /// this could be true when EnableToFetchOnlyChangedDataFromDB is true and we don't want to sync deleted record in cache.
+        /// this could be true when <see cref="EnableToFetchOnlyChangedDataFromDB" /> is true and we don't want to sync deleted record in cache.
         /// </summary>
         public bool DisableToSyncDeletedRecord_JustIfEnableToFetchOnlyChangedDataFromDB { get; set; }
 
         /// <summary>
-        /// This is depricated, please use 'CacheRefreshingKind = CacheRefreshingKind.Slide;' instead.
+        /// This is depricated, please use '<see cref="CacheRefreshingKind" /> = <see cref="CacheRefreshingKind.Slide"/>;' instead.
         /// </summary>
-        [Obsolete(message: "'EnableAutomaticallyAndPeriodicallyRefreshCache' property in 'Core.Cmn.Attributes.CacheableAttribute' is deprecated, please use 'CacheRefreshingKind = CacheRefreshingKind.Slide;' instead.", error: false)]
+        [Obsolete(message: "'" + nameof(EnableAutomaticallyAndPeriodicallyRefreshCache) + "'" + " property in 'Core.Cmn.Attributes.CacheableAttribute' is deprecated, please use " + "'" + nameof(CacheRefreshingKind) + " = " + nameof(CacheRefreshingKind.Slide) + ";'" + " instead.", error: false)]
         public bool EnableAutomaticallyAndPeriodicallyRefreshCache { get; set; }
 
         public bool EnableCoreSerialization { get; set; }
@@ -35,10 +35,15 @@ namespace Core.Cmn.Attributes
         public bool EnableToFetchOnlyChangedDataFromDB { get; set; }
 
         public bool EnableUseCacheServer { get; set; }
+        [Obsolete(message: "'" + nameof(ExpireCacheSecondTime) + "'" + " property in 'Core.Cmn.Attributes.CacheableAttribute' is deprecated, please use " + "'" + nameof(AutoRefreshInterval) + "'" + " instead.", error: false)]
         public int ExpireCacheSecondTime { get; set; }
+        /// <summary>
+        /// The period time in seconds that 'Cache' must be refreshed according to <see cref="CacheRefreshingKind" />.
+        /// </summary>
+        public int AutoRefreshInterval { get; set; }
 
         /// <summary>
-        /// Set it just if EnableToFetchOnlyChangedDataFromDB is true.
+        /// Set it just if <see cref="EnableToFetchOnlyChangedDataFromDB"/> is true.
         /// </summary>
         public string NameOfNavigationPropsForFetchingOnlyChangedDataFromDB { get; set; }
     }

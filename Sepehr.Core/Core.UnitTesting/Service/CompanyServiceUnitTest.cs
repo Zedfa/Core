@@ -1,26 +1,25 @@
-﻿using Core.Ef;
-using Core.Entity;
-using Core.Service;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
-using Core.UnitTesting.Entity;
+﻿using Core.Cmn;
 using Core.Cmn.Attributes;
+using Core.Entity;
 using Core.Rep;
-using Core.Cmn;
+using Core.Service;
+using Core.UnitTesting.Entity;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace Core.UnitTesting.Service
 {
     [TestClass()]
     public class CompanyServiceUnitTest : ServiceUnitTestBase<ICompanyService, ICompanyRepository, Company>
-    {       
-
+    {
         protected override ICompanyService ConstructService()
         {
-            IDbContextBase ctx = Mock.MockHelperBase.BuildMockContext();            
+            IDbContextBase ctx = Mock.MockHelperBase.BuildMockContext();
 
             return new CompanyService(ctx);
         }
 
         private EntityUnitTestHelperBase<Company> _entityUnitTestHelper;
+
         protected override EntityUnitTestHelperBase<Company> EntityUnitTestHelper
         {
             get
@@ -31,14 +30,14 @@ namespace Core.UnitTesting.Service
 
         [ClassInitialize]
         public static void Initialize(TestContext testContext)
-        {            
+        {
             //Core.Cmn.AppBase.LogService = new Core.Service.LogService(ServiceBase.DependencyInjectionFactory.CreateContextInstance());
-           // Core.Cmn.AppBase.BuildEntityInfoDic(Core.Cmn.AppBase.GetAlltypes());            
+            // Core.Cmn.AppBase.BuildEntityInfoDic(Core.Cmn.AppBase.GetAlltypes());
         }
 
         [TestInitialize]
         public void TestInitialize()
-        {            
+        {
             EntityUnitTestHelper.SeedData();
         }
 
@@ -51,7 +50,6 @@ namespace Core.UnitTesting.Service
         [ClassCleanup]
         public static void CleanUp()
         {
-
         }
 
         [UnitTest]
@@ -143,6 +141,6 @@ namespace Core.UnitTesting.Service
         public override void GetAppBaseTest()
         {
             base.GetAppBaseTest();
-        }        
+        }
     }
 }

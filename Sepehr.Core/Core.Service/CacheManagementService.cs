@@ -16,11 +16,11 @@ namespace Core.Service
         {
 
         }
-        [Cacheable(EnableSaveCacheOnHDD = true, ExpireCacheSecondTime = 60, EnableAutomaticallyAndPeriodicallyRefreshCache = true, EnableUseCacheServer = true)]
+        [Cacheable(EnableSaveCacheOnHDD = true, ExpireCacheSecondTime = 120, EnableAutomaticallyAndPeriodicallyRefreshCache = true)]
         public static bool WriteToHardCaches()
         {
             var cacheList = CacheService.ObjectCache.ToList();
-            CacheConfig.CacheInfoDic.Values.ToList().Where(ci => ci.EnableSaveCacheOnHDD).ToList().ForEach(ci =>
+            CacheConfig.CacheInfoDic.Values.ToList().Where(ci => ci.EnableSaveCacheOnHDD && (ci.CacheRefreshingKind != CacheRefreshingKind.SqlDependency || ci.EnableToFetchOnlyChangedDataFromDB)).ToList().ForEach(ci =>
             {
                 cacheList.Where(cache => cache.Key.StartsWith(ci.BasicKey.ToString()) && !cache.Key.Contains("_Fake")).ToList().ForEach(cache =>
                 {

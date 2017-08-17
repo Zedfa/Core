@@ -5060,7 +5060,7 @@ namespace Core.Ef.Extensions
 
             if (connection == null)
             {
-                connection = new SqlConnection(GetConnectionString(queryobject));
+                connection = new SqlConnection(((IDbContextInternal)context).ConnectionString);
             }
 
             if (command == null)
@@ -5073,45 +5073,6 @@ namespace Core.Ef.Extensions
                     command.Parameters.AddWithValue(parameter.Name, parameter.Value);
                 }
             }
-        }
-
-        /// <summary>
-        /// Use ObjectQuery to get SqlConnection and SqlCommand.
-        /// </summary>
-        public void GetSqlCommand(ObjectQuery query, ref SqlConnection connection, ref SqlCommand command)
-        {
-            if (query == null)
-                throw new System.ArgumentException("Paramter cannot be null", "query");
-
-            if (connection == null)
-            {
-                connection = new SqlConnection(GetConnectionString(query));
-            }
-
-            if (command == null)
-            {
-                command = new SqlCommand(GetSqlString(query), connection);
-
-                // Add all the paramters used in query.
-                foreach (ObjectParameter parameter in query.Parameters)
-                {
-                    command.Parameters.AddWithValue(parameter.Name, parameter.Value);
-                }
-            }
-        }
-
-        /// <summary>
-        /// Use ObjectQuery to get the connection string.
-        /// </summary>
-        public  String GetConnectionString(ObjectQuery query)
-        {
-            if (query == null)
-            {
-                throw new ArgumentException("Paramter cannot be null", "query");
-            }
-
-            EntityConnection connection = query.Context.Connection as EntityConnection;
-            return connection.StoreConnection.ConnectionString;
         }
 
         /// <summary>

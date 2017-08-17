@@ -1,6 +1,5 @@
-﻿using System;
+﻿using Core.Cmn.Monitoring;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
-using Core.Cmn.Monitoring;
 using System.Threading.Tasks;
 
 namespace Core.UnitTesting.Cmn
@@ -12,7 +11,7 @@ namespace Core.UnitTesting.Cmn
         public void stopWatch_test()
         {
             System.Diagnostics.Debug.WriteLine("start");
-            using (var w =new Watch())
+            using (var w = new Watch())
             {
                 w.OnWatchStop += W_OnWatchStop;
                 System.Diagnostics.Debug.WriteLine(w.Stopwatch.ElapsedMilliseconds);

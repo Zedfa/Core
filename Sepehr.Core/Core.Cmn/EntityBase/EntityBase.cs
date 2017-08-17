@@ -104,7 +104,14 @@ namespace Core.Cmn
                     var keyColumnName = EntityInfo().KeyColumns.Keys.FirstOrDefault();
                     if (keyColumnName != null)
                     {
-                        _cacheId = (int)this[keyColumnName];
+                        try
+                        {
+                            _cacheId = Convert.ToInt32(this[keyColumnName]);
+                        }
+                        catch (Exception ex)
+                        {
+                            throw AppBase.LogService.Handle(ex, $"On casting PK for EntityName: '{this.GetType().Name}' and PropertyName: '{keyColumnName}' an error has occured.");
+                        }
                     }
                 }
                 return _cacheId;
@@ -269,7 +276,7 @@ namespace Core.Cmn
                                 {
                                     var queryableCacheExecution = new QueryableCacheDataProvider<T>(cacheInfo);
                                     //  _stopwatch.Restart();
-                                    result = queryableCacheExecution.Cache<List<T>>(cacheInfo, cacheInfo.RefreshCacheTimeSeconds, cacheInfo.BasicKey.ToString(), true).
+                                    result = queryableCacheExecution.Cache<List<T>>(cacheInfo, cacheInfo.AutoRefreshInterval, cacheInfo.BasicKey.ToString(), true).
                                         Where(item =>
                                             {
                                                 var otherPropertyValue = item[infoForFillingNavigationProperty.OtherEntityRefrencePropertyName];
@@ -296,6 +303,7 @@ namespace Core.Cmn
                                     _EntityBase resultItem;
                                     if (!cacheInfo.DisableCache && result.Count() == 0)
                                     {
+                                        //ToDo: Change invoke method by excact delegate for better performance.
                                         result = (cacheInfo.MethodInfo.Invoke(null, new object[] { cacheInfo.Repository.GetQueryableForCahce(AppBase.DependencyInjectionFactory.CreateContextInstance()) }) as IQueryable<T>)
                                             .Where(string.Format("{0} == {1}", infoForFillingNavigationProperty.OtherEntityRefrencePropertyName, thisPropertyValue));
                                         resultItem = result.FirstOrDefault() as _EntityBase;
@@ -473,11 +481,7 @@ namespace Core.Cmn
 
         public void CallNavigationPropertyChangedByCache(_EntityBase sender, string propertyName)
         {
-            var propertyChangedByCache = NavigationPropertyChangedByCache;
-            if (propertyChangedByCache != null)
-            {
-                propertyChangedByCache(sender, new PropertyChangedEventArgs(propertyName));
-            }
+            NavigationPropertyChangedByCache?.Invoke(sender, new PropertyChangedEventArgs(propertyName));
         }
 
         //public static bool operator ==(_EntityBase left, _EntityBase right)
@@ -569,11 +573,7 @@ namespace Core.Cmn
 
         public static void CallPropertyChangedByCache(List<T> senders, string propertyName)
         {
-            var propertyChangedByCache = PropertyChangedByCache;
-            if (propertyChangedByCache != null)
-            {
-                propertyChangedByCache(senders, new PropertyChangedEventArgs(propertyName));
-            }
+            PropertyChangedByCache?.Invoke(senders, new PropertyChangedEventArgs(propertyName));
         }
 
         public EntityBase<T> ShallowCopy()

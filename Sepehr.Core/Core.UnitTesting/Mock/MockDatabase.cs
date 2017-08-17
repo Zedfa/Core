@@ -1,8 +1,8 @@
-﻿using System;
+﻿using Core.Cmn;
+using System;
 using System.Collections.Generic;
-using System.Data.Common;
-using Core.Cmn;
 using System.Data;
+using System.Data.Common;
 
 namespace Core.UnitTesting.Mock
 {
@@ -31,7 +31,7 @@ namespace Core.UnitTesting.Mock
             return 0;
         }
 
-        public IEnumerable<T> SqlQuery<T>(string sql, params object[] parameters) 
+        public IEnumerable<T> SqlQuery<T>(string sql, params object[] parameters)
         {
             return null;
         }

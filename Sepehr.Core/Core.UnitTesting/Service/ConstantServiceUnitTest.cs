@@ -1,32 +1,21 @@
-﻿using Core.Ef;
-using Core.Entity;
-using Core.Service;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-
-using Core.UnitTesting.Entity;
-using System.Globalization;
+﻿using Core.Cmn;
 using Core.Cmn.Attributes;
-
+using Core.Entity;
 using Core.Rep;
-using Core.Cmn;
-using Core.Cmn.DependencyInjection;
+using Core.Service;
+using Core.UnitTesting.Entity;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
+using System.Collections.Generic;
+using System.Globalization;
+using System.Linq;
 
 namespace Core.UnitTesting.Service
 {
     [TestClass()]
     public class ConstantServiceUnitTest : ServiceUnitTestBase<IConstantService, IConstantRepository, Constant>
     {
-        protected override IConstantService ConstructService()
-        {
-            IDbContextBase ctx = Mock.MockHelperBase.BuildMockContext();
-
-            return new ConstantService(ctx);
-        }
-
         private EntityUnitTestHelperBase<Constant> _entityUnitTestHelper;
+
         protected override EntityUnitTestHelperBase<Constant> EntityUnitTestHelper
         {
             get
@@ -35,42 +24,15 @@ namespace Core.UnitTesting.Service
             }
         }
 
-
-        public override void Initialize(TestContext testContext)
-        {
-            Core.Cmn.AppBase.StartApplication();         
-        }
-
-        [TestInitialize]
-        public void TestInitialize()
-        {
-            EntityUnitTestHelper.SeedData();
-        }
-
-        [TestCleanup]
-        public void TestCleanup()
-        {
-            EntityUnitTestHelper.CleanData();
-        }
-
         [ClassCleanup]
         public static void CleanUp()
         {
-
         }
 
-        [UnitTest]
-        [TestMethod()]
-        public override void ConstructorTest()
+        [ClassInitialize]
+        public static void Initialize(TestContext testContext)
         {
-            base.ConstructorTest();
-        }
-
-        [UnitTest]
-        [TestMethod()]
-        public override void GetContextTest()
-        {
-            base.GetContextTest();
+            Core.Cmn.AppBase.StartApplication();
         }
 
         [UnitTest]
@@ -78,6 +40,13 @@ namespace Core.UnitTesting.Service
         public override void AllTest()
         {
             base.AllTest();
+        }
+
+        [UnitTest]
+        [TestMethod()]
+        public override void ConstructorTest()
+        {
+            base.ConstructorTest();
         }
 
         [UnitTest]
@@ -96,13 +65,6 @@ namespace Core.UnitTesting.Service
 
         [UnitTest]
         [TestMethod()]
-        public override void DeleteByEntityTest()
-        {
-            base.DeleteByEntityTest();
-        }
-
-        [UnitTest]
-        [TestMethod()]
         public override void DeleteByEntityListTest()
         {
             base.DeleteByEntityListTest();
@@ -110,23 +72,9 @@ namespace Core.UnitTesting.Service
 
         [UnitTest]
         [TestMethod()]
-        public override void UpdateByEntityTest()
+        public override void DeleteByEntityTest()
         {
-            base.DeleteByEntityListTest();
-        }
-
-        [UnitTest]
-        [TestMethod()]
-        public override void GetCountTest()
-        {
-            base.GetCountTest();
-        }
-
-        [UnitTest]
-        [TestMethod()]
-        public override void FilterByPredicateTest()
-        {
-            base.FilterByPredicateTest();
+            base.DeleteByEntityTest();
         }
 
         [UnitTest]
@@ -134,6 +82,13 @@ namespace Core.UnitTesting.Service
         public override void FilterByExpressionTest()
         {
             base.FilterByExpressionTest();
+        }
+
+        [UnitTest]
+        [TestMethod()]
+        public override void FilterByPredicateTest()
+        {
+            base.FilterByPredicateTest();
         }
 
         [UnitTest]
@@ -152,6 +107,57 @@ namespace Core.UnitTesting.Service
 
         [UnitTest]
         [TestMethod()]
+        public void GetConstantByNameOfCategoryAndCultureTest()
+        {
+            // assemble
+            IConstantService service = ConstructService();
+
+            List<Constant> all = service.All(false).ToList();
+
+            foreach (Constant constant in all)
+            {
+                // act
+                List<Constant> list1 = service.GetConstantByNameOfCategoryAndCulture(constant.ConstantCategory.Name, constant.Culture, false);
+
+                // assert
+                Assert.IsNotNull(list1);
+                foreach (Constant c in list1)
+                {
+                    Assert.AreEqual(constant.ConstantCategory.Name, c.ConstantCategory.Name);
+                    Assert.AreEqual(constant.Culture, c.Culture);
+                }
+            }
+        }
+
+        [UnitTest]
+        [TestMethod()]
+        public void GetConstantByNameOfCategoryOnlyTest()
+        {
+            // assemble
+            IConstantService service = ConstructService();
+
+            List<Constant> all = service.All(false).ToList();
+
+            foreach (Constant constant in all)
+            {
+                // act
+                List<Constant> list1 = service.GetConstantByNameOfCategory(constant.ConstantCategory.Name, true, false);
+
+                // assert
+                List<Constant> list2 = service.GetConstantByNameOfCategoryAndCulture(constant.ConstantCategory.Name, service.CurrentCulture.Name, false);
+                Assert.IsNotNull(list2);
+                if (list2.Count == 0)
+                {
+                    list2 = service.GetConstantByNameOfCategoryAndCulture(constant.ConstantCategory.Name, service.GetDefaultCulture(false), false);
+                    Assert.IsNotNull(list2);
+                }
+
+                CollectionAssert.AreEqual(list2, list1);
+            }
+        }
+
+        [UnitTest]
+        [TestMethod()]
         public void GetConstantsTest()
         {
             // assemble
@@ -163,6 +169,20 @@ namespace Core.UnitTesting.Service
             // assert
             Assert.IsNotNull(list);
             Assert.AreEqual(list.Count, service.All(false).ToList().Count);
+        }
+
+        [UnitTest]
+        [TestMethod()]
+        public override void GetContextTest()
+        {
+            base.GetContextTest();
+        }
+
+        [UnitTest]
+        [TestMethod()]
+        public override void GetCountTest()
+        {
+            base.GetCountTest();
         }
 
         [UnitTest]
@@ -207,72 +227,33 @@ namespace Core.UnitTesting.Service
             }
         }
 
-        [UnitTest]
-        [TestMethod()]
-        public void GetConstantByNameOfCategoryOnlyTest()
+        [TestCleanup]
+        public void TestCleanup()
         {
-            // assemble
-            IConstantService service = ConstructService();
+            EntityUnitTestHelper.CleanData();
+        }
 
-            List<Constant> all = service.All(false).ToList();
-
-            foreach (Constant constant in all)
-            {
-                // act
-                List<Constant> list1 = service.GetConstantByNameOfCategory(constant.ConstantCategory.Name, true, false);
-
-                // assert
-                List<Constant> list2 = service.GetConstantByNameOfCategoryAndCulture(constant.ConstantCategory.Name, service.CurrentCulture.Name, false);
-                Assert.IsNotNull(list2);
-                if (list2.Count == 0)
-                {
-                    list2 = service.GetConstantByNameOfCategoryAndCulture(constant.ConstantCategory.Name, service.GetDefaultCulture(false), false);
-                    Assert.IsNotNull(list2);
-                }
-
-                CollectionAssert.AreEqual(list2, list1);
-            }
+        [TestInitialize]
+        public void TestInitialize()
+        {
+            EntityUnitTestHelper.SeedData();
         }
 
         [UnitTest]
         [TestMethod()]
-        public void GetConstantByNameOfCategoryAndCultureTest()
-        {
-            // assemble
-            IConstantService service = ConstructService();
-
-            List<Constant> all = service.All(false).ToList();
-
-            foreach (Constant constant in all)
-            {
-
-                // act
-                List<Constant> list1 = service.GetConstantByNameOfCategoryAndCulture(constant.ConstantCategory.Name, constant.Culture, false);
-
-                // assert
-                Assert.IsNotNull(list1);
-                foreach (Constant c in list1)
-                {
-                    Assert.AreEqual(constant.ConstantCategory.Name, c.ConstantCategory.Name);
-                    Assert.AreEqual(constant.Culture, c.Culture);
-                }
-            }
-        }
-
-        [UnitTest]
-        [TestMethod()]
-        public void TryGetValueByKeyOneConstantTest()
+        public void TryGetValueByKeyAndCategoryAndCultureTest()
         {
             // assemble
             IConstantService service = ConstructService();
 
             Constant entity = EntityUnitTestHelper.CreateSampleEntity();
+
             entity = service.Create(entity);
 
             string value;
 
             // act
-            bool tryResult = service.TryGetValue(entity.Key, out value, false);
+            bool tryResult = service.TryGetValue(entity.Key, entity.ConstantCategory.Name, entity.Culture, out value, false);
 
             // assert
             Assert.IsTrue(tryResult);
@@ -282,37 +263,37 @@ namespace Core.UnitTesting.Service
             service.Delete(entity);
 
             // act
-            tryResult = service.TryGetValue(entity.Key, out value, false);
-
-            // assert
+            tryResult = service.TryGetValue(entity.Key, entity.ConstantCategory.Name, entity.Culture, out value, false);
             Assert.IsFalse(tryResult);
             Assert.IsNull(value);
         }
 
         [UnitTest]
         [TestMethod()]
-        public void TryGetValueByKeyMoreConstantsTest()
+        public void TryGetValueByKeyAndCategoryMoreConstantsTest()
         {
             // assemble
             IConstantService service = ConstructService();
+
             IList<Constant> list = EntityUnitTestHelper.CreateSampleEntityList(CultureCount, CultureCount);
             for (int i = 0; i < list.Count; i++)
             {
                 Constant c = list[i];
+                c.ConstantCategoryID = 1;
                 c.Key = list[0].Key;
                 c.Culture = CULTURES[i];
             }
 
+            service.CurrentCulture = CultureInfo.CreateSpecificCulture(list[0].Culture);
+
             list[0].ConstantCategory = ConstantCategoryUnitTestHelper.GENERAL_CONFIG_CONSTANT_CATEGORY;
             list[0].ConstantCategoryID = ConstantCategoryUnitTestHelper.GENERAL_CONFIG_CONSTANT_CATEGORY.ID;
 
-            service.CurrentCulture = CultureInfo.CreateSpecificCulture(list[0].Culture);
-
             service.Create(list.ToList());
-            string value;
 
             // act
-            bool tryResult = service.TryGetValue(list[0].Key, out value, false);
+            string value;
+            bool tryResult = service.TryGetValue(list[0].Key, ConstantCategoryUnitTestHelper.GENERAL_CONFIG_NAME, out value, false);
 
             // assert
             Assert.IsTrue(tryResult);
@@ -356,33 +337,30 @@ namespace Core.UnitTesting.Service
             Assert.IsNull(value);
         }
 
-
         [UnitTest]
         [TestMethod()]
-        public void TryGetValueByKeyAndCategoryMoreConstantsTest()
+        public void TryGetValueByKeyMoreConstantsTest()
         {
             // assemble
             IConstantService service = ConstructService();
-
             IList<Constant> list = EntityUnitTestHelper.CreateSampleEntityList(CultureCount, CultureCount);
             for (int i = 0; i < list.Count; i++)
             {
                 Constant c = list[i];
-                c.ConstantCategoryID = 1;
                 c.Key = list[0].Key;
                 c.Culture = CULTURES[i];
             }
 
-            service.CurrentCulture = CultureInfo.CreateSpecificCulture(list[0].Culture);
-
             list[0].ConstantCategory = ConstantCategoryUnitTestHelper.GENERAL_CONFIG_CONSTANT_CATEGORY;
             list[0].ConstantCategoryID = ConstantCategoryUnitTestHelper.GENERAL_CONFIG_CONSTANT_CATEGORY.ID;
 
+            service.CurrentCulture = CultureInfo.CreateSpecificCulture(list[0].Culture);
+
             service.Create(list.ToList());
+            string value;
 
             // act
-            string value;
-            bool tryResult = service.TryGetValue(list[0].Key, ConstantCategoryUnitTestHelper.GENERAL_CONFIG_NAME, out value, false);
+            bool tryResult = service.TryGetValue(list[0].Key, out value, false);
 
             // assert
             Assert.IsTrue(tryResult);
@@ -396,19 +374,18 @@ namespace Core.UnitTesting.Service
 
         [UnitTest]
         [TestMethod()]
-        public void TryGetValueByKeyAndCategoryAndCultureTest()
+        public void TryGetValueByKeyOneConstantTest()
         {
             // assemble
             IConstantService service = ConstructService();
 
             Constant entity = EntityUnitTestHelper.CreateSampleEntity();
-
             entity = service.Create(entity);
 
             string value;
 
             // act
-            bool tryResult = service.TryGetValue(entity.Key, entity.ConstantCategory.Name, entity.Culture, out value, false);
+            bool tryResult = service.TryGetValue(entity.Key, out value, false);
 
             // assert
             Assert.IsTrue(tryResult);
@@ -418,9 +395,25 @@ namespace Core.UnitTesting.Service
             service.Delete(entity);
 
             // act
-            tryResult = service.TryGetValue(entity.Key, entity.ConstantCategory.Name, entity.Culture, out value, false);
+            tryResult = service.TryGetValue(entity.Key, out value, false);
+
+            // assert
             Assert.IsFalse(tryResult);
             Assert.IsNull(value);
+        }
+
+        [UnitTest]
+        [TestMethod()]
+        public override void UpdateByEntityTest()
+        {
+            base.DeleteByEntityListTest();
+        }
+
+        protected override IConstantService ConstructService()
+        {
+            IDbContextBase ctx = Mock.MockHelperBase.BuildMockContext();
+
+            return new ConstantService(ctx);
         }
     }
 }

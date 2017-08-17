@@ -1,20 +1,21 @@
-﻿using System.Diagnostics;
-using System.Reflection;
-using Core.Service;
+﻿using System;
+using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
+using System.Linq;
+using System.Reflection;
+using System.Text;
 using System.Threading;
-using System.Windows.Forms;
+using System.Threading.Tasks;
 
-namespace Core.TraceViewer
+namespace Core.EventLogs
 {
-    static class RegisterEventLogSourceWithOperatingSystem
+    class Registrant
     {
-        //private static string _eventSourceName = "TraceViewerService";
-        //private static string _logName = Assembly.GetExecutingAssembly().GetName().Name;
-        internal static void SimulateInstall(string windowsEventFolder)
+        private static int _maxLogSize = 16384;//1GB
+       public void SimulateInstall(string windowsEventFolder,string logName)
         {
-           //  CheckEventLogExist();
-
+               
             var sourceFolder = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
             CreateManifestFiles(sourceFolder);
 
@@ -37,28 +38,30 @@ namespace Core.TraceViewer
 
             foreach (var filename in Directory.GetFiles(windowsEventFolder, "*.etwManifest.man"))
             {
-                var commandArgs = string.Format("im {0} /rf:\"{1}\" /mf:\"{1}\"",
+                var installCommandArgs = string.Format("im {0} /rf:\"{1}\" /mf:\"{1}\"",
                     filename,
                     Path.Combine(windowsEventFolder, Path.GetFileNameWithoutExtension(filename) + ".dll"));
+                var configArgs = $"sl {logName} /ms:{_maxLogSize}";
+                   
 
                 // as a precaution uninstall the manifest.      
-                Process.Start(new ProcessStartInfo("wevtutil.exe", "um" + commandArgs.Substring(2)) { Verb = "runAs" }).WaitForExit();
-                Thread.Sleep(200);
+                Process.Start(new ProcessStartInfo("wevtutil.exe", "um" + installCommandArgs.Substring(2)) { Verb = "runAs" }).WaitForExit();
+                Thread.Sleep(2000);
 
-                Process.Start(new ProcessStartInfo("wevtutil.exe", commandArgs) { Verb = "runAs" }).WaitForExit();
+                Process.Start(new ProcessStartInfo("wevtutil.exe", installCommandArgs) { Verb = "runAs" }).WaitForExit();
+                Process.Start(new ProcessStartInfo("wevtutil.exe", configArgs) { Verb = "runAs" }).WaitForExit();
+
             }
 
             Thread.Sleep(1000);
 
         }
 
-        //    }
-        //}
-        internal static void SimulateUninstall( string windowsEventFolder)
+
+       public void SimulateUninstall(string windowsEventFolder)
         {
             // run wevtutil elevated to unregister the ETW manifests
-            // try
-            //{
+
             foreach (var filename in Directory.GetFiles(windowsEventFolder, "*.etwManifest.man"))
             {
                 var commandArgs = string.Format("um {0}", filename);
@@ -72,44 +75,20 @@ namespace Core.TraceViewer
             // a command prompt in that directory or visual studio.If all else fails, rebooting should fix this.  
             if (Directory.Exists(windowsEventFolder))
                 Directory.Delete(windowsEventFolder, true);
-            //}
-            //finally
-            //{
-            //    DeleteEventLog();
 
-            //}
 
 
         }
 
         private static void CreateManifestFiles(string locationManifest)
         {
-            Process.Start(new ProcessStartInfo($"{locationManifest}\\eventRegister.exe", $"{locationManifest}\\Core.Service.dll") { Verb = "runAs" }).WaitForExit();
+            var proc = Process.Start(new ProcessStartInfo($"{locationManifest}\\eventRegister.exe", $"{locationManifest}\\Core.Service.dll") { Verb = "runAs" });
+            proc.WaitForExit();
+            if (proc.ExitCode > 0)
+                throw new Exception($"core.mvc or eventRegister.exe is not available in this location:{locationManifest}");
 
         }
-        //private static void CheckEventLogExist()
-        //{
 
-        //    EventLog eventLog = new EventLog(_logName);
-        //    eventLog.Source = _eventSourceName;
-        //    //eventLog.MaximumKilobytes = 8388608;//1GB
-
-        //    if (!EventLog.SourceExists(_eventSourceName))
-        //    {
-        //        EventLog.CreateEventSource(_eventSourceName, _logName);
-
-        //    }
-        //}
-
-        //private static void DeleteEventLog() {
-
-        //    if (EventLog.SourceExists(_eventSourceName))
-        //    {
-        //        EventLog.DeleteEventSource(_eventSourceName);
-        //    }
-
-        //    if (EventLog.Exists(_logName))
-        //    {
-        //        EventLog.Delete(_logName);
     }
+
 }

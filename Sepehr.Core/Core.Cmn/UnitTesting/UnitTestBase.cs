@@ -75,11 +75,11 @@ namespace Core.Cmn.UnitTesting
             return result;
         }
 
-        [ClassInitialize]
-        public virtual void Initialize(TestContext testContext)
-        {
-            Core.Cmn.AppBase.StartApplication();
-        }
+        //[ClassInitialize]
+        //public virtual void Initialize(TestContext testContext)
+        //{
+        //    Core.Cmn.AppBase.StartApplication();
+        //}
 
         protected int GetRandomInt(int min = 1, int max = int.MaxValue)
         {

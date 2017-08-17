@@ -1,10 +1,5 @@
-﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using Core.Cmn.Extensions;
+﻿using Core.Cmn.Extensions;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace Core.Rep.Tests.Cmn
 {
@@ -16,6 +11,5 @@ namespace Core.Rep.Tests.Cmn
         {
             Assert.AreEqual("1sdsd4h20".ExtractNumbers(), "1420");
         }
-
     }
 }

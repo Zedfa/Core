@@ -10,7 +10,6 @@ using System.Collections.Generic;
 
 using System.Linq;
 
-
 namespace Core.UnitTesting.Service
 {
     public abstract class ServiceUnitTestBase<TService, TRepository, TEntity> : UnitTestBase
@@ -19,7 +18,7 @@ namespace Core.UnitTesting.Service
         where TService : IServiceBase<TEntity>
     {
         protected abstract EntityUnitTestHelperBase<TEntity> EntityUnitTestHelper { get; }
-        
+
         protected abstract TService ConstructService();
 
         public virtual void ConstructorTest()
@@ -68,7 +67,7 @@ namespace Core.UnitTesting.Service
 
             // assert
             Assert.IsNotNull(found);
-            EntityUnitTestHelper.AssertEntitiesAreEqual(entity, found);            
+            EntityUnitTestHelper.AssertEntitiesAreEqual(entity, found);
         }
 
         public virtual void CreateByListTest()
@@ -86,7 +85,7 @@ namespace Core.UnitTesting.Service
 
                 // assert
                 Assert.IsNotNull(found);
-                EntityUnitTestHelper.AssertEntitiesAreEqual(entity, found);                
+                EntityUnitTestHelper.AssertEntitiesAreEqual(entity, found);
             }
         }
 
@@ -135,7 +134,7 @@ namespace Core.UnitTesting.Service
 
                 // assert
                 Assert.IsNotNull(found);
-            }            
+            }
         }
 
         public virtual void UpdateByEntityTest()
@@ -244,7 +243,7 @@ namespace Core.UnitTesting.Service
             // assemble
             TService service = ConstructService();
 
-            TEntity entity = EntityUnitTestHelper.CreateSampleEntity();            
+            TEntity entity = EntityUnitTestHelper.CreateSampleEntity();
             entity = service.Create(entity);
 
             // act
@@ -252,7 +251,7 @@ namespace Core.UnitTesting.Service
 
             // assert
             Assert.IsNotNull(found);
-            EntityUnitTestHelper.AssertEntitiesAreEqual(entity, found);            
+            EntityUnitTestHelper.AssertEntitiesAreEqual(entity, found);
         }
 
         public virtual void GetAppBaseTest()
@@ -266,6 +265,5 @@ namespace Core.UnitTesting.Service
             // assert
             Assert.IsNotNull(app);
         }
-
     }
 }
