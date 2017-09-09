@@ -9,7 +9,7 @@ var ngSearchObj = (function () {
         this.schemaTypes = null;
         this.booleanValContainer = {};
         this.multiValueFields = {};
-        this.seWinWidth = "900";
+        this.seWinWidth = "auto";
         this.seWinHeight = "250";
         this.cGId = "";
         this.filterSeperator = "|";
@@ -558,7 +558,6 @@ var ngSearchObj = (function () {
                 result = that.createLookupTemplate(that.getLookupPropertyValue(dataItem.fld.columnId.LId), dataItem);
                 break;
             case "dropdown":
-                debugger;
                 result = that.createDropDownTemplate(that.getDropDownPropertyValue(dataItem.fld.columnId.LId), dataItem);
                 break;
             case "currency":

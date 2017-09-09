@@ -92,6 +92,8 @@
     <Compile Include="Controllers\Cache\CacheInfoManagementController.cs" />
     <Compile Include="Controllers\SepehrError\SepehrErrorController.cs" />
     <Compile Include="Helpers\CustomWrapper\CoreKendoGrid\Settings\Features\Margin.cs" />
+    <Compile Include="UserApiRequest.cs" />
+    <Compile Include="UserControllerRequest.cs" />
     <Compile Include="MvcBaseApplicationStart.cs" />
     <Compile Include="App_Start\BundleConfig.cs" />
     <Compile Include="App_Start\CoreAreaRegistration.cs" />
@@ -280,7 +282,7 @@
     <Compile Include="Helpers\TreeViewWrapper\TreeViewModel.cs" />
     <Compile Include="Helpers\TreeViewWrapper\TreeViewModelBase.cs" />
     <Compile Include="Helpers\TreeViewWrapper\TreeViewTransport.cs" />
-    <Compile Include="IFileService.cs" />
+    <Compile Include="Interface\IFileService.cs" />
     <Compile Include="Helpers\IViewInfo.cs" />
     <Compile Include="Infrastructure\AccountMembership.cs" />
     <Compile Include="Infrastructure\Authentication.cs" />
@@ -418,6 +420,7 @@
     <Content Include="Content\fonts\Yekan.eot" />
     <Content Include="Content\fonts\Yekan.ttf" />
     <Content Include="Content\fonts\Yekan.woff" />
+    <Content Include="Content\images\fav.png" />
     <Content Include="Content\kendo\kendo.dataviz.default.min.css" />
     <Content Include="Content\kendo\kendo.dataviz.min.css" />
     <Content Include="app.config" />
@@ -433,7 +436,6 @@
     <Content Include="Content\images\captcha-loading.gif" />
     <Content Include="Content\images\error-icon.png" />
     <Content Include="Content\images\excel.png" />
-    <Content Include="Content\images\fav.png" />
     <Content Include="Content\images\find-replace.png" />
     <Content Include="Content\images\header.png" />
     <Content Include="Content\images\help.png" />

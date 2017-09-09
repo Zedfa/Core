@@ -13,16 +13,17 @@ namespace Core.Cmn
         public LogInfo(string source) {
             ApplicationName = ConfigHelper.GetConfigValue<string>("ApplicationNameForLog");
             Source = source;
-
+           
         }
 
         public LogInfo([CallerFilePath] string file = null, [CallerMemberName] string method = null, [CallerLineNumber] int line = 0)
         {
             ApplicationName = ConfigHelper.GetConfigValue<string>("ApplicationNameForLog");
-            //IP  = AppBase.Request.IP;
+          
             Source = $"File: {file} , Method: {method} , Line: {line}";
+            
         }
-        
+
         public Exception OccuredException { get; set; }
         public string CustomMessage { get; set; }
 
@@ -30,11 +31,11 @@ namespace Core.Cmn
         public bool RaiseThrowException { get; set; }
         public string Platform { get; set; }
 
-        public string IP { get; set; }
+        //public string IP { get; set; }
 
         public string ApplicationName { get; private set; }
 
-       
+        public IUserRequest Request { get;  set; }
 
     }
 }

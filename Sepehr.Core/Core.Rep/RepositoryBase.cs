@@ -1,26 +1,24 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Data;
-using System.Linq;
-using System.Linq.Expressions;
+﻿using Core.Cmn;
+using Core.Cmn.Attributes;
+using Core.Cmn.Cache;
+using Core.Cmn.EntityBase;
+using Core.Cmn.Extensions;
 using Core.Entity;
 using Core.Repository.Interface;
-using EntityState = Core.Cmn.EntityState;
-using Core.Cmn.Extensions;
-using Core.Cmn;
-using Core.Cmn.EntityBase;
-using Core.Cmn.Cache;
-using System.Diagnostics;
+using System;
+using System.Collections.Generic;
+using System.Data;
 using System.Data.SqlClient;
-using System.Text;
-using Core.Cmn.Attributes;
-using Core.Ef.Extensions;
+using System.Diagnostics;
 using System.Globalization;
+using System.Linq;
 using System.Linq.Dynamic;
+using System.Linq.Expressions;
+using System.Text;
+using EntityState = Core.Cmn.EntityState;
 
 namespace Core.Rep
-{//, IDTOQueryableBuilder<TObject>
-
+{
     public class RepositoryBase
     {
         static RepositoryBase()
@@ -29,6 +27,7 @@ namespace Core.Rep
         }
 
         private static IDependencyInjectionFactory _dependencyInjectionFactory;
+
         public static IDependencyInjectionFactory DependencyInjectionFactory
         {
             get
@@ -38,6 +37,7 @@ namespace Core.Rep
                 return _dependencyInjectionFactory;
             }
         }
+
         public static int DefualtMaxRetriesCountForDeadlockRetry { get; set; }
     }
 
@@ -49,16 +49,9 @@ namespace Core.Rep
 
         protected IDbContextBase ContextBase;
 
-
         private IDbSetBase<TObject> dbSet;
 
-        //public virtual IDbContextBase ContextGenerator()
-        //{
-        //    return null;
-        //}
-
-        Stopwatch Stopwatch { get; set; }
-
+        private Stopwatch Stopwatch { get; set; }
 
         public RepositoryBase(IDbContextBase dbContextBase)
         {
@@ -72,9 +65,9 @@ namespace Core.Rep
             ContextBase = DependencyInjectionFactory.CreateContextInstance();
         }
 
-        //protected Func<IQueryable<TObject>, IQueryable<IDTO>> DtoQueryableDelegate;
-
-        protected virtual void SetQueryable(IQueryable<TObject> queryable) { }
+        protected virtual void SetQueryable(IQueryable<TObject> queryable)
+        {
+        }
 
         protected IQueryable<IDto> QueryableDtos { get; set; }
 
@@ -85,13 +78,13 @@ namespace Core.Rep
             return QueryableDtos;
         }
 
-
         public virtual IQueryable<TObject> All(bool canUseCacheIfPossible = true)
         {
             return DbSet.AsQueryable();
         }
 
         private static string _tableName;
+
         public string TableName
         {
             get
@@ -123,13 +116,13 @@ namespace Core.Rep
                     //else
                     //{
                     //    _tableName = entityType.Name;
-
                 }
                 return _tableName;
             }
         }
 
         private string _schema;
+
         public string Schema
         {
             get
@@ -168,6 +161,7 @@ namespace Core.Rep
         }
 
         public static string _keyName;
+
         public string KeyName
         {
             get
@@ -179,6 +173,7 @@ namespace Core.Rep
                 return _keyName;
             }
         }
+
         public IDbSetBase<TObject> DbSet
         {
             get
@@ -195,9 +190,6 @@ namespace Core.Rep
                 ContextBase.Dispose();
         }
 
-
-
-
         public virtual IQueryable<TObject> Filter(Expression<Func<TObject, bool>> predicate, bool allowFilterDeleted = true)
         {
             return DbSet.Where(predicate);
@@ -206,9 +198,7 @@ namespace Core.Rep
         public virtual IQueryable<TObject> Filter(string expression, bool allowFilterDeleted = true, params object[] value)
         {
             return DbSet.Where(expression, value).AsQueryable();
-
         }
-
 
         public IQueryable<TObject> Filter(Expression<Func<TObject, bool>> filter,
          out int total, int index = 0, int size = 50)
@@ -231,9 +221,7 @@ namespace Core.Rep
                 _resetSet.Skip(skipCount).Take(expressionInfo.PageSize);
             total = _resetSet.Count();
             return _resetSet.AsQueryable();
-
         }
-
 
         public bool Contains(Expression<Func<TObject, bool>> predicate)
         {
@@ -243,7 +231,6 @@ namespace Core.Rep
         public virtual TObject Find(params object[] keys)
         {
             return DbSet.Find(keys);
-
         }
 
         public virtual TObject Find(Expression<Func<TObject, bool>> predicate, bool allowFilterDeleted = true)
@@ -261,7 +248,6 @@ namespace Core.Rep
 
         public virtual List<TObject> Create(List<TObject> objectList, bool allowSaveChange = true)
         {
-
             var result = DbSet.AddRange(objectList);
             if (allowSaveChange)
                 SaveChanges();
@@ -271,26 +257,8 @@ namespace Core.Rep
 
         public virtual int SaveChanges()
         {
-            //try
-            //{
-
-
             return ContextBase.SaveChanges();
-            //}
-            //catch (DbUpdateConcurrencyException ex)
-            //{
-            //    var objContext = ((IObjectContextAdapter)ContextBase).ObjectContext;
-            //    // Get failed entry
-            //    var entry = ex.Entries.Select(e => e.Entity);
-            //    // Now call refresh on ObjectContext
-            //    objContext.Refresh(RefreshMode.ClientWins, entry);
-            //    return entry.Count();
-
-            //}
-
-
         }
-
 
         public virtual int Delete(TObject t, bool allowSaveChange = true)
         {
@@ -298,10 +266,7 @@ namespace Core.Rep
             if (allowSaveChange)
                 return SaveChanges();
             return 0;
-
         }
-
-
 
         public virtual int Count
         {
@@ -313,7 +278,6 @@ namespace Core.Rep
 
         public virtual int Update(TObject t, bool allowSaveChange = true)
         {
-
             //example of using an IQueryable as the filter for the update
             //var users = context.Users.Where(u => u.FirstName == "firstname");
             // context.Users.Update(users, u => new User { FirstName = "newfirstname" });
@@ -336,96 +300,24 @@ namespace Core.Rep
             return 0;
         }
 
-
-
-        //private LambdaExpression CreateExpression(Type objectType, string expression)
-        //{
-
-        //    LambdaExpression lambdaExpression =
-        //        System.Linq.Dynamic.DynamicExpression.ParseLambda(
-        //            objectType, typeof(bool), expression);
-        //    return lambdaExpression;
-        //}
-
         public virtual int Update(Expression<Func<TObject, bool>> predicate, Expression<Func<TObject, TObject>> updatepredicate, bool allowSaveChange = true)
         {
-
             var res = DbSet.Where(predicate).Update(updatepredicate);
             if (allowSaveChange)
                 return SaveChanges();
             return res;
         }
 
-
         public virtual int Delete(Expression<Func<TObject, bool>> predicate, bool allowSaveChange = true)
         {
-            //Remark:Use Extended For Delete
-            //var objects = Filter(predicate);
-            //foreach (var obj in objects)
-            //  DbSet.Remove(obj);
             var res = DbSet.Where(predicate).Delete();
             if (allowSaveChange)
                 return SaveChanges();
             return res;
         }
 
-        //Remark:
-        ////public virtual TObject CreateAndAttach<T>(TObject tObject, Type attachObject, List<object> attachedList, T t)
-        ////{
-        ////    //var role = new PegahRole() { Guid = pegahRole };
-
-        ////    //agar in kar ra anjam dahim row jadid dar pegahrole inser nemikonad.
-        ////    // ctx.PegahRoles.Attach(role);
-        ////    // role.PegahUsers.Add(PegahUser);
-
-        ////    var attacheDbset = ContextBase.Set(attachObject);
-        ////    foreach (var item in attachedList)
-        ////    {
-        ////        var finded = attacheDbset.Find(item);
-        ////        attacheDbset.Attach(finded);
-        ////        (tObject["Roles"] as ICollection<T>).Add((T)finded);
-        ////    }
-
-        ////    var newEntry = DbSet.Add(tObject);
-        ////    ContextBase.SaveChanges();
-        ////    return newEntry;
-        ////}
-
-        ////public virtual TObject UpdateAndAttach<T>(TObject t, List<object> attachedList, List<T> removedList, Expression<Func<TObject, bool>> predicate)
-        ////{
-        ////    var attacheDbset = ContextBase.Set(typeof(T));
-
-        ////    //  var removedList1= (t["Roles"] as ICollection<T>).ToList();
-
-
-        ////    foreach (var item in attachedList)
-        ////    {
-        ////        var finded = attacheDbset.Find(item);
-        ////        attacheDbset.Attach(finded);
-        ////        (t["Roles"] as ICollection<T>).Add((T)finded);
-        ////        // attacheDbset.PegahUsers.Add(PegahUser);
-        ////    }
-
-        ////    // (T["Users"] as t).Add(t);
-        ////    DbSet.Add(t);
-
-        ////    var users = DbSet.Include("Roles").Single(predicate);
-        ////    var newRoles = attacheDbset.Where(r => selectedRoles.Contains(r.Id)).ToList();
-        ////    foreach (var item in removedList)
-        ////    {
-
-        ////        (t["Roles"] as ICollection<T>).Clear();
-
-
-
-
-        ////    }
-        ////    ContextBase.SaveChanges();
-        ////    return t;
-        ////}
         public int Delete(List<TObject> itemsForDeletion, bool allowSaveChange = true)
         {
-
             itemsForDeletion.ForEach(item => ContextBase.SetContextState(item, EntityState.Deleted));
             if (allowSaveChange)
             {
@@ -491,6 +383,7 @@ namespace Core.Rep
                 return func.Invoke(GetQueryableForCahce((Activator.CreateInstance(ContextBase.GetType()) as IDbContextBase)) as IQueryable<TObject>, param1);
             }
         }
+
         public IQueryable<T> Cache<T, P1, P2>(Func<IQueryable<TObject>, P1, P2, IQueryable<T>> func, P1 param1, P2 param2, bool canUseCacheIfPossible = true) where T : IEntity, new()
         {
             if (canUseCacheIfPossible)
@@ -529,7 +422,6 @@ namespace Core.Rep
             {
                 return func.Invoke(GetQueryableForCahce((Activator.CreateInstance(ContextBase.GetType()) as IDbContextBase)) as IQueryable<TObject>, param1, param2, param3);
             }
-
         }
 
         public IQueryable<T> Cache<T, P1, P2, P3, P4>(Func<IQueryable<TObject>, P1, P2, P3, P4, IQueryable<T>> func, P1 param1, P2 param2, P3 param3, P4 param4, bool canUseCacheIfPossible = true) where T : IEntity, new()
@@ -551,8 +443,6 @@ namespace Core.Rep
                 return func.Invoke(GetQueryableForCahce((Activator.CreateInstance(ContextBase.GetType()) as IDbContextBase)) as IQueryable<TObject>, param1, param2, param3, param4);
             }
         }
-
-
 
         public IQueryable<T> RefreshCache<T>(Func<IQueryable<TObject>, IQueryable<T>> func) where T : EntityBase<T>, new()
         {
@@ -625,8 +515,6 @@ namespace Core.Rep
                 {
                     s.Append("<br/>");
                     s.Append(item.inUsedTbName + "," + " ");
-
-
                 }
                 s.Append("در حال استفاده می باشد");
                 throw new Exception(s.ToString(), new Exception(s.ToString(), null));
@@ -634,12 +522,10 @@ namespace Core.Rep
 
             ContextBase.SetContextState(entity, EntityState.Deleted);
 
-
             if (allowSaveChange)
                 return SaveChanges();
             return 0;
         }
-
 
         public byte[] GetMaxTimeStamp()
         {

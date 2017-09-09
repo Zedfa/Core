@@ -114,15 +114,15 @@ namespace Core.Service
             }
         }
 
-        public Exception Handle(string IP, Exception ex, string customMessage, [CallerFilePath] string file = null, [CallerMemberName] string method = null, [CallerLineNumber] int line = 0)
-        {
-            var info = new LogInfo($"File: {file} , Method: {method} , Line: {line}");
-            info.OccuredException = ex;
-            info.CustomMessage = customMessage;
-            info.IP = IP;
-            HandleLogInfo(info);
-            return ex;
-        }
+        //public Exception Handle(string IP, Exception ex, string customMessage, [CallerFilePath] string file = null, [CallerMemberName] string method = null, [CallerLineNumber] int line = 0)
+        //{
+        //    var info = new LogInfo($"File: {file} , Method: {method} , Line: {line}");
+        //    info.OccuredException = ex;
+        //    info.CustomMessage = customMessage;
+        //    info.Request.IP = IP;
+        //    HandleLogInfo(info);
+        //    return ex;
+        //}
 
         public Exception Handle(Exception ex, string customMessage, string source, [CallerFilePath] string file = null, [CallerMemberName] string method = null, [CallerLineNumber] int line = 0)
         {
@@ -177,13 +177,13 @@ namespace Core.Service
             HandleLogInfo(info);
         }
 
-        public void Write(string customMessage, string ip, [CallerFilePath] string file = null, [CallerMemberName] string method = null, [CallerLineNumber] int line = 0)
-        {
-            var info = new LogInfo($"File: {file} , Method: {method} , Line: {line}");
-            info.CustomMessage = customMessage;
-            info.IP = ip;
-            HandleLogInfo(info);
-        }
+        //public void Write(string customMessage, string ip, [CallerFilePath] string file = null, [CallerMemberName] string method = null, [CallerLineNumber] int line = 0)
+        //{
+        //    var info = new LogInfo($"File: {file} , Method: {method} , Line: {line}");
+        //    info.CustomMessage = customMessage;
+        //    info.Request.IP = ip;
+        //    HandleLogInfo(info);
+        //}
 
         private void FillLogObjectList(LogInfo logInfo, List<LogInfo> logInfoList)
         {
@@ -195,7 +195,6 @@ namespace Core.Service
                 var childLog = new LogInfo(logInfo.Source);
                 childLog.OccuredException = logInfo.OccuredException.InnerException;
                 childLog.CustomMessage = logInfo.CustomMessage;
-                childLog.IP = logInfo.IP;
                 childLog.Platform = logInfo.Platform;
                 FillLogObjectList(childLog, logInfoList);
             }
@@ -219,7 +218,10 @@ namespace Core.Service
                     xmlElement.AppendChild(doc.CreateElement("CustomMessage")).InnerText = logInfo.CustomMessage + "." + logInfo.OccuredException?.Message;
                     xmlElement.AppendChild(doc.CreateElement("InnerExceptionCount")).InnerText = (logObjects.Count - 1).ToString();
                     xmlElement.AppendChild(doc.CreateElement("CreateDateTime")).InnerText = DateTime.Now.ToString();
-                    xmlElement.AppendChild(doc.CreateElement("IP")).InnerText = logObjects[i].IP;
+                    xmlElement.AppendChild(doc.CreateElement("IP")).InnerText = logObjects[i].Request?.IP;
+                    xmlElement.AppendChild(doc.CreateElement("Data")).InnerText = logObjects[i].Request?.Data;
+                    xmlElement.AppendChild(doc.CreateElement("Url")).InnerText = logObjects[i].Request?.Url;
+                    xmlElement.AppendChild(doc.CreateElement("Method")).InnerText = logObjects[i].Request?.Method;
                     xmlElement.AppendChild(doc.CreateElement("Platform")).InnerText = logObjects[i].Platform;
                     xmlElement.AppendChild(doc.CreateElement(String.Format("ExceptionType", i))).InnerText = logObjects[i].OccuredException?.GetType().Name;
 
@@ -231,7 +233,10 @@ namespace Core.Service
                     xmlElement.AppendChild(doc.CreateElement(String.Format("InnerStackTrace_{0}", i))).InnerText = logObjects[i].OccuredException?.StackTrace;
                     xmlElement.AppendChild(doc.CreateElement(String.Format("InnerSource_{0}", i))).InnerText = logObjects[i].OccuredException?.Source;
                     xmlElement.AppendChild(doc.CreateElement("CreateDateTime")).InnerText = DateTime.Now.ToString();
-                    xmlElement.AppendChild(doc.CreateElement("IP")).InnerText = logObjects[i].IP;
+                    xmlElement.AppendChild(doc.CreateElement("IP")).InnerText = logObjects[i].Request?.IP;
+                    xmlElement.AppendChild(doc.CreateElement("Data")).InnerText = logObjects[i].Request?.Data;
+                    xmlElement.AppendChild(doc.CreateElement("Url")).InnerText = logObjects[i].Request?.Url;
+                    xmlElement.AppendChild(doc.CreateElement("Method")).InnerText = logObjects[i].Request?.Method;
                     xmlElement.AppendChild(doc.CreateElement("Platform")).InnerText = logObjects[i].Platform;
                 }
             }
@@ -336,7 +341,18 @@ namespace Core.Service
             log.ClientPlatform = eventLog.Platform;
             log.CreateDate = DateTime.Now;
             log.Source = eventLog.Source;
-            log.IP = eventLog.IP;
+            if (eventLog.Request != null )
+            {
+                log.Request = new Request
+                {
+                    IP = eventLog.Request.IP,
+                    Url = eventLog.Request.Url,
+                    Data = eventLog.Request.Data,
+                    Method = eventLog.Request.Method
+                };
+              
+            }
+            
             if (ex != null)
             {
                 ExceptionLog exceptionLog = new ExceptionLog();
@@ -390,19 +406,20 @@ namespace Core.Service
         private void HandleLogInfo(LogInfo info)
         {
             try
-            {
+            {                 
+                info.Request = DependencyInjectionFactory.TryToResolveIRequest()?.UserRequest;
                 LogToDbException(info);
             }
             catch (Exception ex)
             {
                 try
                 {
-                    //ExceptionXMLHandler.Handle(info);
+                   
                     LogToFileException(info);
                     var log = new LogInfo();
                     log.OccuredException = ex;
                     log.CustomMessage = "خطا در هنگام ثبت لاگ در دیتابیس!";
-                    // ExceptionXMLHandler.Handle(log);
+                  
                     LogToFileException(log);
 
                 }
@@ -422,8 +439,9 @@ namespace Core.Service
             
             WriteInConsole(logInfo);
             var log = GenerateLog(logInfo);
-            //var repositoryBase = new LogRepository();
-            _repositoryBase.Create(log);
+            // hatman bayad new shavad choon dbcontext nemitavanad thread safe bashad
+            var repositoryBase = new LogRepository();
+            repositoryBase.Create(log);
         }
 
         private void LogToDbException(List<LogInfo> logInfoList)
@@ -437,8 +455,8 @@ namespace Core.Service
                 logs.Add(GenerateLog(logInfo));
             }
 
-            //var repositoryBase = new LogRepository();
-            _repositoryBase.Create(logs);
+            var repositoryBase = new LogRepository();
+            repositoryBase.Create(logs);
         }
 
         private void WriteInConsole(LogInfo logInfo)

@@ -13,7 +13,8 @@ namespace Core.Entity
 
     public class Log : EntityBase<Log>
     {
-       
+        [Key]
+        [Column(Order = 1)]
         public int Id { get; set; }
         //public string UserId { get; set; }
         public string CustomMessage { get; set; }
@@ -22,10 +23,6 @@ namespace Core.Entity
         //public string LogType { get; set; }
         public virtual ExceptionLog ExceptionLog { get; set; }
         /// <summary>
-        /// fill automatically or manually
-        /// </summary>
-        public string IP { get; set; }
-        /// <summary>
         /// fill in compile time automatically
         /// </summary>
         public string Source { get; set; }
@@ -33,8 +30,9 @@ namespace Core.Entity
         /// <summary>
         /// fill from config file by "ApplicationNameForLog" key 
         /// </summary>
-        public string ApplicationName{ get; set; }
+        public string ApplicationName { get; set; }
 
+        public virtual Request Request { get; set; }
 
 
     }

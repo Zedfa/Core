@@ -24,8 +24,22 @@ namespace Core.Cmn.Cache
         [DataMember]
         public int BasicKey { get; set; }
 
+        private int _autoRefreshInterval;
         [DataMember]
-        public int AutoRefreshInterval { get; set; }
+        public int AutoRefreshInterval
+        {
+            get
+            {
+                if (_autoRefreshInterval == 0)
+                    return 360000;
+                else
+                    return _autoRefreshInterval;
+            }
+            set
+            {
+                _autoRefreshInterval = value;
+            }
+        }
 
         [IgnoreDataMember]
         public MethodInfo MethodInfo { get; set; }
@@ -161,8 +175,12 @@ namespace Core.Cmn.Cache
 
         [DataMember]
         public int LastRecordCount { get; set; }
-
+        [DataMember]
         public bool NotYetGetCacheData { get; internal set; }
+        [DataMember]
+        public byte[] MaxTimeStampForDeletedRecord2 { get; internal set; }
+        [DataMember]
+        public byte[] MaxTimeStampForDeletedRecord { get; internal set; }
 
         public event EventHandler<CacheChangeEventArgs> OnAddEntities;
 

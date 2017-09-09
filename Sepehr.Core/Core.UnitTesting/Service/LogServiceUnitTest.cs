@@ -4,6 +4,7 @@ using Core.Entity;
 using Core.Rep;
 using Core.Service;
 using Core.UnitTesting.Entity;
+using Core.UnitTesting.Mock;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System;
 using System.Collections.Generic;
@@ -27,21 +28,7 @@ namespace Core.UnitTesting.Service
             }
         }
 
-        //public string LogPath
-        //{
-        //    get
-        //    {
-        //        return ConfigurationManager.AppSettings["LogPath"].ToString();
-        //    }
-        //}
 
-        //public string ApplicationName
-        //{
-        //    get
-        //    {
-        //        return ConfigurationManager.AppSettings["ApplicationNameForLog"].ToString();
-        //    }
-        //}
 
         [TestMethod()]
         public override void ConstructorTest()
@@ -56,6 +43,11 @@ namespace Core.UnitTesting.Service
             return new LogService(ctx);
         }
 
+        [ClassInitialize]
+        public static void Initialize(TestContext testContext)
+        {
+            Core.Cmn.AppBase.StartApplication();
+        }
         [TestMethod()]
         public override void AllTest()
         {
@@ -127,39 +119,50 @@ namespace Core.UnitTesting.Service
             Assert.IsTrue(registeredLog.Any());
         }
 
+       
+
         [TestMethod]
-        public void Handle_InDB_IP_False_Test()
+        public void Write_InDB_UserRequest_True_Test()
         {
-            string ip = "192.168.1.49";
-            var message = $"تست لاگ برداری در متد Handle_InDB_IP_True_Test در تاریخ {DateTime.Now.ToShortDateString()}";
+
+            var message = $"تست لاگ برداری در متد Write_InDB_UserRequest_True_Test در تاریخ {DateTime.Now.ToShortDateString()}";
 
             var service = ConstructService();
+           
+            var requestInfo = ServiceBase.DependencyInjectionFactory.CreateInjectionInstance<IRequest>();
+            var userRequest = new MockUserRequest();
+            requestInfo.UserRequest = userRequest;
 
             // act
-            service.Handle(ip, new NotImplementedException(), message, "Core.UnitTest");
+            service.Write(message);
 
             //assert
-            var registeredLog = service.Filter(log => log.IP.Equals("localhost"));
-            Assert.IsFalse(registeredLog.Any());
+            var registeredLog = service.Filter(log => log.Request.IP.Equals("::1"));
+            Assert.IsTrue(registeredLog.Any());
+
+
         }
 
         [TestMethod]
-        [ExpectedException(typeof(NotImplementedException))]
-        public void Handle_InDB_IP_ThrowException_True_Test()
+        public void Handle_InDB_UserRequest_True_Test()
         {
-            string ip = "192.168.1.49";
-            var message = $"تست لاگ برداری در متد Handle_InDB_IP_True_Test در تاریخ {DateTime.Now.ToShortDateString()}";
+
+            var message = $"تست لاگ برداری در متد Handle_InDB_UserRequest_True_Test در تاریخ {DateTime.Now.ToShortDateString()}";
 
             var service = ConstructService();
 
+            var requestInfo = ServiceBase.DependencyInjectionFactory.CreateInjectionInstance<IRequest>();
+            var userRequest = new MockUserRequest();
+            requestInfo.UserRequest = userRequest;
+
             // act
-            var exception = service.Handle(ip, new NotImplementedException(), message, "Core.UnitTest");
+            service.Handle( new NotFiniteNumberException("NotFiniteNumber", new PlatformNotSupportedException()),  message);
 
             //assert
-            var registeredLog = service.Filter(log => log.IP.Equals(ip));
+            var registeredLog = service.Filter(log => log.Request.IP.Equals("::1"));
             Assert.IsTrue(registeredLog.Any());
 
-            throw exception;
+
         }
 
         [TestMethod]

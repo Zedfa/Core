@@ -11,5 +11,6 @@ namespace Core.Cmn
     {
         T CreateInjectionInstance<T>();
         IDbContextBase CreateContextInstance();
-    }
+        IRequest TryToResolveIRequest();
+    }       
 }

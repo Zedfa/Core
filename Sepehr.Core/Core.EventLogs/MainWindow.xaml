@@ -10,10 +10,60 @@
         mc:Ignorable="d"
         Title="MainWindow" 
         Height="{Binding SystemParameters.PrimaryScreenHeight}" 
-        Width="{Binding SystemParameters.PrimaryScreenWidth}" >
+        Width="{Binding SystemParameters.PrimaryScreenWidth}" Icon="Images/trace.png" >
     <Grid >
 
         <TabControl Background="AliceBlue">
+          
+            <TabItem Header="EventLog Viewer">
+                <Grid  VerticalAlignment="Stretch" Margin="0,0,0,0" Width="auto" Height="auto" HorizontalAlignment="Stretch" >
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition />
+                    </Grid.ColumnDefinitions>
+
+                    <Grid Grid.Column="1" >
+                        <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Top" Height="30" Margin="0,0,5,0" Panel.ZIndex="100">
+                            <Button  Width="50" HorizontalAlignment="Right" VerticalAlignment="Top"  Click="RefreshLogs">Refresh</Button>
+                            <Button Width="100"  VerticalAlignment="Top"  Click="SaveLogGridConfig">Save Grid Config</Button>
+                            <ComboBox SelectedIndex="0"  Name="cmbAutoRefrsh" SelectionChanged="cmbAutoRefrsh_SelectionChanged" VerticalAlignment="Top" 
+                                      Height="20" DisplayMemberPath="Value" SelectedValuePath="Key" ItemsSource="{Binding Path= AutoRefreshItems}" Width="150"  >
+                            </ComboBox>
+                        </StackPanel>
+                        <dxg:GridControl  Margin="0,0,0,0" x:Name="eventLogGrid">
+                            <dxg:GridControl.View>
+                                <dxg:TableView AllowPerPixelScrolling="True" ShowTotalSummary="True" AllowEditing="False">
+                                </dxg:TableView>
+                            </dxg:GridControl.View>
+                            <dxg:GridControl.Columns>
+                                <dxg:GridColumn Header="EventID" Width="50" Binding="{Binding Path=RowData.Row.System.EventID}" />
+                                <dxg:GridColumn Header="TraceKey" Width="70" Binding="{Binding Path=RowData.Row.TraceKey}"/>
+                                <dxg:GridColumn Header="Level" Width="100"  >
+                                    <dxg:GridColumn.DisplayTemplate>
+                                        <ControlTemplate>
+                                            <StackPanel Orientation="Horizontal" Background="{Binding RowData.Row.System.Color}" >
+                                                <!--<Image Source="{Binding Path=RowData.Row.System.LevelIcon}" Loaded="Image_Loaded" Height="16" Width="16"  VerticalAlignment="Stretch"  HorizontalAlignment="Stretch"></Image>-->
+                                                <TextBlock Text="{Binding Path=RowData.Row.System.LevelText}" >
+                                                   
+                                                </TextBlock>
+                                                
+                                            </StackPanel>
+                                        </ControlTemplate>
+                                    </dxg:GridColumn.DisplayTemplate>
+                                </dxg:GridColumn>
+                                <dxg:GridColumn Header="TimeCreated" Width="150" Binding="{Binding Path=RowData.Row.System.TimeCreated.SystemTime}">
+                                    <dxg:GridColumn.EditSettings>
+                                        <dxe:TextEditSettings Mask="yyyy-MM-dd HH:mm:ss" MaskType="DateTime"
+                                              MaskUseAsDisplayFormat="True"/>
+                                    </dxg:GridColumn.EditSettings>
+                                </dxg:GridColumn>
+                                <dxg:GridColumn Header="Message" Binding="{Binding Path=RowData.Row.Message}" AllowBestFit="true" AllowEditing="true" BestFitMaxRowCount="1000" BestFitMode="Smart" />
+                               
+                                <!--<dxg:GridColumn Header="RecordID" Width="50" Binding="{Binding Path=RowData.Row.System.RecordID}"/>-->
+                            </dxg:GridControl.Columns>
+                        </dxg:GridControl>
+                    </Grid>
+                </Grid>
+            </TabItem>
             <TabItem Header="Install/UnInstall EventLog">
                 <Grid  Margin="10">
                     <Grid.ColumnDefinitions>
@@ -28,72 +78,6 @@
                     <Button Width="200" Height="50" Grid.Column="0" Grid.Row="0"   Click="InstallEventLogButton_Click" >Install Event Log</Button>
                     <Button Width="200" Height="50" Grid.Column="0" Grid.Row="1"   Click="UnInstallEventLogButton_Click">Uninstall EventLog</Button>
 
-                </Grid>
-            </TabItem>
-            <TabItem Header="EventLog Viewer">
-                <Grid Width="auto" >
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="250"/>
-                        <ColumnDefinition Width="*"/>
-                    </Grid.ColumnDefinitions>
-                    <TreeView x:Name="treeViewEventLogs"    
-                  SelectedItemChanged="treeViewEventLogs_SelectedItemChanged" Width="200" Grid.Column="0" HorizontalAlignment="Left" >
-                        <TreeView.ItemContainerStyle>
-                            <Style TargetType="{x:Type TreeViewItem}">
-                                <Setter Property="IsSelected" Value="{Binding IsSelected}"></Setter>
-                                <Setter Property="Template">
-                                    <Setter.Value>
-                                        <ControlTemplate TargetType="TreeViewItem">
-                                            <TextBlock  Text="{Binding Name}"></TextBlock>
-                                        </ControlTemplate>
-                                    </Setter.Value>
-                                </Setter>
-                                <Style.Triggers>
-                                    <Trigger Property="IsSelected" Value="True">
-                                        <!-- if you want to customize the appearance of a selected element do it here -->
-                                        <Setter Property="FontWeight" Value="Bold" />
-                                        <Setter Property="Foreground" Value="Salmon"/>
-                                    </Trigger>
-                                </Style.Triggers>
-                            </Style>
-                        </TreeView.ItemContainerStyle>
-
-                    </TreeView>
-                    <Grid Grid.Column="1">
-                        <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Top" Height="50" Margin="0,0,0,0">
-                            <Button Height="40" Width="50" HorizontalAlignment="Right" VerticalAlignment="Top"  Click="RefreshLogs">Refresh</Button>
-                            <Button Height="40" Width="100"  VerticalAlignment="Top"  Click="SaveLogGridConfig">Save Grid Config</Button>
-                        </StackPanel>
-                        <dxg:GridControl Margin="0,50,0,0"  x:Name="eventLogGrid" Width="auto" Height="auto" HorizontalAlignment="Center" 
-                           >
-                            <dxg:GridControl.View>
-                                <dxg:TableView AllowPerPixelScrolling="True" ShowTotalSummary="True" AllowEditing="False">
-                                </dxg:TableView>
-                            </dxg:GridControl.View>
-                            <dxg:GridControl.Columns>
-                                <dxg:GridColumn Header="Level" Width="100"  >
-                                    <dxg:GridColumn.DisplayTemplate>
-                                        <ControlTemplate>
-                                            <StackPanel Orientation="Horizontal" Background="White">
-                                                <!--<Image Source="{Binding Path=RowData.Row.System.LevelIcon}" Loaded="Image_Loaded" Height="16" Width="16"  VerticalAlignment="Stretch"  HorizontalAlignment="Stretch"></Image>-->
-                                                <TextBlock Text="{Binding Path=RowData.Row.System.LevelText}" ></TextBlock>
-                                            </StackPanel>
-                                        </ControlTemplate>
-                                    </dxg:GridColumn.DisplayTemplate>
-                                </dxg:GridColumn>
-                                <dxg:GridColumn Header="TimeCreated" Width="150" Binding="{Binding Path=RowData.Row.System.TimeCreated.SystemTime}">
-                                    <dxg:GridColumn.EditSettings>
-                                        <dxe:TextEditSettings Mask="yyyy-MM-dd HH:mm:ss" MaskType="DateTime"
-                                              MaskUseAsDisplayFormat="True"/>
-                                    </dxg:GridColumn.EditSettings>
-                                </dxg:GridColumn>
-                                <dxg:GridColumn Header="Message" Width="500" Binding="{Binding Path=RowData.Row.Message}" AllowBestFit="true" BestFitMaxRowCount="1000" BestFitMode="Smart" />
-                                <dxg:GridColumn Header="TraceKey" Width="70" Binding="{Binding Path=RowData.Row.TraceKey}"/>
-                                <dxg:GridColumn Header="EventID" Width="50" Binding="{Binding Path=RowData.Row.System.EventID}" />
-                                <!--<dxg:GridColumn Header="RecordID" Width="50" Binding="{Binding Path=RowData.Row.System.RecordID}"/>-->
-                            </dxg:GridControl.Columns>
-                        </dxg:GridControl>
-                    </Grid>
                 </Grid>
             </TabItem>
         </TabControl>

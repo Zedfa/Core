@@ -16,7 +16,7 @@ namespace Core.Service
         {
 
         }
-        [Cacheable(EnableSaveCacheOnHDD = true, ExpireCacheSecondTime = 120, EnableAutomaticallyAndPeriodicallyRefreshCache = true)]
+        [Cacheable(EnableSaveCacheOnHDD = true, AutoRefreshInterval = 120, CacheRefreshingKind = CacheRefreshingKind.Slide)]
         public static bool WriteToHardCaches()
         {
             var cacheList = CacheService.ObjectCache.ToList();
@@ -24,17 +24,21 @@ namespace Core.Service
             {
                 cacheList.Where(cache => cache.Key.StartsWith(ci.BasicKey.ToString()) && !cache.Key.Contains("_Fake")).ToList().ForEach(cache =>
                 {
-                    try
+                    lock (ci)
                     {
-                        var binary = Core.Cmn.Extensions.SerializationExtensions.SerializetoBinary(cache.Value.GetType().GetProperty("Data").GetValue(cache.Value));
-                        if (!System.IO.Directory.Exists(System.AppDomain.CurrentDomain.BaseDirectory + @"/Cache"))
-                            System.IO.Directory.CreateDirectory(System.AppDomain.CurrentDomain.BaseDirectory + @"/Cache");
-                        System.IO.File.WriteAllBytes(string.Format(System.AppDomain.CurrentDomain.BaseDirectory + @"/Cache/{0}.Cache", ci.Name), binary);
-                    }
-                    catch (Exception ex)
-                    {
-                        //  Core.Cmn.AppBase.LogService.Handle(ex, "", string.Format("error in write cache in HDD = {0}", ci.Name));
-                        Core.Cmn.AppBase.LogService.Handle(ex, string.Format("error in write cache in HDD = {0}", ci.Name));
+                        try
+                        {
+                            var data = cache.Value.GetType().GetProperty("Data").GetValue(cache.Value);
+                            var binary = Core.Cmn.Extensions.SerializationExtensions.SerializetoBinary(data);
+                            if (!System.IO.Directory.Exists(System.AppDomain.CurrentDomain.BaseDirectory + @"/Cache"))
+                                System.IO.Directory.CreateDirectory(System.AppDomain.CurrentDomain.BaseDirectory + @"/Cache");
+                            System.IO.File.WriteAllBytes(string.Format(System.AppDomain.CurrentDomain.BaseDirectory + @"/Cache/{0}.Cache", ci.Name), binary);
+                        }
+                        catch (Exception ex)
+                        {
+                            //  Core.Cmn.AppBase.LogService.Handle(ex, "", string.Format("error in write cache in HDD = {0}", ci.Name));
+                            Core.Cmn.AppBase.LogService.Handle(ex, string.Format("error in write cache in HDD = {0}", ci.Name));
+                        }
                     }
                 });
             });

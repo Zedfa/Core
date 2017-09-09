@@ -1,7 +1,6 @@
 ﻿
 using System;
-
-
+using System.Threading;
 
 namespace Core.Cmn
 {
@@ -16,7 +15,7 @@ namespace Core.Cmn
             {
 
                 if (dbContextType == null)
-                    dbContextType = AppBase.DependencyInjectionManager.Resolve<IDbContextBase>().GetType(); 
+                    dbContextType = AppBase.DependencyInjectionManager.Resolve<IDbContextBase>().GetType();
                 return dbContextType;
             }
         }
@@ -28,7 +27,14 @@ namespace Core.Cmn
 
         public T CreateInjectionInstance<T>()
         {
-                return AppBase.DependencyInjectionManager.Resolve<T>();
+            return AppBase.DependencyInjectionManager.Resolve<T>();
+        }
+        public IRequest TryToResolveIRequest()
+        {
+
+            IRequest request = null;
+            Core.Cmn.AppBase.AllRequests.TryGetValue(Thread.CurrentThread.ManagedThreadId, out request);
+            return request;
         }
     }
 }

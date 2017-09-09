@@ -82,16 +82,16 @@ namespace Core.Cmn.Cache
                 resultList = newData;
             else
             {
-
-
                 if (!cacheInfo.DisableToSyncDeletedRecord_JustIfEnableToFetchOnlyChangedDataFromDB && !cacheInfo.IsFunctionalCache)
                 {
                     var deletedRecords = CacheConfig.CacheManagementRepository.
-                        GetDeletedRecordsByTable(cacheInfo.Repository.Schema + "." + cacheInfo.Repository.TableName,
-                        cacheInfo.MaxTimeStampUintForDeletedRecord);
+                          GetDeletedRecordsByTable(cacheInfo.Repository.Schema + "." + cacheInfo.Repository.TableName,
+                          cacheInfo.MaxTimeStampForDeletedRecord, cacheInfo.CacheRefreshingKind != CacheRefreshingKind.SqlDependency);
+
                     if (deletedRecords.Count > 0)
                     {
-                        var maxTimeStampDeletedRecords = deletedRecords.Max(item => ((_EntityBase)item).TimeStampUnit);
+                        var maxDeletedRecordItem = (_EntityBase)deletedRecords.OrderByDescending(item => ((_EntityBase)item).TimeStampUnit).First();
+                        var maxTimeStampDeletedRecords = ((_EntityBase)maxDeletedRecordItem).TimeStampUnit;
                         var oldEntityBaseLst = (oldData as IList).Cast<_EntityBase>().ToList();
                         var oldLst = oldData as IList;
                         entitiesForDeletion = new List<_EntityBase>();
@@ -173,7 +173,10 @@ namespace Core.Cmn.Cache
 
                         cacheInfo.MaxTimeStampUintForDeletedRecord = cacheInfo.MaxTimeStampUintForDeletedRecord2;
                         cacheInfo.MaxTimeStampUintForDeletedRecord2 = maxTimeStampDeletedRecords;
+                        cacheInfo.MaxTimeStampForDeletedRecord = cacheInfo.MaxTimeStampForDeletedRecord2;
+                        cacheInfo.MaxTimeStampForDeletedRecord2 = maxDeletedRecordItem.TimeStamp;
                     }
+
                 }
 
 

@@ -100,6 +100,8 @@ namespace Core.Ef
         public DbSet<RouteMapConfig> RouteMapConfigs { get; set; }
         public DbSet<DeletedCachedRecord> DeletedCachedRecords { get; set; }
 
+        public DbSet<Request> Requests { get; set; }
+
         public static int DefualtMaxRetriesCountForDeadlockRetry { get; set; }
 
         private int _maxRetriesCountForDeadlockRetry;

@@ -178,6 +178,7 @@
     <Compile Include="FileHelper.cs" />
     <Compile Include="GeneralConstant.cs" />
     <Compile Include="ApplicationStartBase.cs" />
+    <Compile Include="HttpHelper.cs" />
     <Compile Include="ICacheManagementRepository.cs" />
     <Compile Include="DependencyInjection\IDependencyInjectionManager.cs" />
     <Compile Include="Interface\IDatabase.cs" />
@@ -199,7 +200,9 @@
     <Compile Include="Interface\IDbEntityEntryBase.cs" />
     <Compile Include="Interface\IDbPropertyValuesBase.cs" />
     <Compile Include="Interface\IDbSetBase.cs" />
+    <Compile Include="Interface\IRequest.cs" />
     <Compile Include="Interface\ITraceViewer.cs" />
+    <Compile Include="Interface\IUserRequest.cs" />
     <Compile Include="IPAddressRange.cs" />
     <Compile Include="Monitoring\Watch.cs" />
     <Compile Include="Report\IReportService.cs" />
@@ -227,6 +230,7 @@
     <Compile Include="Report\ReportBase.cs" />
     <Compile Include="Report\ReportConfig.cs" />
     <Compile Include="Report\ReportDataSource.cs" />
+    <Compile Include="RequestInfo.cs" />
     <Compile Include="Resources\ARLocalizer.cs" />
     <Compile Include="Resources\ENLocalizer.cs" />
     <Compile Include="Resources\FALocalizeManager.cs" />

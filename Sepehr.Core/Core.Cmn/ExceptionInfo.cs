@@ -12,9 +12,29 @@ namespace Core.Cmn
         public string Details { get; set; }
         public string StackTrace { get; set; }
         public bool IsRTL { get; set; }
-
         public string Source { get; set; }
 
+        private int? _statusCode;
+        public int? StatusCode
+        {
+            get
+            {
+                if (_statusCode == null)
+                    _statusCode = 500;
+
+                return _statusCode;
+            }
+            set
+            {
+                _statusCode = value.Value;
+            }
+        }
+        public ExceptionInfo(string message, int status, bool isRTL )
+        {
+            this.Message = message;
+            this.StatusCode = status;
+            this.IsRTL = isRTL;
+        }
         public ExceptionInfo(string message, bool isRTL = true)
         {
             this.Message = message;

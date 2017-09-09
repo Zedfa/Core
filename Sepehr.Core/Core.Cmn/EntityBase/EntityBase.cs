@@ -91,11 +91,10 @@ namespace Core.Cmn
 
         private int _cacheId;
         [NotMapped]
-        //[NonSerialized]
         [IgnoreDataMember]
         [ScriptIgnore]
         [JsonIgnore]
-        public virtual int CacheId
+        internal virtual int CacheId
         {
             get
             {

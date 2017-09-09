@@ -1,7 +1,7 @@
 ﻿<div>
     <div id="view-container" ng-if="1==1">
-        <div id="kendoMenuParent" class="col-lg-7">
-            <div id="kendoMenu" kendo-menu k-data-source="MenuItems" k-rebind="MenuItems" k-on-select="onMenuItemSelect(kendoEvent)"></div>
+        <div id="kendoMenuParent">
+            <div id="kendoMenu" kendo-menu k-data-source="MenuItems" k-rebind="MenuItems" k-on-select="onMenuItemSelect(kendoEvent)"  class="pull-right"></div>
         </div>
         <div id="customTemplateMenu" class="col-lg-5" ng-if="customTemplate">{{customTemplate}}</div>
     </div>
@@ -14,7 +14,7 @@
             </div>
         </div>
     </div>
-
+    <div class="clearfix"></div>
 </div>
 
 

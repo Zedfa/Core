@@ -7,10 +7,11 @@
 
 <div id='dw_loginDiv' class="k-block k-info-colored" kendo-window="loginPopup"
      k-title="'ورود به سیستم'"
-     k-width="390"
-     k-height="400"
+     k-width="300"
+     k-height="380"
      k-resizable="false"
      k-scrollable="false"
+     k-padding="0"
      k-actions="[]"
      @*k-close="{{isAuthorize}}"*@>
     @*k-activate="orderWindows"*@
@@ -30,7 +31,7 @@
                     <label ng-show="domain">Domain: {{domain}}</label>
                 </p>
 
-                <p style="margin-right: 25px;">
+                <p>
                     @Html.LabelCrFor(m => m.Password)
                     @*@Html.PasswordCrFor(m => m.Password, htmlAttributes: new Dictionary<string, object> { { "ng-model", "password" } })*@
 
@@ -45,6 +46,7 @@
                 <div style="margin: 15px;">
 
                     <core-captcha captcha-encrypted="captchaEncrypted" captcha-entered="captchaEntered" refresh-image="refreshImage"></core-captcha>
+
 
                 </div>
 

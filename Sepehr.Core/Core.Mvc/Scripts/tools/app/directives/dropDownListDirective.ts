@@ -10,12 +10,13 @@ ddlDirectiveModule.addDirective("dropDownList", ["$compile", "$http", function (
             //model: "=",
             propertyId: "=",
             propertyName: "=",
-            selectedItem: "=",
+            selectedItem: "=?",
             url: "@",
             width: "@",
             customChange: "&",
             onDataBound: "&",
-            dbCategoryName: "@"
+            dbCategoryName: "@",
+            customDataSource: "=?source"
             // onSelect:"&"
         },
         controller: ["$scope", "$element", "$attrs", function ($scope, $element, $attrs) {
@@ -25,21 +26,22 @@ ddlDirectiveModule.addDirective("dropDownList", ["$compile", "$http", function (
                     $scope.url = "/api/ConstantsAPi/GetConstantByNameOfCategory?category=" + $scope.dbCategoryName;
             }
 
-            $scope.customDataSource = {
-                transport: {
-                    read: {
-                        dataType: "json",
-                        url: $scope.url,
-                    }
-                },
+            if ($scope.url) {
+                $scope.customDataSource = {
+                    transport: {
+                        read: {
+                            dataType: "json",
+                            url: $scope.url,
+                        }
+                    },
 
-            };
+                };
+            }
+
+
             $scope.dataBound = function (e) {
 
 
-                //if (!$scope.model) {
-                //    $scope.model = {};
-                //}
                 var text = $scope.propertyName, //$scope.model[$scope.propertyName],
                     val = $scope.propertyId//$scope.model[$scope.propertyId];
                 if (text) {
@@ -47,19 +49,23 @@ ddlDirectiveModule.addDirective("dropDownList", ["$compile", "$http", function (
                 }
                 else {
                     var foundedItem;
-                    $.each(e.sender.dataSource.data(), (index, record) => {
+
+                    var len = e.sender.dataSource.data().length;
+                    for (var i = 0; i < len; i++) {
+                        var record = e.sender.dataSource.data()[i];
                         if (record[$scope.valueName] == val) {
-                            foundedItem = index;
+                            foundedItem = i;
                             return;
                         }
-                    });
+                    }
+
                     e.sender.select(foundedItem);
 
                     setModel(e.sender);
 
                 }
 
-                if ($scope.onDataBound) {
+                if ($scope.$eval($attrs.onDataBound)) {
                     $scope.onDataBound({ args: e, scope: $scope });
                 }
             };
@@ -101,14 +107,14 @@ ddlDirectiveModule.addDirective("dropDownList", ["$compile", "$http", function (
 
                 var selectedIndex = dropdown.selectedIndex,
                     selectedItem = dropdown.dataItem(selectedIndex);
+                if (selectedItem) {
+                    $scope.selectedItem = selectedItem;
+                    //$scope.model[$scope.propertyName] = selectedItem[$scope.displayName];
+                    $scope.propertyName = selectedItem[$scope.displayName];
 
-                $scope.selectedItem = selectedItem;
-                //$scope.model[$scope.propertyName] = selectedItem[$scope.displayName];
-                $scope.propertyName = selectedItem[$scope.displayName];
-
-                //$scope.model[$scope.propertyId] = selectedItem[$scope.valueName];
-                $scope.propertyId = selectedItem[$scope.valueName];
-
+                    //$scope.model[$scope.propertyId] = selectedItem[$scope.valueName];
+                    $scope.propertyId = selectedItem[$scope.valueName];
+                }
             };
 
 
@@ -116,11 +122,36 @@ ddlDirectiveModule.addDirective("dropDownList", ["$compile", "$http", function (
         link: function (scope, elem, attrs) {
 
             elem.find("input").attr("width", scope.width ? scope.width : 'auto');
-            scope.dropdown.reloadByUrl = (url: string) => {
-                scope.customDataSource.transport.read.url = url;
-                scope.customDataSource.transport.dataSource.read();
+            if (scope.url) {
+                scope.dropdown.reloadByUrl = (url: string) => {
+                    scope.customDataSource.transport.read.url = url;
+                    scope.customDataSource.transport.dataSource.read();
 
-            };
+                };
+
+            }
+            //else {
+
+            //    scope.$watch("dropdown", (n, o) => {
+
+            //        if (n) {
+            //            scope.isWidgetCreated = true;
+            //        }
+            //    });
+            //    scope.$watch("customDataSource", (n, o) => {
+
+            //        if (n) {
+            //            scope.isDataSourceChanged = true;
+            //        }
+            //    }, true);
+            //    scope.$watch("isWidgetCreated +isDataSourceChanged", (n, o) => {
+            //        if (scope.isWidgetCreated && scope.isDataSourceChanged) {
+            //            scope.dropdown.setDataSource(scope.customDataSource);
+            //            scope.dropdown.refresh();
+            //        }
+            //    });
+
+            //}
         },
 
         template: "<span ><input id='{{id}}' kendo-drop-down-list='dropdown' k-data-text-field='displayName' k-data-value-field='valueName' k-data-source='customDataSource'"

@@ -4,6 +4,7 @@ using System.Diagnostics.Tracing;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Windows.Media;
 using System.Xml.Serialization;
 
 namespace Core.EventLogs
@@ -46,6 +47,7 @@ namespace Core.EventLogs
         [XmlElement(ElementName = "Level")]
         public int LevelNo { get; set; }
 
+        string _levelText;
         public string LevelText
         {
             get
@@ -54,18 +56,43 @@ namespace Core.EventLogs
                 {
                     case 1:
                         LevelIcon = "Images/error.png";
-                        return "Critical";
+                        return _levelText= "Critical";
                     case 2:
                         LevelIcon = "Images/error.png";
-                        return "Error";
+                        return _levelText = "Error";
                     case 3:
                         LevelIcon = "Images/warning.png";
-                        return "Warning";
+                        return _levelText = "Warning";
                     default:
                         LevelIcon = "Images/info.png";
-                        return "Informational";
+                        return _levelText = "Informational";
                 }
             }
+            set {
+                _levelText = value;
+            }
+        }
+        Brush _color;
+        public Brush Color {
+            get
+            {
+                switch (LevelNo)
+                {
+                    case 1:
+                        return _color = Brushes.DarkRed;
+                    case 2:
+                        return _color = Brushes.Red;
+                    case 3:
+                        return _color = Brushes.LightYellow;
+                    default:
+                        return _color = Brushes.SkyBlue;
+                }
+            }
+            set {
+                _color = value;
+                
+            }
+            
         }
 
         public string LevelIcon { get; set; }

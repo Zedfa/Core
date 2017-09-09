@@ -56,8 +56,8 @@ kendoGridAngularAdapterModule.addDirective('gridView', ["$compile", "$http", "$q
                 onSearchStyle: "@",
                 height: "@",
                 width: "@",
-                aeWidth: "@",
-                aeHeight: "@",
+                modalWidth: "@",
+                modalHeight: "@",
                 isLookup: "@",
                 wiPropName: "@",
                 requestParameters: "=",
@@ -102,6 +102,8 @@ kendoGridAngularAdapterModule.addDirective('gridView', ["$compile", "$http", "$q
                     var dtoType = res["dtoType"];
                     dtoType = (dtoType === "undefined" || !dtoType) ? null : dtoType;
                     var gridAddEditTempl;
+                    var resizable = true;
+                    var Reorderable = false;
                     var initCreate = res["dataSource"]["transport"].create;
                     scope.view = {};
                     res.cache = false;
@@ -154,9 +156,9 @@ kendoGridAngularAdapterModule.addDirective('gridView', ["$compile", "$http", "$q
                     scope.activateWin = function (arg) {
                     };
                     if (addEdit) {
-                        var aeWidth = !scope.aeWidth ? 410 : scope.aeWidth;
-                        var aeHeight = !scope.aeHeight ? 100 : scope.aeHeight;
-                        winAE = "<div kendo-window='winAe' k-modal='true' " + "k-width='" + aeWidth + "'  k-height='" + aeHeight + "' k-visible='false' " + 'k-on-open="win2visible=true" k-on-close="closeAdwin()" > </div>';
+                        var modalWidth = !scope.modalWidth ? 'auto' : scope.modalWidth;
+                        var modalHeight = !scope.modalHeight ? 'auto' : scope.modalHeight;
+                        winAE = "<div kendo-window='winAe' k-modal='true' " + "k-width='" + modalWidth + "'  k-height='" + modalHeight + "' k-visible='false' " + 'k-on-open="win2visible=true" k-on-close="closeAdwin()" > </div>';
                         scope.closeAdwin = function () {
                             if (scope.ajaxSuccess == false && scope.opt == 'add') {
                                 scope[scope.gridName].dataSource.remove(model);
@@ -278,7 +280,6 @@ kendoGridAngularAdapterModule.addDirective('gridView', ["$compile", "$http", "$q
                     ;
                     function removeSearchTextInFooter(container) {
                         var pager = container.find("div[data-role=pager]");
-                        pager.children("[class='search-text']").remove();
                     }
                     ;
                     function assignRefreshCallback() {
@@ -599,7 +600,7 @@ kendoGridAngularAdapterModule.addDirective('gridView', ["$compile", "$http", "$q
                         }
                     }
                     scope.gridOptions = res;
-                    var kendoGridElem = "<div kendo-grid='" + scope.gridName + "' options='gridOptions'  k-toolbar='[{ template: toolbarTemplate }]' ></div>";
+                    var kendoGridElem = "<div kendo-grid='" + scope.gridName + "' options='gridOptions' k-resizable='true'  k-toolbar='[{ template: toolbarTemplate }]' ></div>";
                     dom.html(kendoGridElem);
                     if (addEdit) {
                         getAdTemplate(tempAddress, !dtoType ? viewModelTypeFullName : dtoType).then(function (dat) {
@@ -625,9 +626,18 @@ kendoGridAngularAdapterModule.addDirective('gridView', ["$compile", "$http", "$q
                                 current.scp.onInit({ args: current.scp });
                             }
                             setShortcutKeyOnGrid(widget.element.data("kendoGrid"));
-                            if (current.atts.height && current.atts.height != '') {
-                                current.dom.find("div.k-grid-content").css("height", current.scp.height);
-                            }
+                            scope.getDocHeight = function () {
+                                return Math.max($(document).height(), $(window).height(), $('.sidebar-left').height(), document.documentElement.clientHeight);
+                            };
+                            var bodyHeight = document.documentElement.clientHeight;
+                            var footerHeight = 39;
+                            var sidebarLeft = angular.element(document.querySelector('.k-tabstrip-wrapper'));
+                            var sidebarRightHeight = $('.sidebar-right').css('height');
+                            var kHeader = angular.element(document.querySelector('.k-header'));
+                            var kGridHeader = widget.content.find('.k-header').height();
+                            var height = kHeader[0].offsetHeight;
+                            var gridContentHeight = bodyHeight - (footerHeight + 110 + 37 + 31 + 15);
+                            current.dom.find("div.k-grid-content").css("height", gridContentHeight);
                             if (current.atts.width && current.atts.width != '') {
                                 current.dom.find("div.k-grid-content").css("width", current.scp.width);
                             }

@@ -9,12 +9,13 @@ ddlDirectiveModule.addDirective("dropDownList", ["$compile", "$http", function (
                 valueName: "@",
                 propertyId: "=",
                 propertyName: "=",
-                selectedItem: "=",
+                selectedItem: "=?",
                 url: "@",
                 width: "@",
                 customChange: "&",
                 onDataBound: "&",
-                dbCategoryName: "@"
+                dbCategoryName: "@",
+                customDataSource: "=?source"
             },
             controller: ["$scope", "$element", "$attrs", function ($scope, $element, $attrs) {
                     if ($attrs.dbCategoryName && $attrs.dbCategoryName != "null") {
@@ -22,14 +23,16 @@ ddlDirectiveModule.addDirective("dropDownList", ["$compile", "$http", function (
                             $scope.valueName = "Value",
                             $scope.url = "/api/ConstantsAPi/GetConstantByNameOfCategory?category=" + $scope.dbCategoryName;
                     }
-                    $scope.customDataSource = {
-                        transport: {
-                            read: {
-                                dataType: "json",
-                                url: $scope.url,
-                            }
-                        },
-                    };
+                    if ($scope.url) {
+                        $scope.customDataSource = {
+                            transport: {
+                                read: {
+                                    dataType: "json",
+                                    url: $scope.url,
+                                }
+                            },
+                        };
+                    }
                     $scope.dataBound = function (e) {
                         var text = $scope.propertyName, val = $scope.propertyId;
                         if (text) {
@@ -37,16 +40,18 @@ ddlDirectiveModule.addDirective("dropDownList", ["$compile", "$http", function (
                         }
                         else {
                             var foundedItem;
-                            $.each(e.sender.dataSource.data(), function (index, record) {
+                            var len = e.sender.dataSource.data().length;
+                            for (var i = 0; i < len; i++) {
+                                var record = e.sender.dataSource.data()[i];
                                 if (record[$scope.valueName] == val) {
-                                    foundedItem = index;
+                                    foundedItem = i;
                                     return;
                                 }
-                            });
+                            }
                             e.sender.select(foundedItem);
                             setModel(e.sender);
                         }
-                        if ($scope.onDataBound) {
+                        if ($scope.$eval($attrs.onDataBound)) {
                             $scope.onDataBound({ args: e, scope: $scope });
                         }
                     };
@@ -73,17 +78,21 @@ ddlDirectiveModule.addDirective("dropDownList", ["$compile", "$http", function (
                             dropdown.select(0);
                         }
                         var selectedIndex = dropdown.selectedIndex, selectedItem = dropdown.dataItem(selectedIndex);
-                        $scope.selectedItem = selectedItem;
-                        $scope.propertyName = selectedItem[$scope.displayName];
-                        $scope.propertyId = selectedItem[$scope.valueName];
+                        if (selectedItem) {
+                            $scope.selectedItem = selectedItem;
+                            $scope.propertyName = selectedItem[$scope.displayName];
+                            $scope.propertyId = selectedItem[$scope.valueName];
+                        }
                     };
                 }],
             link: function (scope, elem, attrs) {
                 elem.find("input").attr("width", scope.width ? scope.width : 'auto');
-                scope.dropdown.reloadByUrl = function (url) {
-                    scope.customDataSource.transport.read.url = url;
-                    scope.customDataSource.transport.dataSource.read();
-                };
+                if (scope.url) {
+                    scope.dropdown.reloadByUrl = function (url) {
+                        scope.customDataSource.transport.read.url = url;
+                        scope.customDataSource.transport.dataSource.read();
+                    };
+                }
             },
             template: "<span ><input id='{{id}}' kendo-drop-down-list='dropdown' k-data-text-field='displayName' k-data-value-field='valueName' k-data-source='customDataSource'"
                 + " k-on-change='change(kendoEvent)' k-on-select='onSelectItem(kendoEvent)' k-on-data-bound='dataBound(kendoEvent)' /> </span>"

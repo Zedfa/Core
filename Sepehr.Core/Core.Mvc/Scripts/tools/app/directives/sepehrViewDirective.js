@@ -6,7 +6,7 @@ sepehrViewDirectiveModule.addDirective('sepehrView', [function () {
             scope: {
                 currentTab: "="
             },
-            controller: ['$scope', '$http', '$element', '$attrs', '$compile', '$location', function ($scope, $http, $element, $attrs, $compile, $location) {
+            controller: ['$scope', '$http', '$element', '$attrs', '$compile', '$location', '$window', function ($scope, $http, $element, $attrs, $compile, $location, $window) {
                     if ($location.path().split('/')[2]) {
                         var myDiv = document.createElement('div');
                         myDiv.setAttribute("ng-include", "\'/core/partialviews/index?partialViewFileName=" + $location.path().split('/')[2] + "\'");
@@ -14,8 +14,18 @@ sepehrViewDirectiveModule.addDirective('sepehrView', [function () {
                         myDiv.setAttribute("id", $location.path().split('/')[2].hashCode());
                         $("#sepehrViewContainer").append($compile(myDiv)($scope));
                     }
+                    var windowapp = angular.element($window);
+                    windowapp.bind('resize', function () {
+                        $scope.getDocHeight = function () {
+                            return Math.max($(document).height(), $(window).height(), document.documentElement.clientHeight);
+                        };
+                        var bodyHeight = document.documentElement.clientHeight;
+                        var footerHeight = 39;
+                        var gridContentHeight = bodyHeight - (footerHeight + 110 + 37 + 31 + 15);
+                        $('body').find("div.k-grid-content").css("height", gridContentHeight);
+                    });
                 }],
-            link: function ($scope, $element, attrs, ctrl) {
+            link: function ($scope, $element, attrs, ctrl, $window) {
             },
             templateUrl: '/core/partialviews/index?partialViewFileName=SepehrView'
         };

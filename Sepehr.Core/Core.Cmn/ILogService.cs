@@ -22,7 +22,7 @@ namespace Core.Cmn
         /// <param name="file ,method,line"> har se motagheyer be sorate automatic poor mishe.aslan niaz be por kardan nadarad. </param>
         /// 
         void Write(string customMessage, [CallerFilePath] string file = null, [CallerMemberName] string method = null, [CallerLineNumber] int line = 0);
-        void Write(string customMessage, string ip, [CallerFilePath] string file = null, [CallerMemberName] string method = null, [CallerLineNumber] int line = 0);
+       // void Write(string customMessage, string ip, [CallerFilePath] string file = null, [CallerMemberName] string method = null, [CallerLineNumber] int line = 0);
 
         Exception Handle(Exception exception, string customMessage, string source, [CallerFilePath] string file = null, [CallerMemberName] string method = null, [CallerLineNumber] int line = 0);
 
@@ -32,7 +32,7 @@ namespace Core.Cmn
 
         Exception Handle(Exception exception, string customMessage, [CallerFilePath] string file = null, [CallerMemberName] string method = null, [CallerLineNumber] int line = 0);
 
-        Exception Handle(string ip, Exception exception, string customMessage, [CallerFilePath] string file = null, [CallerMemberName] string method = null, [CallerLineNumber] int line = 0);
+        //Exception Handle(string ip, Exception exception, string customMessage, [CallerFilePath] string file = null, [CallerMemberName] string method = null, [CallerLineNumber] int line = 0);
         Exception Handle(LogInfo logInfo);
 
         void BatchHandle(List<LogInfo> eventLogs);

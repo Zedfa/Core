@@ -22,7 +22,7 @@ class ngSearchObj {
     instance;
     activeRowIndex;
 
-    seWinWidth = "900";
+    seWinWidth = "auto";
     seWinHeight = "250";
     scope;
     compile;
@@ -782,7 +782,6 @@ class ngSearchObj {
                 result = that.createLookupTemplate(that.getLookupPropertyValue(dataItem.fld.columnId.LId), dataItem);
                 break;
             case "dropdown":
-                debugger;
                 result = that.createDropDownTemplate(that.getDropDownPropertyValue(dataItem.fld.columnId.LId), dataItem);
                 break;
             case "currency":

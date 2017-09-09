@@ -1,14 +1,12 @@
-﻿using System;
+﻿using Core.Cmn;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
-using System.Linq;
-using System.Web.Mvc;
-using Microsoft.CSharp.RuntimeBinder;
-using Core.Cmn;
-using System.Xml;
 using System.Globalization;
+using System.Web.Mvc;
 using System.Web.Routing;
-
+using System.Xml;
+using System;
+using System.Threading;
 
 namespace Core.Mvc.Controller
 {
@@ -17,11 +15,8 @@ namespace Core.Mvc.Controller
     {
         private ILogService _logService = Core.Cmn.AppBase.LogService;
 
-
-
         protected override void OnException(System.Web.Mvc.ExceptionContext filterContext)
         {
-            
             //Core.Cmn.AppBase.TraceViewer.Failure(filterContext.Exception.InnerException + filterContext.Exception.StackTrace + filterContext.Exception.Message);
 
             ExceptionInfo excepInfo = new ExceptionInfo(filterContext.Exception, false);
@@ -40,21 +35,14 @@ namespace Core.Mvc.Controller
             filterContext.Result = SetException(excepInfo);
             filterContext.ExceptionHandled = true;
 
-            // var eLog = _logService.GetEventLogObj();
-            // eLog.UserId = "ControllerBase";
-            // eLog.CustomMessage = excepInfo.Message;
-            //// eLog.LogFileName = "ControllerBaseLog";
-            // eLog.OccuredException = filterContext.Exception;
-            // _logService.Handle(eLog);
             _logService.Handle(filterContext.Exception, excepInfo.Message);
         }
 
         private ActionResult SetException(ExceptionInfo exception)
         {
-
             this.HttpContext.Response.Clear();
 
-            this.HttpContext.Response.StatusCode = 500;
+            this.HttpContext.Response.StatusCode = exception.StatusCode.Value;
 
             this.HttpContext.Response.TrySkipIisCustomErrors = true;
 
@@ -65,15 +53,11 @@ namespace Core.Mvc.Controller
                 RecursionLimit = 3,
                 JsonRequestBehavior = System.Web.Mvc.JsonRequestBehavior.AllowGet
             };
-
         }
 
         public ActionResult ShowException(ExceptionInfo exception)
         {
-
             return SetException(exception);
-
-
         }
 
         public void AddModelError(List<ValidationResult> validationResults)
@@ -81,9 +65,7 @@ namespace Core.Mvc.Controller
             foreach (var validationResult in validationResults)
             {
                 ModelState.AddModelError(validationResult.ErrorMessage, ((string[])(validationResult.MemberNames))[0]);
-
             }
-
         }
 
         [HttpGet]
@@ -115,10 +97,8 @@ namespace Core.Mvc.Controller
             return Content(result);
         }
 
-
         private CultureInfo SetCurrentCulture(System.Web.Routing.RequestContext requestContext)
         {
-
             string culture = requestContext.HttpContext.Request.Url.AbsolutePath.Split('/')[1];
             if (culture == "en")
             {
@@ -142,44 +122,12 @@ namespace Core.Mvc.Controller
             SetCurrentCulture(requestContext);
             base.Initialize(requestContext);
         }
-        //protected override void OnActionExecuting(ActionExecutingContext filterContext)
-        //{
-        //   // if (filterContext.RouteData.DataTokens["area"].Equals(CoreAreaRegistration.))
-        //    object areaName = string.Empty;
-
-        //    if (filterContext.RouteData.DataTokens.TryGetValue("area",out areaName) &&
-        //        areaName.Equals("Core") && (filterContext.Result is ViewResult || filterContext.Result is PartialViewResult))
-        //    {
-        //        if (filterContext.Result is ViewResult)
-        //        {
-        //            var view = filterContext.Result as ViewResult;
-        //            view.ViewName =  GenerateViewPath(filterContext.RouteData, view.ViewName);
-        //            filterContext.Result = view;
-        //        }
-
-        //        else
-        //        {
-        //            var partialView = filterContext.Result as PartialViewResult;
-        //            partialView.ViewName = GenerateViewPath(filterContext.RouteData, partialView.ViewName);
-        //            filterContext.Result = partialView;
-        //        }
-        //    }
-        //    base.OnActionExecuting(filterContext);
-        //}
 
         private string GenerateViewPath(RouteData routeData, string viewName)
         {
-
             var controllerName = routeData.GetRequiredString("controller");
             var actionName = routeData.GetRequiredString("action");
-            //if (viewName.Equals("Index"))
-            //{
-            //    viewName = string.Format("~/Areas/Core/{0}/{1}", controllerName, actionName);
-            //}
-            //else
-            //{
-            //    viewName = viewName.Replace("~/", "~/Areas/Core/");
-            //}
+
             if (controllerName.ToLower().Equals("partialviews") && actionName.ToLower().Equals("index"))
             {
                 return viewName;
@@ -198,19 +146,13 @@ namespace Core.Mvc.Controller
                 else
                 {
                     viewName = string.Format("~/Areas/Core/{0}/{1}", controllerName, viewName);
-
                 }
-
             }
             return viewName;
         }
-        //protected override void OnActionExecuting(ActionExecutingContext filterContext)
-        //{
-        //    base.OnActionExecuting(filterContext);
-        //}
+
         protected override void OnResultExecuted(ResultExecutedContext filterContext)
         {
-
             object areaName = string.Empty;
 
             if (filterContext.RouteData.DataTokens.TryGetValue("area", out areaName) &&
@@ -223,22 +165,30 @@ namespace Core.Mvc.Controller
                     filterContext.Result = view;
                     // view.ExecuteResult(this.ControllerContext);
                 }
-
                 else if (filterContext.Result is PartialViewResult)
                 {
                     var partialView = filterContext.Result as PartialViewResult;
                     partialView.ViewName = GenerateViewPath(filterContext.RouteData, partialView.ViewName);
                     filterContext.Result = partialView;
                     //partialView.ExecuteResult(this.ControllerContext);
-
                 }
             }
 
             //base.OnResultExecuted(filterContext);
         }
+        protected override IAsyncResult BeginExecute(RequestContext requestContext, AsyncCallback callback, object state)
+        {
+            var request = AppBase.DependencyInjectionManager.Resolve<IRequest>();
+
+            Core.Cmn.AppBase.AllRequests.TryAdd(Thread.CurrentThread.ManagedThreadId, request);
+            if (request != null) request.UserRequest = new UserControllerRequest(requestContext.HttpContext.Request);
+            return base.BeginExecute(requestContext, callback, state);
+        }
         protected override void Dispose(bool disposing)
         {
             base.Dispose(disposing);
+            IRequest request = null;
+            Core.Cmn.AppBase.AllRequests.TryRemove(Thread.CurrentThread.ManagedThreadId, out request);
         }
     }
 }

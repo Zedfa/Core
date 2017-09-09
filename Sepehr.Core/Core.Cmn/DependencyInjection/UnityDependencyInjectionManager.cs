@@ -11,7 +11,7 @@ using Core.Cmn.Extensions;
 
 namespace Core.Cmn.DependencyInjection
 {
-    public class UnityDependencyInjectionManager : IDependencyInjectionManager
+    internal class UnityDependencyInjectionManager : IDependencyInjectionManager
     {
         public UnityDependencyInjectionManager(List<Type> allTypes)
         {

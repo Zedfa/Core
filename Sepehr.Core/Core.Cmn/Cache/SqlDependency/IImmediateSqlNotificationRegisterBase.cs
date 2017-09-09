@@ -1,14 +1,13 @@
 ﻿using System;
-using System.Collections.Generic;
+using System.Data.SqlClient;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Core.Cmn.Cache.SqlDependency
 {
     public interface IImmediateSqlNotificationRegisterBase
     {
-        event EventHandler OnChanged;
+        event EventHandler<SqlNotificationEventArgs> OnChanged;
+
         void Init(IDbContextBase context, IQueryable query);
     }
 }

@@ -1,5 +1,7 @@
-﻿using Core.Cmn.DependencyInjection;
+﻿using Core.Cmn.Cache;
+using Core.Cmn.DependencyInjection;
 using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
@@ -10,6 +12,7 @@ namespace Core.Cmn
 {
     public class AppBase
     {
+        public static ConcurrentDictionary<int, IRequest> AllRequests = new ConcurrentDictionary<int, IRequest>();
         private static bool _isApplicationStarted;
         private static object _lockObject = new object();
 
@@ -101,7 +104,7 @@ namespace Core.Cmn
             else
                 binPath = AppDomain.CurrentDomain.BaseDirectory;
 
-            foreach (string dll in Directory.GetFiles(binPath, "*.dll", SearchOption.AllDirectories))
+            foreach (string dll in Directory.GetFiles(binPath, "*.dll", SearchOption.TopDirectoryOnly))
             {
                 try
                 {
@@ -205,6 +208,9 @@ namespace Core.Cmn
 
                       });
 
+                    ///The line below converts ConcurrentDictionary to Dictionary, because after building cache we never add any CacheInfo 
+                    ///to our Dictionary so we did not need a ConcurrentDictionary any more for ThreadSafty.
+                    Cache.CacheConfig.CacheInfoDic = Cache.CacheConfig.CacheInfoDic.ToDictionary(item => item.Key, item => item.Value);
                     LogService.Write("Application started");
                     LogService.Write($"Is64BitProcess: {Environment.Is64BitProcess}");
                     LogService.Write($"ProcessorCount: {Environment.ProcessorCount}");

@@ -57,23 +57,29 @@
     <Reference Include="Core.Service">
       <HintPath>..\Core.Service\bin\Debug\Core.Service.dll</HintPath>
     </Reference>
-    <Reference Include="DevExpress.Data.v15.2">
-      <HintPath>..\..\..\Sepehr360\Sepehr360_Tools\Sepehr360_ToolsApp\External bin\DevExpress.Data.v15.2.dll</HintPath>
+    <Reference Include="DevExpress.Data.v15.2, Version=15.2.4.0, Culture=neutral, PublicKeyToken=b88d1754d700e49a, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\SharedAssembly\DevExpress\DevExpress.Data.v15.2.dll</HintPath>
     </Reference>
-    <Reference Include="DevExpress.Mvvm.v15.2">
-      <HintPath>..\..\..\Sepehr360\Sepehr360_Tools\Sepehr360_ToolsApp\External bin\DevExpress.Mvvm.v15.2.dll</HintPath>
+    <Reference Include="DevExpress.Mvvm.v15.2, Version=15.2.4.0, Culture=neutral, PublicKeyToken=b88d1754d700e49a, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\SharedAssembly\DevExpress\DevExpress.Mvvm.v15.2.dll</HintPath>
     </Reference>
-    <Reference Include="DevExpress.Printing.v15.2.Core">
-      <HintPath>..\..\..\Sepehr360\Sepehr360_Tools\Sepehr360_ToolsApp\External bin\DevExpress.Printing.v15.2.Core.dll</HintPath>
+    <Reference Include="DevExpress.Printing.v15.2.Core, Version=15.2.4.0, Culture=neutral, PublicKeyToken=b88d1754d700e49a, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\SharedAssembly\DevExpress\DevExpress.Printing.v15.2.Core.dll</HintPath>
     </Reference>
-    <Reference Include="DevExpress.Xpf.Core.v15.2">
-      <HintPath>..\..\..\Sepehr360\Sepehr360_Tools\Sepehr360_ToolsApp\External bin\DevExpress.Xpf.Core.v15.2.dll</HintPath>
+    <Reference Include="DevExpress.Xpf.Core.v15.2, Version=15.2.4.0, Culture=neutral, PublicKeyToken=b88d1754d700e49a, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\SharedAssembly\DevExpress\DevExpress.Xpf.Core.v15.2.dll</HintPath>
     </Reference>
-    <Reference Include="DevExpress.Xpf.Grid.v15.2">
-      <HintPath>..\..\..\Sepehr360\Sepehr360_Tools\Sepehr360_ToolsApp\External bin\DevExpress.Xpf.Grid.v15.2.dll</HintPath>
+    <Reference Include="DevExpress.Xpf.Grid.v15.2, Version=15.2.4.0, Culture=neutral, PublicKeyToken=b88d1754d700e49a, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\SharedAssembly\DevExpress\DevExpress.Xpf.Grid.v15.2.dll</HintPath>
     </Reference>
-    <Reference Include="DevExpress.Xpf.Grid.v15.2.Core">
-      <HintPath>..\..\..\Sepehr360\Sepehr360_Tools\Sepehr360_ToolsApp\External bin\DevExpress.Xpf.Grid.v15.2.Core.dll</HintPath>
+    <Reference Include="DevExpress.Xpf.Grid.v15.2.Core, Version=15.2.4.0, Culture=neutral, PublicKeyToken=b88d1754d700e49a, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\SharedAssembly\DevExpress\DevExpress.Xpf.Grid.v15.2.Core.dll</HintPath>
     </Reference>
     <Reference Include="eventRegister">
       <HintPath>..\..\NugetPackages\Microsoft.Diagnostics.Tracing.EventRegister.1.1.28\build\eventRegister.exe</HintPath>
@@ -173,6 +179,9 @@
     <Resource Include="Images\error.png" />
     <Resource Include="Images\Info.png" />
     <Resource Include="Images\warning.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Images\trace.png" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

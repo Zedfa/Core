@@ -5,12 +5,15 @@ using Core.Cmn.DependencyInjection;
 using Core.Cmn.Extensions;
 using Newtonsoft.Json.Converters;
 using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.Data.SqlClient;
 using System.Diagnostics;
 using System.Linq;
 using System.Reflection;
 using System.ServiceModel;
 using System.ServiceModel.Description;
+using System.Threading.Tasks;
 
 namespace Core.Cmn.Cache
 {
@@ -22,10 +25,12 @@ namespace Core.Cmn.Cache
 
         static CacheConfig()
         {
-            CacheInfoDic = new Dictionary<string, CacheInfo>();
+            //Remark: 'CacheInfoDic' will change to Dictionary Type after buliding cache in  AppBase.StartApplication() method, because after building cache we never add any CacheInfo 
+            ///to our Dictionary so we did not need a ConcurrentDictionary any more for ThreadSafty.
+            CacheInfoDic = new ConcurrentDictionary<string, CacheInfo>();
         }
 
-        public static Dictionary<string, CacheInfo> CacheInfoDic { get; private set; }
+        public static IDictionary<string, CacheInfo> CacheInfoDic { get; internal set; }
 
         public static ICacheManagementRepository CacheManagementRepository
         {
@@ -111,6 +116,7 @@ namespace Core.Cmn.Cache
             serviceAssemblies.ForEach(ass => BuildCachesInAssembly(dBContext, ass, false));
             if (Core.Cmn.ConfigHelper.GetConfigValue<bool>("EnableCacheServerListener") && !IsCacheServerServiceStart)
                 StartCacheServerService();
+
         }
 
         public static void StartCacheServerService()
@@ -290,7 +296,10 @@ namespace Core.Cmn.Cache
                                                     Stopwatch stopwatch = new Stopwatch();
                                                     stopwatch.Start();
                                                     if (!cacheInfoAtt.DisableCache)
+                                                    {
+                                                        ((IQueryableCacheDataProvider)queryableCacheExecution).DbContext = AppBase.DependencyInjectionFactory.CreateContextInstance();
                                                         (typeof(CacheBase)).GetMethod("RefreshCache").MakeGenericMethod(returnCacheType).Invoke(null, new object[] { queryableCacheExecution, currentCacheInfo });
+                                                    }
                                                     stopwatch.Stop();
                                                     currentCacheInfo.FrequencyOfBuilding += 1;
                                                     currentCacheInfo.BuildingTime += new TimeSpan(stopwatch.ElapsedTicks);
@@ -302,15 +311,15 @@ namespace Core.Cmn.Cache
                                                    AppBase.DependencyInjectionManager.Resolve(typeOfSqlNotifier,
                                                    new ParameterOverride("context", ((IQueryableCacheDataProvider)queryableCacheExecution).DbContext),
                                                    new ParameterOverride("query", ((IQueryableCacheDataProvider)queryableCacheExecution).GetQuery()));
-                                                immediateSqlNotificationRegister.OnChanged += (object sender, EventArgs e) =>
+                                                immediateSqlNotificationRegister.OnChanged += (object sender, SqlNotificationEventArgs e) =>
                                                 {
                                                     if (currentCacheInfo.CountOfWaitingThreads < 3)
                                                     {
                                                         Stopwatch stopwatch = new Stopwatch();
                                                         stopwatch.Start();
-                                                        (typeof(CacheBase)).GetMethod("RefreshCache").MakeGenericMethod(returnCacheType).Invoke(null, new object[] { queryableCacheExecution, currentCacheInfo });
                                                         ((IQueryableCacheDataProvider)queryableCacheExecution).DbContext = AppBase.DependencyInjectionFactory.CreateContextInstance();
                                                         immediateSqlNotificationRegister.Init(((IQueryableCacheDataProvider)queryableCacheExecution).DbContext, ((IQueryableCacheDataProvider)queryableCacheExecution).GetQuery());
+                                                        ExcecuteQueryForRefreshingSqlDependencyCache(currentCacheInfo, returnCacheType, queryableCacheExecution, 500);
                                                         stopwatch.Stop();
                                                         currentCacheInfo.FrequencyOfBuilding += 1;
                                                         currentCacheInfo.BuildingTime += new TimeSpan(stopwatch.ElapsedTicks);
@@ -416,6 +425,26 @@ namespace Core.Cmn.Cache
                         throw new NotSupportedException("Cacheable Attribute can't use on Non static methods, because we can't work on nostatic method for caching.");
                     }
                 }
+            }
+        }
+
+        private static void ExcecuteQueryForRefreshingSqlDependencyCache(CacheInfo currentCacheInfo, Type returnCacheType, object queryableCacheExecution, int delay)
+        {
+            try
+            {
+                (typeof(CacheBase)).GetMethod("RefreshCache").MakeGenericMethod(returnCacheType).Invoke(null, new object[] { queryableCacheExecution, currentCacheInfo });
+            }
+            catch (Exception ex)
+            {
+                Task.Delay(delay).Wait();
+                ((IQueryableCacheDataProvider)queryableCacheExecution).DbContext = AppBase.DependencyInjectionFactory.CreateContextInstance();
+                try
+                {
+                    AppBase.LogService.Handle(ex, $"Exception on excecuting Query for refreshing a DependencySql Cache on {currentCacheInfo.Name}");
+                }
+                catch
+                { }
+                ExcecuteQueryForRefreshingSqlDependencyCache(currentCacheInfo, returnCacheType, queryableCacheExecution, delay + 1000);
             }
         }
     }

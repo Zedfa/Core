@@ -8,6 +8,8 @@ using System.Reflection;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media.Imaging;
+using System.Threading;
+using Core.Cmn;
 
 namespace Core.EventLogs
 {
@@ -23,9 +25,11 @@ namespace Core.EventLogs
         {
             GridControl.AllowInfiniteGridSize = true;
             InitializeComponent();
+            cmbAutoRefrsh.DataContext = this;
+
             _viewer = new Viewer();
             _regisrant = new Registrant();
-            LoadTreeViewEventLogsData();
+            LoadGridEventsData();
             this.Loaded += MainWindow_Loaded;
         }
 
@@ -37,6 +41,14 @@ namespace Core.EventLogs
                 return System.IO.Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.CommonApplicationData), _logName);
             }
         }
+        public Dictionary<int, string> AutoRefreshItems => new Dictionary<int, string> {
+            {-1, "Select Auto Refresh..." },
+            { 0, "Manual" },
+            { 5, "5 Seconds" },
+            { 30 , "30 Seconds"} ,
+            { 60, "Minute"}
+        };
+
 
         private void MainWindow_Loaded(object sender, RoutedEventArgs e)
         {
@@ -47,28 +59,10 @@ namespace Core.EventLogs
 
         public string DefaultEventLog { get { return "TraceViewerService/Admin"; } }
 
-        private void LoadTreeViewEventLogsData()
+        public void LoadGridEventsData()
         {
-
-            var eventLogs = _viewer.GetAllEventLogsName().Select(str => new TreeNodeEventLogViewModel()
-            { Name = str, IsSelected = str == DefaultEventLog });
-            treeViewEventLogs.ItemsSource = eventLogs;
-        }
-
-        private void treeViewEventLogs_SelectedItemChanged(object sender, RoutedPropertyChangedEventArgs<object> e)
-        {
-            var selectedItem = (TreeNodeEventLogViewModel)((System.Windows.Controls.TreeView)sender).SelectedValue;
-
-            LoadGridEventsData(selectedItem.Name);
-        }
-
-        private void LoadGridEventsData(string logName)
-        {
-            if (!string.IsNullOrEmpty(logName))
-            {
-                var dataSource = _viewer.GetEventLogData(logName);
-                eventLogGrid.ItemsSource = dataSource;
-            }
+            var dataSource = _viewer.GetEventLogData(DefaultEventLog);
+            eventLogGrid.ItemsSource = dataSource;
 
         }
 
@@ -89,21 +83,17 @@ namespace Core.EventLogs
 
         private void RefreshLogs(object sender, RoutedEventArgs e)
         {
-            if (treeViewEventLogs.SelectedValue != null)
-            {
-                var selectedEventlog = ((TreeNodeEventLogViewModel)treeViewEventLogs.SelectedValue).Name;
-                LoadGridEventsData(selectedEventlog);
-            }
+            LoadGridEventsData();
         }
 
         private void InstallEventLogButton_Click(object sender, RoutedEventArgs e)
         {
             try
             {
-                _regisrant.SimulateInstall(DeploymentFolder,DefaultEventLog);
+                _regisrant.SimulateInstall(DeploymentFolder, DefaultEventLog);
                 MessageBox.Show("عملیات با موفقیت انجام شد", "Success", MessageBoxButton.OK, MessageBoxImage.Information);
 
-                LoadTreeViewEventLogsData();
+                LoadGridEventsData();
             }
             catch (Exception ex)
             {
@@ -121,7 +111,7 @@ namespace Core.EventLogs
 
                     _regisrant.SimulateUninstall(DeploymentFolder);
                     MessageBox.Show("عملیات با موفقیت انجام شد", "Success", MessageBoxButton.OK, MessageBoxImage.Information);
-                    LoadTreeViewEventLogsData();
+                    LoadGridEventsData();
                 }
                 catch (Exception ex)
                 {
@@ -130,9 +120,24 @@ namespace Core.EventLogs
             }
         }
 
-        private void Image_Loaded(object sender, RoutedEventArgs e)
+        private static PeriodicTaskFactory _stateTimer;
+
+
+        private void cmbAutoRefrsh_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
-            ((Image)sender).Source = new BitmapImage(new Uri(((LogEntry)(((EditGridCellData)((Image)sender).DataContext)).RowData.Row).System.LevelIcon, UriKind.Relative));
+            var delay = (int)cmbAutoRefrsh.SelectedValue;
+            if (_stateTimer != null)
+            {
+                _stateTimer.CancelToken = new CancellationToken(true);
+            }
+
+            if (delay > 0)
+            {
+                _stateTimer = new PeriodicTaskFactory((task) => { this.Dispatcher.BeginInvoke(new Action(LoadGridEventsData)); },
+                new TimeSpan(0, 0, delay),
+                new TimeSpan(0, 0, delay));
+                _stateTimer.Start();
+            }
         }
     }
 }

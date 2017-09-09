@@ -7,16 +7,20 @@ rgb(11,72,107) with your new color.
 /*#region Base Elements*/
 
 body {
-    width: 100%;
-    height: 100%;
+    margin: 0;
+    height:100%;
 }
 
 html {
-    overflow: hidden !important;
+    /*overflow: hidden !important;*/
     font: 73% verdana,Tahoma,'Lucida Grande',helvetica,arial,sans-serif;
     /*background-color: rgb(11,72,107);*/ /* azure*/
     width: 100% !important;
     height: 100% !important;
+}
+
+.k-tabstrip .k-tabstrip-items {
+    padding: 5px 5px 0 0;
 }
 
 header,
@@ -87,6 +91,9 @@ first child of the left and right table columns */
 
 /* you can specify a greater or lesser percentage for the 
 page width. Or, you can specify an exact pixel width. */
+#main-menu {
+    padding: 10px 10px 0 10px;
+}
 
 .page {
     width: 90%;
@@ -136,14 +143,14 @@ header, #header {
 
 .sidebar-left {
     width: 100%;
-    height: 85%;
+    height: 100%;
     display: inline-block;
     vertical-align: middle;
 }
 
 .date-details {
     float: left;
-    margin-left: 300px;
+    /*margin-left: 300px;*/
 }
 
     .date-details > div:first-child {
@@ -159,14 +166,14 @@ header, #header {
     text-align: center;
 }
 
-footer {
+/*footer {
     color: #999;
     padding: 10px 0;
     text-align: center;
     line-height: normal;
     margin: 0;
     font-size: .9em;
-}
+}*/
 
 .left-align {
     text-align: left;
@@ -297,14 +304,14 @@ footer {
 
 /*#region TabStrip*/
 
-div#tabStripNavigator {
+/*div#tabStripNavigator {
     background: none;
     border: none;
-}
+}*/
 
 #tabStripNavigatorContainer {
     width: 98%;
-    height: 85%;
+    height: 100%;
     -moz-border-radius: 5px;
     -webkit-border-radius: 5px;
     border-radius: 5px;
@@ -321,14 +328,16 @@ div#tabStripNavigator {
 }
 
 #tabStripNavigatorContainer1 {
-    width: 98%;
-    height: 85%;
     -moz-border-radius: 5px;
     -webkit-border-radius: 5px;
     border-radius: 5px;
     background: #e3e3e3;
     position: absolute;
+    left: 10px;
     z-index: -2;
+    right: 10px;
+    top: 10%;
+    bottom: 10px;
 }
 
 #tabStripNavigator .k-tabstrip-items .k-link {
@@ -342,6 +351,7 @@ div#tabStripNavigator {
 
 #tabStripNavigator .k-state-active {
     border-color: #BE8369;
+    background-color: #c2ddfe;
 }
 
 /*#endregion*/
@@ -355,9 +365,9 @@ fieldset {
     padding: 0;
 }
 
-.k-widget.k-window.k-rtl {
+/*.k-widget.k-window.k-rtl {
     width: 850px;
-}
+}*/
 
 legend {
     font-size: 1.2em;
@@ -374,9 +384,9 @@ table {
     border-collapse: collapse;
 }
 
-    table[role='grid'] {
+    /*table[role='grid'] {
         position: relative;
-    }
+    }*/
 
     table td {
         padding: 1px;
@@ -428,23 +438,32 @@ div#title {
 }
 
 #logo {
-    margin: 0px 0px 8px;
+
+    /*margin: 10px 0px 8px;*/
     width: 100%;
     /*height: 80px;*/
     z-index: -1000;
-    background-image: url('images/header.png');
+    background-image: url('/Areas/Core/Content/images/header.png');
     background-repeat: repeat-x;
+}
+
+#dw_loginDiv {
+    padding: 0;
 }
 
 #loginForm {
 }
 
     #loginForm .part {
-        margin: 25px 65px 30px 65px;
+        margin: 0px 65px 0px 0px;
     }
 
     #loginForm p {
         margin: 15px;
+    }
+
+    #loginForm .btnLogin {
+        margin-right: 15px;
     }
 
 #logindisplay {
@@ -600,6 +619,7 @@ input#ViewElementInVisible {
 
     .k-textbox[data-val-required], .k-textbox.manual-validation, .required-validation {
         width: 145px;
+        margin-bottom: 10px;
         border-left-color: rgb(236,99,22) !important;
         border-left-width: 5px !important;
     }
@@ -862,16 +882,23 @@ input#SaveCompanyViewElement {
 
 
 /*#region Main Page & ScrollBar */
+#kendoMenu {
+    margin-bottom: 40px;
+}
 
 #tabstripNgView {
-    width: 100%;
+    position: relative;
+    /*left: 11px;
+    right: 10px;
+    bottom: 0;
+    top: 118px;*/
     -moz-border-radius: 5px;
     -webkit-border-radius: 5px;
     border-radius: 5px;
-    overflow-y: scroll;
-    overflow-x: hidden;
+    /*overflow-y: scroll;*/
+    /*overflow-x: hidden;*/
     background: transparent;
-    background: #f9f9f9;
+    background: #e3e3e3;
     font-family: Tahoma !important;
     /*font-size:14px;*/
     -ms-flex: 1;
@@ -980,13 +1007,14 @@ div.k-grid-content .ng-scope.k-state-selected .k-state-focused {
 
 
 /*Main Container*/
-.k-grid.k-widget.k-reorderable {
+/*.k-grid.k-widget.k-reorderable {
     width: 100%;
-}
+}*/
 
     /*Grid-Buttons Container*/
     .k-grid.k-widget.k-reorderable > .k-header.k-grid-toolbar.ng-scope {
         /*font-size:16px !important;*/
+        background: #c2ddfe;
     }
 
         /*Grid-Buttons Like Insert & ... */
@@ -1038,11 +1066,18 @@ k-grid.k-widget.k-reorderable > .k-grouping-header {
 /*Grid-Table Contents Main Container (Contents and Scrollbar)*/
 .k-grid.k-widget.k-reorderable > .k-grid-content {
     /*font-size:16px !important;*/
+    /*padding-left:0 !important;*/
     height: 300px;
     overflow-x: auto;
     overflow-y: scroll;
 }
-
+/*.k-rtl .k-scrollbar-vertical{
+    display:none !important;
+ 
+}
+.k-virtual-scrollable-wrap {
+    overflow-y: scroll;
+}*/
     /*Grid-Table Contents Container (Only Contents)*/
     .k-grid.k-widget.k-reorderable > .k-grid-content tbody {
         /*font-size:16px !important;*/
@@ -1073,7 +1108,8 @@ k-grid.k-widget.k-reorderable > .k-grouping-header {
 }
 
 .k-pager-wrap.k-grid-pager.k-widget {
-    height: auto;
+    height: 38px;
+    padding:0;
 }
 
 
@@ -1082,7 +1118,7 @@ k-grid.k-widget.k-reorderable > .k-grouping-header {
 /*#region Main Section */
 
 
-#tabstripNgView > div {
+/*#tabstripNgView > div {
     -ms-flex: 1;
     -webkit-flex: 1;
     flex: 1;
@@ -1114,7 +1150,7 @@ k-grid.k-widget.k-reorderable > .k-grouping-header {
 
 
     /* Just Core */
-    #tabstripNgView > div .k-grid.k-widget.k-reorderable {
+    /*#tabstripNgView > div .k-grid.k-widget.k-reorderable {
     }
 
 
@@ -1132,9 +1168,10 @@ k-grid.k-widget.k-reorderable > .k-grouping-header {
         -webkit-align-content: stretch;
         align-content: stretch;
         min-height: 242px;
-    }
 
-        #tabstripNgView > div div.ng-isolate-scope.ng-scope .k-grid.k-widget.k-reorderable {
+    }*/
+
+        /*#tabstripNgView > div div.ng-isolate-scope.ng-scope .k-grid.k-widget.k-reorderable {
             -ms-flex: 1;
             -webkit-flex: 1;
             flex: 1;
@@ -1168,7 +1205,7 @@ k-grid.k-widget.k-reorderable > .k-grouping-header {
             -ms-flex: 1;
             -webkit-flex: 1;
             flex: 1;
-            display: flex;
+            display: block;
             -ms-flex-direction: row;
             -webkit-flex-direction: row;
             flex-direction: row;
@@ -1199,7 +1236,7 @@ k-grid.k-widget.k-reorderable > .k-grouping-header {
 
         #tabstripNgView > div .k-grid-content table.k-selectable {
             position: absolute;
-        }
+        }*/
 
 
             #tabstripNgView > div .k-grid-content table.k-selectable > tbody {
@@ -1371,15 +1408,17 @@ k-grid.k-widget.k-reorderable > .k-grouping-header {
 
 /*Whole Container of Popup Page - Outer One*/
 
-.k-widget.k-window.k-rtl {
+/*.k-widget.k-window.k-rtl {
     width: 850px;
     font-family: Tahoma !important;
-}
+}*/
 
 .k-window-content.k-content {
-    overflow-y: auto;
+    max-height: 580px;
+    overflow-y: scroll;
     overflow-x: hidden;
     font-family: Tahoma !important;
+    padding: 15px;
 }
 
 /*Whole Container - Inner One*/
@@ -1407,15 +1446,30 @@ k-grid.k-widget.k-reorderable > .k-grouping-header {
         margin-left: 0;
     }
 
-    .grid-inside li label {
-        padding-top: 4px;
-    }
+bottom-margin {
+    clear: both;
+}
 
-    .grid-inside div label {
-        padding-top: 4px;
-    }
+.grid-inside li label {
+    padding-top: 4px;
+}
+
+.grid-inside div label {
+    padding-top: 4px;
+}
 
 /*#region grid inside responsive */
+@media only screen and (max-width:742px) {
+    #tabstripNgView {
+        top: 246px;
+    }
+}
+
+@media only screen and (max-width:1200px) {
+    .sidebar-right {
+        width: 16%;
+    }
+}
 
 @media only screen and (max-height:764px) {
 
@@ -1755,24 +1809,6 @@ button.k-button.k-button-icontext.k-grid-cancel {
 /*#endregion*/
 
 /*#region ViewElementRole Page*/
-
-.k-widget.k-window .k-window-titlebar.k-header {
-    text-align: right;
-}
-
-.k-widget.k-window .k-block.k-info-colored.k-window-content.k-content .k-header.k-grid-toolbar {
-    text-align: right;
-}
-
-.k-widget.k-window .k-block.k-info-colored.k-window-content.k-content .k-grouping-header {
-    text-align: right;
-}
-
-.k-widget.k-window .k-block.k-info-colored.k-window-content.k-content .k-grid-header tr th {
-    text-align: right;
-}
-
-
 section.filters-container.center-section.access-level {
     font-family: Tahoma !important;
 }
@@ -1916,14 +1952,16 @@ section.ffilters-container.center-section.access-level div#treeViewElement ul.k-
 
 /*#region  Fixing Popup Grids*/
 .k-widget.k-window.k-rtl {
-    left: 0 !important;
-    right: 0 !important;
+    left: 50% !important;
+    transform: translateX(-50%) !important;
+    /*right: 0 !important;*/
     margin: auto;
-    width: 80%;
+    /*width: auto !important;*/
     top: 10px !important;
+    margin-bottom: 10px;
 }
 
-@media(max-width: 768px){
+@media(max-width: 768px) {
 
     .k-widget.k-window.k-rtl.modal-fixing {
         width: 100%;

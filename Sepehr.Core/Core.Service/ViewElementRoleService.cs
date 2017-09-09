@@ -99,7 +99,7 @@ namespace Core.Service
             }
         }
 
-        [Cacheable(ExpireCacheSecondTime = 60)]
+        [Cacheable(ExpireCacheSecondTime = 20)]
         public static IList<ViewElementInfo> GetViewElementGrantedToUserCache(int userId)
         {
             var viewElementRoleService = ServiceBase.DependencyInjectionFactory.CreateInjectionInstance<IViewElementRoleService>();

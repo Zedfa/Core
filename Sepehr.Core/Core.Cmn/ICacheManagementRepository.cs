@@ -18,7 +18,7 @@ namespace Core.Cmn
     public interface ICacheManagementRepository
     {
         void CreateSqlTriggerForDetectingDeletedRecords(string tableName, string keyName);
-        List<IDeletedCachedRecord> GetDeletedRecordsByTable(string tableName, UInt64 timeStampUInt);
+        List<IDeletedCachedRecord> GetDeletedRecordsByTable(string tableName, byte[] timeStamp, bool canUseCacheIfPossible = true);
         void CheckServiceBrokerOnDb();
         int Delete();
     }

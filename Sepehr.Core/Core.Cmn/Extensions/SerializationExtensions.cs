@@ -81,18 +81,24 @@ namespace Core.Cmn.Extensions
             return obj;
         }
 
-        public static T DeSerializeXMLToObject<T>(this string xmlConvertedString)
+        public static T DeSerializeXMLToObject<T>(this string xmlConvertedString, bool ignoreInvalidChars = true)
         {
             var ser = new XmlSerializer(typeof(T));
+
+            xmlConvertedString = ignoreInvalidChars? RemoveInvalidXmlChars(xmlConvertedString): xmlConvertedString;
             var stringReader = new StringReader(xmlConvertedString);
-            var xmlReader = new XmlTextReader(stringReader);
+            var xmlReader = XmlReader.Create(stringReader);
             object obj = ser.Deserialize(xmlReader);
             xmlReader.Close();
             stringReader.Close();
 
             return (T)obj;
         }
-
+        private static string RemoveInvalidXmlChars(string text)
+        {
+            string invalidChars = @"[^\x09\x0A\x0D\x20-\xD7FF\xE000-\xFFFD\x10000-x10FFFF]";
+            return System.Text.RegularExpressions.Regex.Replace(text, invalidChars, "");
+        }
         public static string StoreViewElementIntoXML(object viewElementComplexTypeObj)
         {
             var xs = new XmlSerializer(viewElementComplexTypeObj.GetType());

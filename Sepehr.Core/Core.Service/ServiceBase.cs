@@ -1,24 +1,21 @@
-﻿using System.Linq;
-using System.Linq.Expressions;
-using Core.Entity;
-using Core.Cmn;
-using Core.Rep;
-using Core.Cmn.Extensions;
-using System;
-using System.Collections.Generic;
-using Core.Repository.Interface;
+﻿using Core.Cmn;
 using Core.Cmn.Attributes;
 using Core.Cmn.Cache;
-using System.Threading;
+using Core.Cmn.Extensions;
+using Core.Rep;
+using Core.Repository.Interface;
+using System;
+using System.Collections.Generic;
 using System.Globalization;
-
+using System.Linq;
+using System.Linq.Expressions;
+using System.Threading;
 
 namespace Core.Service
 {
     public abstract class ServiceBase
     {
         public static AppBase appBase;
-
         static ServiceBase()
         {
             appBase = new AppBase();
@@ -35,16 +32,17 @@ namespace Core.Service
             }
         }
 
+
     }
 
     [Injectable(InterfaceType = typeof(IServiceBase<>), DomainName = "Core")]
     public class ServiceBase<T> : ServiceBase, IServiceBase<T>, IServiceCache, IDisposable where T : EntityBase<T>, new()
     {
+
         public IDbContextBase ContextBase { get; private set; }
         protected IRepositoryBase<T> _repositoryBase;
-       
-        public CultureInfo CurrentCulture { get; set; }
 
+        public CultureInfo CurrentCulture { get; set; }
 
         public virtual IQueryable<T> All(bool canUseCache = true)
         {
@@ -56,84 +54,31 @@ namespace Core.Service
             ContextBase = coreContextBase;
             _repositoryBase = GetRepository(ContextBase);
             CurrentCulture = Thread.CurrentThread.CurrentUICulture;
-
-
         }
+
         public ServiceBase()
         {
             ContextBase = DependencyInjectionFactory.CreateContextInstance();
             _repositoryBase = GetRepository();
             CurrentCulture = Thread.CurrentThread.CurrentUICulture;
-
-
         }
 
-       
         public IRepositoryBase<T> RepositoryBase
         {
             get { return _repositoryBase; }
         }
-
 
         public virtual IRepositoryBase<T> GetRepository(IDbContextBase dbContext = null)
         {
             if (dbContext == null)
             {
                 return new RepositoryBase<T>();
-
             }
             else
             {
-                    return new RepositoryBase<T>(ContextBase);
-                
+                return new RepositoryBase<T>(ContextBase);
             }
         }
-
-        //public virtual IQueryable<T> All(bool canUseCacheIfPossible = true)
-        //{
-        //    if (CacheKey != null)
-        //        return _repositoryBase.All().Cache(ExpireCacheSecondTime, canUseCacheIfPossible);
-        //    else return _repositoryBase.All();
-        //    //#if DEBUG
-        //    //            string useUnlimitedCacheTime_JustForDebugTime = System.Configuration.ConfigurationManager.AppSettings["UseUnlimitedCacheTime_JustForDebugTime"];
-        //    //            if (useUnlimitedCacheTime_JustForDebugTime == null || bool.Parse(useUnlimitedCacheTime_JustForDebugTime))
-        //    //                ExpireCacheSecondTime = 1000000;
-        //    //#endif
-        //    //            if (canUseCacheIfPossible && CacheKey != null)
-        //    //            {
-
-        //    //                List<T> result = new List<T>();
-        //    //                var fakeResult = string.Empty;
-        //    //                if (CacheService.TryGetCache<List<T>>(CacheKey, out result))
-        //    //                {
-        //    //                    if (!CacheService.TryGetCache<string>(CacheKey + 1, out fakeResult))
-        //    //                    {
-        //    //                        CacheService.SetCache<string>(CacheKey + 1, "Fake value", ExpireCacheSecondTime);
-        //    //#if DEBUG
-        //    //                        var countOfFetchRecord_JustForDebugTime = int.Parse(System.Configuration.ConfigurationManager.AppSettings["CountOfFetchRecord_JustForDebugTime"]);
-        //    //                        result = _repositoryBase.All().Take(countOfFetchRecord_JustForDebugTime).ToList();
-        //    //#else
-        //    //                        result = _repositoryBase.All().ToList();
-        //    //#endif
-        //    //                        CacheService.SetCache<List<T>>(CacheKey, result,  ExpireCacheSecondTime * (double)100000);
-        //    //                    }
-        //    //                }
-        //    //                else
-        //    //                {
-        //    //                    result = _repositoryBase.All().ToList();
-        //    //                    CacheService.SetCache<List<T>>(CacheKey, result, ExpireCacheSecondTime * (double)100000);
-        //    //                    CacheService.SetCache<string>(CacheKey + 1, "Fake value", ExpireCacheSecondTime);
-        //    //                }
-
-        //    //                CacheService.TryGetCache<List<T>>(CacheKey, out result);
-        //    //                return result.AsQueryable();
-        //    //            }
-        //    //            else
-        //    //            {
-        //    //                return _repositoryBase.All();
-
-        //    //            }
-        //}
 
 
         public virtual T Create(T entity, bool allowSaveChange = true)
@@ -148,9 +93,7 @@ namespace Core.Service
 
         public virtual int Delete(T entity, bool allowSaveChange = true)
         {
-
             return _repositoryBase.Delete(entity, allowSaveChange);
-
         }
 
         public virtual int Delete(IQueryable<T> itemsForDeletion, bool allowSaveChange = true)
@@ -167,6 +110,7 @@ namespace Core.Service
         {
             return _repositoryBase.Delete(i, allowSaveChange);
         }
+
         public virtual int Update(T entity, bool allowSaveChange = true)
         {
             return _repositoryBase.Update(entity, allowSaveChange);
@@ -174,9 +118,7 @@ namespace Core.Service
 
         public virtual int Update(Expression<Func<T, bool>> predicate, Expression<Func<T, T>> updatepredicate, bool allowSaveChange = true)
         {
-
             return _repositoryBase.Update(predicate, updatepredicate, allowSaveChange);
-
         }
 
         public virtual int Count { get { return _repositoryBase.Count; } }
@@ -184,7 +126,6 @@ namespace Core.Service
         public virtual void Attach(dynamic entity)
         {
             _repositoryBase.Update(entity);
-
         }
 
         public virtual T Find(params object[] keys)
@@ -197,8 +138,6 @@ namespace Core.Service
             return _repositoryBase.Find(predicate);
         }
 
-
-
         public AppBase AppBase { get { return appBase; } }
 
         public virtual void Dispose()
@@ -207,15 +146,12 @@ namespace Core.Service
                 _repositoryBase.Dispose();
         }
 
-
         //Remark:
         //public T CreateAndAttach(T TObject, Type attchObject, List<ob> attachedIdList)
         //{
         //    return _repositoryBase.CreateAndAttach(TObject, attchObject, attachedIdList);
 
         //}
-
-
 
         // Remarks:
         //     When executing this method, the statement is immediately executed on the database
@@ -226,7 +162,6 @@ namespace Core.Service
         {
             return _repositoryBase.Update(source, predicate);
         }
-
 
         public virtual IQueryable<T> Filter(Expression<Func<T, bool>> predicate, bool allowFilterDeleted = true)
         {
@@ -244,7 +179,6 @@ namespace Core.Service
         //    return null;
         //    //return _repositoryBase.Filter(expressionInfo,total,);
         //}
-
 
         public virtual IQueryable<T> Filter(Expression<Func<T, bool>> filter, out int total, int index = 0, int size = 50)
         {
@@ -279,7 +213,6 @@ namespace Core.Service
             {
                 throw new ArgumentNullException("func");
             }
-
         }
 
         private void GetOrCreateCacheInfo(Delegate func, out string cacheKey, out CacheInfo cacheInfo)
@@ -317,7 +250,6 @@ namespace Core.Service
             {
                 throw new ArgumentNullException("func");
             }
-
         }
 
         public R Cache<P1, P2, R>(Func<P1, P2, R> func, P1 param1, P2 param2, bool canUseCacheIfPossible = true)
@@ -344,7 +276,6 @@ namespace Core.Service
             {
                 throw new ArgumentNullException("func");
             }
-
         }
 
         public R Cache<P1, P2, P3, R>(Func<P1, P2, P3, R> func, P1 param1, P2 param2, P3 param3, bool canUseCacheIfPossible = true)
@@ -371,7 +302,6 @@ namespace Core.Service
             {
                 throw new ArgumentNullException("func");
             }
-
         }
 
         public R Cache<P1, P2, P3, P4, R>(Func<P1, P2, P3, P4, R> func, P1 param1, P2 param2, P3 param3, P4 param4, bool canUseCacheIfPossible = true)
@@ -379,7 +309,6 @@ namespace Core.Service
             string cacheKey;
             CacheInfo cacheInfo;
             GetOrCreateCacheInfo(func, out cacheKey, out cacheInfo);
-
 
             if (func != null)
             {
@@ -399,7 +328,6 @@ namespace Core.Service
             {
                 throw new ArgumentNullException("func");
             }
-
         }
 
         public R Cache<P1, P2, P3, P4, P5, R>(Func<P1, P2, P3, P4, P5, R> func, P1 param1, P2 param2, P3 param3, P4 param4, P5 param5, bool canUseCacheIfPossible = true)
@@ -407,7 +335,6 @@ namespace Core.Service
             string cacheKey;
             CacheInfo cacheInfo;
             GetOrCreateCacheInfo(func, out cacheKey, out cacheInfo);
-
 
             if (func != null)
             {
@@ -427,8 +354,8 @@ namespace Core.Service
             {
                 throw new ArgumentNullException("func");
             }
-
         }
+
         public R RefreshCache<R>(Func<R> func)
         {
             var cacheKey = func.Method.GetHashCode().ToString();
@@ -445,7 +372,6 @@ namespace Core.Service
             {
                 throw new ArgumentNullException("func");
             }
-
         }
 
         public R RefreshCache<P1, R>(Func<P1, R> func, P1 param1, string key = null, int expireCacheSecondTime = 60)
@@ -463,9 +389,6 @@ namespace Core.Service
             {
                 throw new ArgumentNullException("func");
             }
-
         }
-
-
     }
 }

@@ -6,22 +6,20 @@
     <grid-view grid-name="userGrid"
                view-model-type="@typeof(Core.Mvc.ViewModel.UserVM.UserViewModel)"
                height="400"
-               ae-width="440"
-               ae-height="430"
                selected-item="user"
                on-data-bound="onUserGridDataBound(args)"
                on-change="onUserGridChange(args)"
-               on-edit="onUserGridEdit(args)">
+               on-edit="onUserGridEdit(args)"
+                    >
     </grid-view>
     <grid-view grid-name="userRoleGrid"
                view-model-type="@typeof(Core.Mvc.ViewModel.UserRoleVM.UserRoleViewModel)"
                height="400"
-               ae-width="409"
-               ae-height="430"
                initial-filter="filterBase"
                on-Pre-Save="onUserRoleGridEdit(args)"
                on-init="onUserRoleGridInit(args)"
-               on-change="onUserRoleGridChange(args)">
+               on-change="onUserRoleGridChange(args)"
+               >
     </grid-view>
 
 </div>

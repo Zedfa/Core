@@ -1,17 +1,24 @@
 ﻿using Core.Cmn;
 using Core.Cmn.Attributes;
-using Core.Entity;
+using Core.Cmn.Cache;
+using Core.Cmn.Exceptions;
 using Core.Cmn.Extensions;
+using Core.Entity;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using Core.Cmn.Exceptions;
 
 namespace Core.Rep
 {
     [Injectable(InterfaceType = typeof(ICacheManagementRepository), DomainName = "Core")]
     public class CacheManagementRepository : RepositoryBase<DeletedCachedRecord>, ICacheManagementRepository
     {
+        public CacheManagementRepository(IDbContextBase dbContextBase)
+            : base(dbContextBase)
+        {
+            // _dbContext = dbContextBase;
+        }
+
         public static string QueryToCreateTriggerForDeletedRecords
         {
             get
@@ -27,7 +34,7 @@ namespace Core.Rep
                 CREATE TRIGGER {0}_InsertDeletedRecordsTrigger
                    ON  {0}
                    AFTER DELETE
-                AS 
+                AS
                 BEGIN
 	                -- SET NOCOUNT ON added to prevent extra result sets from
 	                -- interfering with SELECT statements.
@@ -36,34 +43,21 @@ namespace Core.Rep
                 select  convert(nvarchar(max), {2} ) DeletedTimeStamp , ''{0}'' TableName , GETDATE() DeletionDateTime , null TimeStamp from deleted
                 end
                 '";
-
             }
         }
+
         public string CacheKey { get; set; }
-        public CacheManagementRepository(IDbContextBase dbContextBase)
-            : base(dbContextBase)
-        {
-
-            // _dbContext = dbContextBase;
-        }
-
         [Cacheable(EnableSaveCacheOnHDD = true, ExpireCacheSecondTime = 1, EnableToFetchOnlyChangedDataFromDB = true, EnableUseCacheServer = false, DisableToSyncDeletedRecord_JustIfEnableToFetchOnlyChangedDataFromDB = true)]
         public static IQueryable<DeletedCachedRecord> AllCache(IQueryable<DeletedCachedRecord> query)
         {
             return query.AsNoTracking();
         }
+
         public override IQueryable<DeletedCachedRecord> All(bool canUseCacheIfPossible = true)
         {
             return Cache<DeletedCachedRecord>(AllCache, canUseCacheIfPossible);
         }
-        public List<IDeletedCachedRecord> GetDeletedRecordsByTable(string tableName, UInt64 timeStampUInt)
-        {
-            return All().Where(rec => rec.TimeStampUnit > timeStampUInt && rec.TableName == tableName).Cast<IDeletedCachedRecord>().ToList();
-        }
-        public void CreateSqlTriggerForDetectingDeletedRecords(string tableName, string pK)
-        {
-            DependencyInjectionFactory.CreateContextInstance().Database.ExecuteSqlCommand(string.Format(QueryToCreateTriggerForDeletedRecords, tableName, DateTime.Now.ToString(), pK));
-        }
+
         public void CheckServiceBrokerOnDb()
         {
             var dbName = DependencyInjectionFactory.CreateContextInstance().Database.Connection.Database;
@@ -73,6 +67,11 @@ namespace Core.Rep
             {
                 throw new ServiceBrokerIsNotEnabledException(dbName);
             }
+        }
+
+        public void CreateSqlTriggerForDetectingDeletedRecords(string tableName, string pK)
+        {
+            DependencyInjectionFactory.CreateContextInstance().Database.ExecuteSqlCommand(string.Format(QueryToCreateTriggerForDeletedRecords, tableName, DateTime.Now.ToString(), pK));
         }
 
         public int Delete()
@@ -97,6 +96,12 @@ namespace Core.Rep
             }
 
             return id;
+        }
+
+        public List<IDeletedCachedRecord> GetDeletedRecordsByTable(string tableName, byte[] timeStamp, bool canUseCacheIfPossible = true)
+        {
+            var result = (IQueryable<DeletedCachedRecord>)CacheDataProvider.MakeQueryableForFetchingOnlyChangedDataFromDB(All(canUseCacheIfPossible).Where(rec => rec.TableName == tableName), new CacheInfo() { MaxTimeStamp = timeStamp, EnableToFetchOnlyChangedDataFromDB = true }, !canUseCacheIfPossible);
+            return result.ToList<IDeletedCachedRecord>();
         }
     }
 }
