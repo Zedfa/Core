@@ -1,5 +1,5 @@
-var kendoGridAngularAdapterModule = new SepehrModule.MainModule("kendoGridViewModule", ["grdSearchServiceModule", "coreValidationService"]);
-kendoGridAngularAdapterModule.addDirective('gridView', ["$compile", "$http", "$q", "grdSearchService", "validate", function ($compiler, $http, $q, grdSearchService, validate) {
+var kendoGridAngularAdapterModule = new SepehrModule.MainModule("kendoGridViewModule", ["gridSearchServiceModule", "coreValidationService"]);
+kendoGridAngularAdapterModule.addDirective('gridView', ["$compile", "$http", "$q", "gridSearchService", "validate", function ($compiler, $http, $q, gridSearchService, validate) {
         function getTemplate(url) {
             var deferred = $q.defer();
             $http.get(url)
@@ -61,7 +61,8 @@ kendoGridAngularAdapterModule.addDirective('gridView', ["$compile", "$http", "$q
                 isLookup: "@",
                 wiPropName: "@",
                 requestParameters: "=",
-                scrollPosition: "@"
+                scrollPosition: "@",
+                onRemoveFilters: "&"
             },
             replace: true,
             controller: function ($scope, $element) {
@@ -268,13 +269,16 @@ kendoGridAngularAdapterModule.addDirective('gridView', ["$compile", "$http", "$q
                     function assignSearchCallback() {
                         hasSearch = true;
                         scope.search = function () {
-                            grdSearchService.loadGridSearch(dom, scope, scope.gridName);
+                            gridSearchService.loadGridSearch(dom, scope, scope.gridName);
                         };
                     }
                     function assignRemoveFilterBtnCallback() {
                         scope.removeFilters = function () {
                             scope[scope.gridName].dataSource.filter(scope.initialFilter ? scope.initialFilter : []);
                             removeSearchTextInFooter(scope[scope.gridName].wrapper);
+                            if (domAttrs.onRemoveFilters) {
+                                scope.onRemoveFilters();
+                            }
                         };
                     }
                     ;

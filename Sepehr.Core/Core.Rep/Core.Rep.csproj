@@ -71,6 +71,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="CacheManagementRepository.cs" />
+    <Compile Include="CheckSqlServiceBrockerRepository.cs" />
     <Compile Include="CompanyChartRepository.cs" />
     <Compile Include="CompanyChartRoleRepository.cs" />
     <Compile Include="CompanyRepository.cs" />

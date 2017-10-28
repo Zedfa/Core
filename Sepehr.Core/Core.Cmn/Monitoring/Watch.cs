@@ -10,6 +10,7 @@ namespace Core.Cmn.Monitoring
     public class WatchElapsed : EventArgs
     {
         public long ElapsedMilliseconds { get; set; }
+        public double TotalElapsedMilliseconds { get; set; }
     }
     public class Watch : IDisposable
     {
@@ -32,6 +33,7 @@ namespace Core.Cmn.Monitoring
         {
             Stopwatch.Stop();
             WatchElapsed.ElapsedMilliseconds = Stopwatch.ElapsedMilliseconds;
+            WatchElapsed.TotalElapsedMilliseconds = Stopwatch.Elapsed.TotalMilliseconds;
             OnWatchStop?.Invoke(this, WatchElapsed);
             OnWatchStop = null;
             Stopwatch = null;

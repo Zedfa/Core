@@ -92,7 +92,13 @@ namespace Core.Service
 
 
 
-        [Cacheable(EnableSaveCacheOnHDD = true, ExpireCacheSecondTime = 1800 /* 30 min*/, EnableAutomaticallyAndPeriodicallyRefreshCache = true, EnableUseCacheServer = true)]
+        [Cacheable(
+            EnableSaveCacheOnHDD = true,
+            EnableCoreSerialization = true,
+            AutoRefreshInterval = 1800 /* 30 min*/,
+            CacheRefreshingKind = Cmn.Cache.CacheRefreshingKind.Slide,
+            EnableUseCacheServer = true
+            )]
         public static bool UpdateDCUser()
         {
             var userProfileService = DependencyInjectionFactory.CreateInjectionInstance<IUserProfileService>();
@@ -100,7 +106,7 @@ namespace Core.Service
             var domainAuthenticationService = DependencyInjectionFactory.CreateInjectionInstance<IDomainAuthenticationService>();
             //user hayi az DC ke login kardand vali password e DC anha taghir karde ra migirad 
             //meghdare DCPassword ra dar cache null mikonad ta user az halate motabr boodan kharej shavad 
-            
+
 
             var DCUserProfileList = userProfileService.All()
                 .Where(profile =>
@@ -118,7 +124,7 @@ namespace Core.Service
                                profile.DCPassword = null;
                            return profile;
                        });
-            
+
 
             return DCUserProfileList.Count() > 0;
 

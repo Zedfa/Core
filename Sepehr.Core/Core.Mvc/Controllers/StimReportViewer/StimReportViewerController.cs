@@ -1,11 +1,7 @@
 ﻿using Core.Mvc.Controller;
-using Core.Mvc.ViewModel;
 using Stimulsoft.Report;
 using Stimulsoft.Report.Mvc;
-using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Web;
 using System.Web.Mvc;
 
 namespace Core.Mvc.Controllers.ReportViewer
@@ -14,21 +10,24 @@ namespace Core.Mvc.Controllers.ReportViewer
     {
         //
         // GET: /ReportViewr/
-       
+        public string ReportType { get; set; }
+
         public ActionResult Index(string reportType)
         {
-            new StimReportViewModel().ReportType = reportType;
+            ReportType = reportType;
             return View();
         }
+
         private static List<object> GetDataSource()
         {
             List<object> result = null;
 
             return result;
         }
+
         public ActionResult GetReportSnapshot()
         {
-            var reportType = new StimReportViewModel().ReportType;
+            var reportType = ReportType;
             var cities = GetDataSource();
 
             // Create the report object and load data from xml file
@@ -43,7 +42,7 @@ namespace Core.Mvc.Controllers.ReportViewer
             {
                 return StiMvcViewer.GetReportSnapshotResult(HttpContext, report);
             }
-            catch 
+            catch
             {
                 return View();
             }

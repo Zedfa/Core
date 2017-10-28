@@ -8,7 +8,7 @@ var coreModules = (function () {
         return [
             'ngRoute',
             'kendo.directives',
-            'grdSearchServiceModule',
+            'gridSearchServiceModule',
             'kendoGridViewModule',
             'menuDirectiveModule',
             'viewElementServiceModule',

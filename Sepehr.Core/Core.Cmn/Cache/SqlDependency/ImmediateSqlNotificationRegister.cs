@@ -164,7 +164,7 @@ namespace Core.Cmn.Cache
             // Move the original SqlDependency event handler.
             if (e.Type == SqlNotificationType.Subscribe || e.Info == SqlNotificationInfo.Error)
             {
-                Core.Cmn.AppBase.LogService.Write($"Some thing is wrong on SqlDependency Change, the query is {iquery} and SqlNotificationInfo is {e.Info}...");
+                Core.Cmn.AppBase.LogService.Write($"Some thing is wrong on SqlDependency Change, the query is {iquery} and SqlNotificationInfo is {e.Info} and Source is {e.Source}...");
             }
 
             dependency.OnChange -= DependencyOnChange;

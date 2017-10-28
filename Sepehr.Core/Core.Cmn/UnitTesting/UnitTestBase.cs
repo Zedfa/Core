@@ -5,7 +5,7 @@ using System.Reflection;
 
 namespace Core.Cmn.UnitTesting
 {
-    public abstract class UnitTestBase
+    public class UnitTestBase
     {       
 
         protected static Random _rand = new Random();
@@ -196,7 +196,7 @@ namespace Core.Cmn.UnitTesting
             return result;
         }
 
-        protected object GetRandomValue(Type type)
+        public object GetRandomValue(Type type)
         {
             object value = null;
 

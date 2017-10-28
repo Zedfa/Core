@@ -1,9 +1,9 @@
 ﻿/// <reference path="../../nggridsearch.ts" />
-var grdSearchServiceModule = new SepehrModule.MainModule("grdSearchServiceModule", ["coreAppInfoServiceModule"]);
+var gridSearchServiceModule = new SepehrModule.MainModule("gridSearchServiceModule", ["coreAppInfoServiceModule"]);
 
 
 
-grdSearchServiceModule.addService("grdSearchService", ["$compile", "coreAppInfoService", function ($compile, coreAppInfoService) {
+gridSearchServiceModule.addService("gridSearchService", ["$compile", "coreAppInfoService", function ($compile, coreAppInfoService) {
 
     window.gridSearchInstances = window.gridSearchInstances ? window.gridSearchInstances : new Array<gridInstanceInfo>();
 
@@ -59,6 +59,9 @@ grdSearchServiceModule.addService("grdSearchService", ["$compile", "coreAppInfoS
         });
         return result;
     }
+    function setGlobalOnInitMethod(method: Function) {
+
+    };
     return {
 
         loadGridSearch: (domElement, grdScope, gridId, ngOkCallback, ngCancelOrCloseCallback): void => {

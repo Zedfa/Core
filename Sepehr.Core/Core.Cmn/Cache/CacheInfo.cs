@@ -158,7 +158,7 @@ namespace Core.Cmn.Cache
 
         public int CountOfWaitingThreads { get; set; }
 
-        [IgnoreDataMember]
+        [IgnoreDataMember]       
         public ConcurrentDictionary<InfoForFillingNavigationProperty, ConcurrentBag<_EntityBase>> InfoAndEntityListForFillingNavigationPropertyDic { get; set; }
 
         [DataMember]
@@ -182,26 +182,46 @@ namespace Core.Cmn.Cache
         [DataMember]
         public byte[] MaxTimeStampForDeletedRecord { get; internal set; }
 
+        public event EventHandler<CacheChangeEventArgs> OnUpdateEntities;
+
         public event EventHandler<CacheChangeEventArgs> OnAddEntities;
 
         public event EventHandler<CacheChangeEventArgs> OnDeleteEntities;
 
         public void CallOnAddEntities(List<_EntityBase> changedEntities)
         {
-            var tmp = OnAddEntities;
-            if (tmp != null)
-            {
-                tmp(this, new CacheChangeEventArgs() { ChangedEntities = changedEntities });
-            }
+            OnAddEntities?.Invoke(this, new CacheChangeEventArgs() { ChangedEntities = changedEntities });
+        }
+
+        public void CallOnUpdateEntities(List<_EntityBase> changedEntities)
+        {
+            OnUpdateEntities?.Invoke(this, new CacheChangeEventArgs() { ChangedEntities = changedEntities });
         }
 
         public void CallOnDeleteEntities(List<_EntityBase> changedEntities)
         {
-            var tmp = OnDeleteEntities;
-            if (tmp != null)
-            {
-                tmp(this, new CacheChangeEventArgs() { ChangedEntities = changedEntities });
-            }
+            OnDeleteEntities?.Invoke(this, new CacheChangeEventArgs() { ChangedEntities = changedEntities });
+        }
+
+        public event EventHandler<CacheChangeEventArgs> AfterUpdateEntities;
+
+        public event EventHandler<CacheChangeEventArgs> AfterAddEntities;
+
+        public event EventHandler<CacheChangeEventArgs> AfterDeleteEntities;
+
+        public void CallAfterAddEntities(List<_EntityBase> changedEntities)
+        {
+            AfterAddEntities?.Invoke(this, new CacheChangeEventArgs() { ChangedEntities = changedEntities });
+        }
+
+        public void CallAfterUpdateEntities(List<_EntityBase> changedEntities)
+        {
+            AfterUpdateEntities?.Invoke(this, new CacheChangeEventArgs() { ChangedEntities = changedEntities });
+        }
+
+        public void CallAfterDeleteEntities(List<_EntityBase> changedEntities)
+        {
+            AfterDeleteEntities?.Invoke(this, new CacheChangeEventArgs() { ChangedEntities = changedEntities });
         }
     }
 

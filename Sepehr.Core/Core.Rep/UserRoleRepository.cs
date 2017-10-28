@@ -15,7 +15,7 @@ namespace Core.Rep
         #endregion
 
 
-       
+
         public UserRoleRepository(IDbContextBase dc)
             : base(dc)
         {
@@ -26,7 +26,12 @@ namespace Core.Rep
             return Cache<UserRole>(AllUserRoleCache, canUseCacheIfPossible);
         }
 
-        [Cacheable(EnableSaveCacheOnHDD = true, EnableUseCacheServer = true, ExpireCacheSecondTime = 60)]
+        [Cacheable(
+            EnableSaveCacheOnHDD = true,
+            EnableUseCacheServer = true,
+            EnableCoreSerialization = true,
+            AutoRefreshInterval = 60
+            )]
         public static IQueryable<UserRole> AllUserRoleCache(IQueryable<UserRole> query)
         {
             return query.AsNoTracking().Include(userRole => userRole.Role).Include(userRole => userRole.User);

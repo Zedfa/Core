@@ -20,7 +20,7 @@ namespace Core.UnitTesting.Cmn
             var ww = new WatchElapsed();
             using (new Watch(out ww))
             {
-                Task.Delay(100).Wait();
+               // Task.Delay(1).Wait();
             }
 
             ww.ElapsedMilliseconds++;

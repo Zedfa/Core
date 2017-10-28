@@ -16,7 +16,12 @@ namespace Core.Service
         {
 
         }
-        [Cacheable(EnableSaveCacheOnHDD = true, AutoRefreshInterval = 120, CacheRefreshingKind = CacheRefreshingKind.Slide)]
+        [Cacheable(
+            EnableSaveCacheOnHDD = true,
+            EnableCoreSerialization =true,
+            AutoRefreshInterval = 120,
+            CacheRefreshingKind = CacheRefreshingKind.Slide
+            )]
         public static bool WriteToHardCaches()
         {
             var cacheList = CacheService.ObjectCache.ToList();

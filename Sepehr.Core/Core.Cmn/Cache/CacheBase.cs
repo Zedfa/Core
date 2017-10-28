@@ -72,10 +72,11 @@ namespace Core.Cmn.Cache
             return result;
         }
 
-        public static T MergeFreshDataByOldCache<T>(T oldData, T newData, CacheInfo cacheInfo, bool isQueryableCache)
+        public static T MergeFreshDataByOldCache<T>(T oldData, T newData, CacheInfo cacheInfo, bool isQueryableCache, out List<_EntityBase> entitiesForDeletion, out List<_EntityBase> entitiesForAddition, out List<_EntityBase> entitiesForUpdates)
         {
-            List<_EntityBase> entitiesForDeletion = null;
-            List<_EntityBase> entitiesForAddition = null;
+            entitiesForDeletion = null;
+            entitiesForAddition = null;
+            entitiesForUpdates = null;
             var nlst = (newData as IList);
             T resultList = oldData;
             if (oldData == null)
@@ -183,6 +184,7 @@ namespace Core.Cmn.Cache
                 if (nlst.Count > 0)
                 {
                     entitiesForAddition = new List<_EntityBase>();
+                    entitiesForUpdates = new List<Cmn._EntityBase>();
                     var newLst = nlst.Cast<_EntityBase>().ToList();
                     var oldLst = (oldData as IList);
                     var oldEntityBaseLst = (oldData as IList).Cast<_EntityBase>().ToList();
@@ -192,13 +194,14 @@ namespace Core.Cmn.Cache
                         result.Add(item);
                     }
 
-                    newLst.ForEach(newItem =>
+                    foreach (var newItem in newLst)
                     {
                         var oldItem = oldEntityBaseLst.FirstOrDefault(item => item.Equals(newItem));
                         if (oldItem != null)
                         {
                             UpdateNavigationProperties(cacheInfo, newItem, oldItem);
                             oldItem.UpdateAllProps(newItem);
+                            entitiesForUpdates.Add(oldItem);
                         }
                         else
                         {
@@ -208,10 +211,15 @@ namespace Core.Cmn.Cache
 
                             // newItem.EnableFillNavigationProperyByCache = true;
                         }
-                    });
+                    }
 
                     resultList = (T)result;
                 }
+            }
+
+            if (entitiesForUpdates != null && entitiesForUpdates.Count > 0)
+            {
+                cacheInfo.CallOnUpdateEntities(entitiesForUpdates);
             }
 
             if (entitiesForAddition != null && entitiesForAddition.Count > 0)
@@ -394,16 +402,34 @@ namespace Core.Cmn.Cache
             {
 
                 refreshCacheValue = cacheExecution.GetFreshData();
+                List<_EntityBase> entitiesForDeletion = null;
+                List<_EntityBase> entitiesForAddition = null;
+                List<_EntityBase> entitiesForUpdates = null;
                 lock (cacheInfo.InfoAndEntityListForFillingNavigationPropertyDic)
                 {
+
                     if (cacheInfo.EnableToFetchOnlyChangedDataFromDB)
                     {
-                        refreshCacheValue = MergeFreshDataByOldCache<T>(oldCacheValue, refreshCacheValue, cacheInfo, true);
-
+                        refreshCacheValue = MergeFreshDataByOldCache<T>(oldCacheValue, refreshCacheValue, cacheInfo, true, out entitiesForDeletion, out entitiesForAddition, out entitiesForUpdates);
                     }
 
                     CacheService.SetCache<T>(cacheExecution.GenerateCacheKey(), refreshCacheValue, cacheInfo.AutoRefreshInterval * (double)100000);
                     cacheInfo.NotYetGetCacheData = false;
+                }
+
+                if (entitiesForUpdates != null && entitiesForUpdates.Count > 0)
+                {
+                    cacheInfo.CallAfterUpdateEntities(entitiesForUpdates);
+                }
+
+                if (entitiesForAddition != null && entitiesForAddition.Count > 0)
+                {
+                    cacheInfo.CallAfterAddEntities(entitiesForAddition);
+                }
+
+                if (entitiesForDeletion != null && entitiesForDeletion.Count > 0)
+                {
+                    cacheInfo.CallAfterDeleteEntities(entitiesForDeletion);
                 }
 
                 cacheInfo.FrequencyOfBuilding += 1;

@@ -40,16 +40,8 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="Castle.Core, Version=3.3.0.0, Culture=neutral, PublicKeyToken=407dd0808d44fbdc, processorArchitecture=MSIL">
-      <HintPath>..\..\..\Sepehr360\Sepehr360_Main\packages\Castle.Core.3.3.3\lib\net45\Castle.Core.dll</HintPath>
-      <Private>True</Private>
-    </Reference>
     <Reference Include="Microsoft.Web.Infrastructure, Version=1.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
       <HintPath>..\..\..\Sepehr360\Sepehr360_Main\packages\Microsoft.Web.Infrastructure.1.0.0.0\lib\net40\Microsoft.Web.Infrastructure.dll</HintPath>
-      <Private>True</Private>
-    </Reference>
-    <Reference Include="Moq, Version=4.5.28.0, Culture=neutral, PublicKeyToken=69f491c39445e920, processorArchitecture=MSIL">
-      <HintPath>..\..\..\Sepehr360\Sepehr360_Main\packages\Moq.4.5.28\lib\net45\Moq.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="System" />
@@ -101,6 +93,7 @@
     </Otherwise>
   </Choose>
   <ItemGroup>
+    <Compile Include="Cmn\DataSourceTests.cs" />
     <Compile Include="Cmn\EntityInfoTests.cs" />
     <Compile Include="Cmn\StringExtTests.cs" />
     <Compile Include="Cmn\TypeExtTests.cs" />
@@ -115,6 +108,7 @@
     <Compile Include="Entity\EntityUnitTestHelperBase.cs" />
     <Compile Include="Mock\Core.Ef\MockBatchExtensions.cs" />
     <Compile Include="Mock\Core.Service\MockUserRequest.cs" />
+    <Compile Include="Mock\MockCheckSqlServiceBrockerRepository.cs" />
     <Compile Include="Mock\MockIDbContextBaseExtentionsForUnitTest.cs" />
     <Compile Include="Mock\MockDbPropertyValues.cs" />
     <Compile Include="Mock\MockDbEntityEntry.cs" />

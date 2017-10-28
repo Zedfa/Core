@@ -864,17 +864,17 @@ var ngSearchObj = (function () {
 var ngSearchHelper;
 (function (ngSearchHelper) {
     function getGridSearchInstanceById(gridId) {
-        var gridSearchService = angular.injector(["grdSearchServiceModule", "ng"]).get("grdSearchService");
+        var gridSearchService = angular.injector(["gridSearchServiceModule", "ng"]).get("gridSearchService");
         return gridSearchService.getGridSearchInstance(gridId);
     }
     ngSearchHelper.getGridSearchInstanceById = getGridSearchInstanceById;
     function getActiveGridSearch() {
-        var gridSearchService = angular.injector(["grdSearchServiceModule", "ng"]).get("grdSearchService");
+        var gridSearchService = angular.injector(["gridSearchServiceModule", "ng"]).get("gridSearchService");
         return gridSearchService.getActiveGridSearchInstance();
     }
     ngSearchHelper.getActiveGridSearch = getActiveGridSearch;
     function setActiveGridSearch(instance) {
-        var gridSearchService = angular.injector(["grdSearchServiceModule", "ng"]).get("grdSearchService");
+        var gridSearchService = angular.injector(["gridSearchServiceModule", "ng"]).get("gridSearchService");
         return gridSearchService.setActiveGridSearchInstance(instance);
     }
     ngSearchHelper.setActiveGridSearch = setActiveGridSearch;

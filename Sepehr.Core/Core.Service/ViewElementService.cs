@@ -213,7 +213,10 @@ namespace Core.Service
 
         }
 
-        [Cacheable(ExpireCacheSecondTime = 10)]
+        [Cacheable(
+            AutoRefreshInterval = 10,
+            EnableCoreSerialization = true
+            )]
         public static List<ViewElementDTO> GetViewElementByUserId(int userId)
         {
             var roleList = new List<Role>();

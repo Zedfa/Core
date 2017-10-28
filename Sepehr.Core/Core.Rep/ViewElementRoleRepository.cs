@@ -21,7 +21,12 @@ namespace Core.Rep
         }
 
 
-        [Cacheable(EnableSaveCacheOnHDD = true, EnableUseCacheServer = false, ExpireCacheSecondTime = 15)]
+        [Cacheable(
+            EnableSaveCacheOnHDD = true,
+            EnableUseCacheServer = false,
+            AutoRefreshInterval = 15,
+            EnableCoreSerialization = true
+            )]
         public static IQueryable<ViewElementRole> AllViewElementsCache(IQueryable<ViewElementRole> query)
         {
 

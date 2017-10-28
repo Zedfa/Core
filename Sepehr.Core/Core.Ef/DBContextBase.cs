@@ -360,18 +360,18 @@ namespace Core.Ef
 
             catch (DbUpdateConcurrencyException dbUpdateCncurrencyEx)
             {
-
+                throw;
                 CheckConstraint(dbUpdateCncurrencyEx);
             }
             catch (DbUpdateException dDbUpdateException)
             {
                 var exp = new DbUpdateExceptionBase(dDbUpdateException);
-                throw exp;
+                throw;
             }
             catch (System.Data.Entity.Validation.DbEntityValidationException dbEntityValidationEx)
             {
                 var exp = new DbEntityValidationExceptionBase(dbEntityValidationEx);
-                throw exp;
+                throw;
             }
             catch (System.Exception ex)
             {
@@ -387,7 +387,7 @@ namespace Core.Ef
                     _logService.Handle(ex, customMessage: "An exception ocuured during saving changes.", source: "SaveChanges()!");
 
                 }
-                throw ex;
+                throw;
             }
 
             if (!isDone)
@@ -400,12 +400,13 @@ namespace Core.Ef
 
                     catch (DbUpdateConcurrencyException e)
                     {
+                        throw;
                         CheckConstraint(e);
                     }
                     catch (DbUpdateException dDbUpdateException)
                     {
                         var exp = new DbUpdateExceptionBase(dDbUpdateException);
-                        throw exp;
+                        throw;
                     }
                     catch (SqlException e)
                     {
@@ -434,10 +435,10 @@ namespace Core.Ef
                                     Core.Cmn.AppBase.LogService.Handle(ex, customMessage: "An exception ocuured during saving changes.", source: "SaveChanges()!");
 
                                 }
-                                throw ex;
+                                throw;
                             }
 
-                            throw e;  // Not a deadlock so throw the exception
+                            throw;  // Not a deadlock so throw the exception
                         }
                         // Add some code to do whatever you want with the exception once you've exceeded the max. retries
                     }

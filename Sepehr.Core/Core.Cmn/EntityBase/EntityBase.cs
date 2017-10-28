@@ -88,7 +88,18 @@ namespace Core.Cmn
                 return _timeStampStr;
             }
         }
-
+        [NotMapped]
+        //[NonSerialized]
+        [IgnoreDataMember]
+        [ScriptIgnore]
+        [JsonIgnore]
+        public ConcurrentDictionary<int, int[]> IndexOfIndexableProperties { get; set; }
+        [NotMapped]
+        //[NonSerialized]
+        [IgnoreDataMember]
+        [ScriptIgnore]
+        [JsonIgnore]
+        public ConcurrentDictionary<int, int[]> IndexOfGroupedIndexableProperties { get; set; }
         private int _cacheId;
         [NotMapped]
         [IgnoreDataMember]
@@ -131,29 +142,10 @@ namespace Core.Cmn
         {
             if (_entityInfo == null)
             {
-                _entityInfo = _EntityBase.GetEntityInfo(this.GetType());
+                _entityInfo = Core.Cmn.EntityInfo.GetEntityInfo(this.GetType());
             }
 
             return _entityInfo;
-        }
-
-        private static object _lockObjectForEntityInfo = new object();
-        public static EntityInfo GetEntityInfo(Type entityType)
-        {
-            EntityInfo entityInfo = null;
-            if (!Core.Cmn.EntityInfo.EntityInfoDic.TryGetValue(entityType, out entityInfo))
-            {
-                lock (_lockObjectForEntityInfo)
-                {
-                    if (!Core.Cmn.EntityInfo.EntityInfoDic.TryGetValue(entityType, out entityInfo))
-                    {
-                        entityInfo = new EntityInfo(entityType);
-                        Core.Cmn.EntityInfo.EntityInfoDic[entityType] = entityInfo;
-                    }
-                }
-            }
-
-            return entityInfo;
         }
 
         [IndexerName("CustomIndexerProperty")]

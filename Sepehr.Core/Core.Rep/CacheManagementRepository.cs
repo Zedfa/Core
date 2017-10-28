@@ -47,7 +47,14 @@ namespace Core.Rep
         }
 
         public string CacheKey { get; set; }
-        [Cacheable(EnableSaveCacheOnHDD = true, ExpireCacheSecondTime = 1, EnableToFetchOnlyChangedDataFromDB = true, EnableUseCacheServer = false, DisableToSyncDeletedRecord_JustIfEnableToFetchOnlyChangedDataFromDB = true)]
+        [Cacheable(
+            EnableSaveCacheOnHDD = true,
+            AutoRefreshInterval = 1,
+            EnableToFetchOnlyChangedDataFromDB = true,
+            EnableUseCacheServer = false,
+            DisableToSyncDeletedRecord_JustIfEnableToFetchOnlyChangedDataFromDB = true,
+            EnableCoreSerialization = true
+            )]
         public static IQueryable<DeletedCachedRecord> AllCache(IQueryable<DeletedCachedRecord> query)
         {
             return query.AsNoTracking();
@@ -56,17 +63,6 @@ namespace Core.Rep
         public override IQueryable<DeletedCachedRecord> All(bool canUseCacheIfPossible = true)
         {
             return Cache<DeletedCachedRecord>(AllCache, canUseCacheIfPossible);
-        }
-
-        public void CheckServiceBrokerOnDb()
-        {
-            var dbName = DependencyInjectionFactory.CreateContextInstance().Database.Connection.Database;
-            var query = $"Select is_broker_enabled from sys.databases where name = '{dbName}'";
-            var isServiceBrokerEnabled = DependencyInjectionFactory.CreateContextInstance().Database.SqlQueryForSingleResult<bool>(query);
-            if (!isServiceBrokerEnabled)
-            {
-                throw new ServiceBrokerIsNotEnabledException(dbName);
-            }
         }
 
         public void CreateSqlTriggerForDetectingDeletedRecords(string tableName, string pK)

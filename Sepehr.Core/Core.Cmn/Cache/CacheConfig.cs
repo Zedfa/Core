@@ -3,6 +3,7 @@ using Core.Cmn.Cache.Server;
 using Core.Cmn.Cache.SqlDependency;
 using Core.Cmn.DependencyInjection;
 using Core.Cmn.Extensions;
+using Core.Cmn.Interface;
 using Newtonsoft.Json.Converters;
 using System;
 using System.Collections.Concurrent;
@@ -85,13 +86,21 @@ namespace Core.Cmn.Cache
 
         public static void OnRepositoryCacheConfig(Type dBContext)
         {
-            CacheConfig.CacheManagementRepository.CheckServiceBrokerOnDb();
+            Core.Cmn.AppBase.DependencyInjectionFactory.CreateInjectionInstance<ICheckSqlServiceBrockerRepository>().CheckServiceBrokerOnDb();
             var repositoryAssemblies = AppDomain.CurrentDomain.GetAssemblies().Where(ass => ass.FullName.ToLower().Contains(".rep")).ToList();
             bool isNeedCache;
             if (Core.Cmn.ConfigHelper.TryGetConfigValue<bool>("IsNeedCache", out isNeedCache) && !isNeedCache)
             {
                 repositoryAssemblies = repositoryAssemblies.Where(ass => ass.FullName.ToLower().Contains("core.rep")).ToList();
             }
+            // Core.Rep must build it's cache at first of all.
+            var coreRepAssembly = repositoryAssemblies.FirstOrDefault(ass => ass.FullName.ToLower().Contains("core.rep"));
+            if (repositoryAssemblies != null)
+            {
+                repositoryAssemblies.Remove(coreRepAssembly);
+                BuildCachesInAssembly(dBContext, coreRepAssembly, true);
+            }
+
             repositoryAssemblies.ForEach(ass => BuildCachesInAssembly(dBContext, ass, true));
             PeriodicTaskFactory p = new PeriodicTaskFactory((pt) =>
             {

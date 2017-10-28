@@ -222,7 +222,7 @@ namespace Core.Serialization.BinaryConverters
         /// </summary>
         public virtual T CreateInstanceBase(BinaryReader reader, Type objectType, DeserializationContext context)
         {
-            throw new NotImplementedException("It must be implemented and called just for reference Types.");
+            return default(T);
         }
 
         public override object CreateInstance(BinaryReader reader, Type objectType, DeserializationContext context)

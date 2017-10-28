@@ -557,9 +557,9 @@ namespace Core.Cmn.FarsiUtils
 
         #region Ctor
 
-        public PersianDate(DateTime dt)
+        public PersianDate(DateTime gregorianDateTime)
         {
-            Assign(PersianDateConverter.ToPersianDate(dt));
+            Assign(PersianDateConverter.ToPersianDate(gregorianDateTime));
         }
         public PersianDate(DateTime date, TimeSpan utcDifference)
         {

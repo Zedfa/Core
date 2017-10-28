@@ -1,5 +1,5 @@
-var grdSearchServiceModule = new SepehrModule.MainModule("grdSearchServiceModule", ["coreAppInfoServiceModule"]);
-grdSearchServiceModule.addService("grdSearchService", ["$compile", "coreAppInfoService", function ($compile, coreAppInfoService) {
+var gridSearchServiceModule = new SepehrModule.MainModule("gridSearchServiceModule", ["coreAppInfoServiceModule"]);
+gridSearchServiceModule.addService("gridSearchService", ["$compile", "coreAppInfoService", function ($compile, coreAppInfoService) {
         window.gridSearchInstances = window.gridSearchInstances ? window.gridSearchInstances : new Array();
         function findObject(id) {
             var foundInstance = null;
@@ -39,6 +39,9 @@ grdSearchServiceModule.addService("grdSearchService", ["$compile", "coreAppInfoS
             });
             return result;
         }
+        function setGlobalOnInitMethod(method) {
+        }
+        ;
         return {
             loadGridSearch: function (domElement, grdScope, gridId, ngOkCallback, ngCancelOrCloseCallback) {
                 var gridSearchInstance = null, searchGridId = "grdSearch" + gridId;

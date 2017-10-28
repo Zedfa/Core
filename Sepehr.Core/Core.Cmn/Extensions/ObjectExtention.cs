@@ -16,16 +16,11 @@ namespace Core.Cmn.Extensions
 {
     public static class ObjectExtention
     {
-        public static T DeepCopy<T>(this T obj) where T : class , new()
+        public static T DeepCopy<T>(this T obj) where T : class, new()
         {
             object clonedObj = null;
-            using (var ms = new MemoryStream())
-            {
-                var formatter = new BinaryFormatter();
-                formatter.Serialize(ms, obj);
-                ms.Position = 0;
-                clonedObj = formatter.Deserialize(ms);
-            }
+            var binary = Core.Serialization.BinaryConverter.Serialize(obj);
+            clonedObj = Core.Serialization.BinaryConverter.Deserialize(binary, obj.GetType());
             return (T)clonedObj;
         }
         // //public static T DeepCopy<T>(this T obj) where T : class , new()
@@ -209,7 +204,7 @@ namespace Core.Cmn.Extensions
 
         }
 
-    
+
         public static TValue GetValue<TObj, TValue>(this TObj obj, Func<TObj, TValue> member, TValue defaultValueOnNull = default(TValue))
         {
             if (member == null)
@@ -230,7 +225,7 @@ namespace Core.Cmn.Extensions
             {
                 return defaultValueOnNull;
             }
-        } 
+        }
 
 
     }

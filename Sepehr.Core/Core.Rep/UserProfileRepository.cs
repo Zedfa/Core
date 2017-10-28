@@ -10,16 +10,23 @@ namespace Core.Rep
 {
     [Injectable(InterfaceType = typeof(IUserProfileRepository), DomainName = "Core")]
 
-    public class UserProfileRepository : RepositoryBase<UserProfile>, IUserProfileRepository 
+    public class UserProfileRepository : RepositoryBase<UserProfile>, IUserProfileRepository
     {
-        
+
         public UserProfileRepository(IDbContextBase dbContextBase)
             : base(dbContextBase)
         {
         }
 
-        [Cacheable(EnableSaveCacheOnHDD = true, EnableUseCacheServer = true, ExpireCacheSecondTime = 5, EnableAutomaticallyAndPeriodicallyRefreshCache = true, EnableToFetchOnlyChangedDataFromDB = true,
-            NameOfNavigationPropsForFetchingOnlyChangedDataFromDB = "User")]
+        [Cacheable(
+            EnableSaveCacheOnHDD = true,
+            EnableUseCacheServer = true,
+            EnableCoreSerialization = true,
+            AutoRefreshInterval = 5,
+            CacheRefreshingKind = Cmn.Cache.CacheRefreshingKind.Slide,
+            EnableToFetchOnlyChangedDataFromDB = true,
+            NameOfNavigationPropsForFetchingOnlyChangedDataFromDB = "User"
+            )]
         public static IQueryable<UserProfile> AllUserProfileCache(IQueryable<UserProfile> query)
         {
             return query.AsNoTracking().Include("User");

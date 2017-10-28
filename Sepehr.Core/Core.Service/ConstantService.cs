@@ -38,7 +38,10 @@ namespace Core.Service
 
 
 
-        [Cacheable(ExpireCacheSecondTime = 10)]
+        [Cacheable(
+            AutoRefreshInterval =  10,
+            EnableCoreSerialization =true
+            )]
         public static T GetValueByCategory_Cache<T>(string key, string category)
         {
 

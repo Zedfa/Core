@@ -77,7 +77,22 @@ li {
 ul.simple {
     list-style-type: none;
 }
-
+.supplierFlightFilter .daysRow   {
+    display:inline-block;
+    width:80%;
+    box-shadow:2px 2px 5px 2px #ccc;
+    
+}
+.supplierFlightFilter .daysRow >div:nth-child(even)   {
+    background-color:#e6e6e6;
+    padding:5px;
+    text-align: center;
+}
+.supplierFlightFilter .daysRow >div:nth-child(odd)   {
+    background-color:#fff;
+    padding:5px;
+    text-align: center;
+}
 /* this rule styles <h2> tags that are the 
 first child of the left and right table columns */
 .rightColumn > h1, .rightColumn > h2, .leftColumn > h1, .leftColumn > h2 {

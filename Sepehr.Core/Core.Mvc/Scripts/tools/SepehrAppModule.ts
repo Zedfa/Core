@@ -97,9 +97,14 @@ module Ambients {
     export class Globals {
         static languageCode: string = null;
         static getLanguageCode() {
+            debugger;
             this.languageCode = window.location.pathname.split('/')[1];
-            if (this.languageCode == "" || this.languageCode == null)
+            if (this.languageCode.length > 2) {
                 this.languageCode = "fa"
+            }
+                if (this.languageCode == "" || this.languageCode == null)
+                    this.languageCode = "fa"
+            
         }
         static gFilterObj: any = [];
         static timer = 0;

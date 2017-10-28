@@ -1235,15 +1235,15 @@ class ngSearchObj {
 module ngSearchHelper {
 
     export function getGridSearchInstanceById(gridId): ngSearchObj {
-        var gridSearchService = angular.injector(["grdSearchServiceModule", "ng"]).get("grdSearchService");
+        var gridSearchService = angular.injector(["gridSearchServiceModule", "ng"]).get("gridSearchService");
         return gridSearchService.getGridSearchInstance(gridId);
     }
     export function getActiveGridSearch(): ngSearchObj {
-        var gridSearchService = angular.injector(["grdSearchServiceModule", "ng"]).get("grdSearchService");
+        var gridSearchService = angular.injector(["gridSearchServiceModule", "ng"]).get("gridSearchService");
         return gridSearchService.getActiveGridSearchInstance();
     }
     export function setActiveGridSearch(instance: ngSearchObj): void {
-        var gridSearchService = angular.injector(["grdSearchServiceModule", "ng"]).get("grdSearchService");
+        var gridSearchService = angular.injector(["gridSearchServiceModule", "ng"]).get("gridSearchService");
         return gridSearchService.setActiveGridSearchInstance(instance);
     }
     //export function initializeSearchObj(instanc :ngSearchObj): void {

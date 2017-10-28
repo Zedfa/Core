@@ -887,10 +887,10 @@ namespace Core.Mvc.Helpers.CoreKendoGrid
                             uGuideCommand.GridID = ID;
                             uGuideCommand.ClickHandler = helpUrl /*Core.Resources.Constants.HelpUrl*/;
                             //TODO: not nead to use COC(Convention over configuration) for ViewModel
-                            var viewModelModelIndex = modelTypeStr.IndexOf("ViewModel");
+                            var viewModelModelIndex = modelTypeStr.ToLower().IndexOf("viewmodel");
                             if (viewModelModelIndex == -1)
                             {
-                                var DTOlIndex = modelTypeStr.IndexOf("DTO");
+                                var DTOlIndex = modelTypeStr.ToLower().IndexOf("dto");
 
                                 if (DTOlIndex == -1)
                                     throw new Exception("ViewModel class Name must end by DTO or ViewModel.");

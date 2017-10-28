@@ -55,10 +55,6 @@
     <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="EdgeJs, Version=0.0.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\..\NugetPackages\Edge.js.6.5.1\lib\net40\EdgeJs.dll</HintPath>
-      <Private>True</Private>
-    </Reference>
     <Reference Include="Microsoft.Diagnostics.Tracing.EventSource">
       <HintPath>..\..\NugetPackages\Microsoft.Diagnostics.Tracing.EventSource.Redist.1.1.28\lib\net40\Microsoft.Diagnostics.Tracing.EventSource.dll</HintPath>
     </Reference>
@@ -124,6 +120,7 @@
   <ItemGroup>
     <Compile Include="AppBase.cs" />
     <Compile Include="Attributes\CacheableAttribute.cs" />
+    <Compile Include="Attributes\IndexablePropertyAttribute.cs" />
     <Compile Include="Attributes\InjectableAttribute.cs" />
     <Compile Include="Attributes\DecimalPrecisionAttribute.cs" />
     <Compile Include="Attributes\FillNavigationProperyByCacheAttribute.cs" />
@@ -142,22 +139,23 @@
     <Compile Include="Cache\SqlDependency\IImmediateSqlNotificationRegister.cs" />
     <Compile Include="Cache\SqlDependency\ImmediateSqlNotificationRegister.cs" />
     <Compile Include="Cache\SqlDependency\RegularlySqlNotificationRegister.cs" />
-    <Compile Include="Cache\InfoForFillingNavigationProperty.cs" />
+    <Compile Include="EntityBase\MetaData\InfoForFillingNavigationProperty.cs" />
     <Compile Include="Cache\IRepositoryCache.cs" />
     <Compile Include="Cache\IServiceCache.cs" />
     <Compile Include="Cache\QueryableCacheDataProvider.cs" />
     <Compile Include="Cache\ServerSideCacheServerService.cs" />
     <Compile Include="CmnHelper.cs" />
     <Compile Include="ConfigHelper.cs" />
+    <Compile Include="DataSource\DataSource.cs" />
+    <Compile Include="EntityBase\MetaData\IndexablePropertyData.cs" />
     <Compile Include="DependencyInjectionFactory.cs" />
     <Compile Include="DependencyInjection\ParameterOverride.cs" />
     <Compile Include="DependencyInjection\UnityDependencyInjectionManager.cs" />
     <Compile Include="DiManager.cs" />
-    <Compile Include="EdgeJs.cs" />
     <Compile Include="EntityBase\DtoBase.cs" />
     <Compile Include="EntityBase\DynamicEntity.cs" />
     <Compile Include="EntityBase\EntityBase.cs" />
-    <Compile Include="EntityBase\EntityInfo.cs" />
+    <Compile Include="EntityBase\MetaData\EntityInfo.cs" />
     <Compile Include="EntityBase\IDto.cs" />
     <Compile Include="EntityBase\IEntity.cs" />
     <Compile Include="EntityBase\IModelBase.cs" />
@@ -166,6 +164,8 @@
     <Compile Include="EntityBase\ViewModelBuilder.cs" />
     <Compile Include="CustomEventArgs\SignInEventArgs.cs" />
     <Compile Include="Exceptions\CoreExceptionBase.cs" />
+    <Compile Include="Exceptions\InvalidFilterOnIndexablePropertyException.cs" />
+    <Compile Include="Exceptions\InvalidIndexablePropertyDataException.cs" />
     <Compile Include="Exceptions\ServiceBrokerIsNotEnabledException.cs" />
     <Compile Include="Extensions\ExceptionExt.cs" />
     <Compile Include="Extensions\IDbContextExt.cs" />
@@ -179,10 +179,11 @@
     <Compile Include="GeneralConstant.cs" />
     <Compile Include="ApplicationStartBase.cs" />
     <Compile Include="HttpHelper.cs" />
-    <Compile Include="ICacheManagementRepository.cs" />
+    <Compile Include="Interface\ICacheManagementRepository.cs" />
     <Compile Include="DependencyInjection\IDependencyInjectionManager.cs" />
+    <Compile Include="Interface\ICheckSqlServiceBrockerRepository.cs" />
     <Compile Include="Interface\IDatabase.cs" />
-    <Compile Include="IDbContextFactory.cs" />
+    <Compile Include="Interface\IDbContextFactory.cs" />
     <Compile Include="ImageHelper.cs" />
     <Compile Include="EncryptionUtil.cs" />
     <Compile Include="Extensions\DateExt.cs" />
@@ -192,7 +193,7 @@
     <Compile Include="Extensions\TypeExt.cs" />
     <Compile Include="FarsiUtils\PersianCalendar.cs" />
     <Compile Include="Cache\ICacheDataProvider.cs" />
-    <Compile Include="ILogService.cs" />
+    <Compile Include="Interface\ILogService.cs" />
     <Compile Include="Interface\IDbChangeTrackerBase.cs" />
     <Compile Include="Interface\IDbContextBase.cs" />
     <Compile Include="Interface\IDbContextConfigurationBase.cs" />
@@ -206,7 +207,7 @@
     <Compile Include="IPAddressRange.cs" />
     <Compile Include="Monitoring\Watch.cs" />
     <Compile Include="Report\IReportService.cs" />
-    <Compile Include="IViewModelBase.cs" />
+    <Compile Include="Interface\IViewModelBase.cs" />
     <Compile Include="Monitoring\ResourceMonitoring.cs" />
     <Compile Include="LogInfo.cs" />
     <Compile Include="PeriodicTaskFactory.cs" />
@@ -245,12 +246,6 @@
     <None Include="App.config">
       <SubType>Designer</SubType>
     </None>
-    <None Include="edge\x64\edge_nativeclr.node">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Include="edge\x86\edge_nativeclr.node">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
@@ -264,20 +259,6 @@
       <Project>{5324964c-6ed2-44c3-a457-141b0eeb081d}</Project>
       <Name>Core.Serialization</Name>
     </ProjectReference>
-  </ItemGroup>
-  <ItemGroup>
-    <Content Include="edge\double_edge.js">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="edge\edge.js">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="edge\x64\node.dll">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="edge\x86\node.dll">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <Import Project="$(SolutionDir)\.nuget\NuGet.targets" Condition="Exists('$(SolutionDir)\.nuget\NuGet.targets')" />

@@ -42,7 +42,13 @@ namespace Core.Rep
         #endregion
 
         #region Methods
-        [Cacheable(EnableSaveCacheOnHDD = true, AutoRefreshInterval  = 600, CacheRefreshingKind = Cmn.Cache.CacheRefreshingKind.SqlDependency, EnableToFetchOnlyChangedDataFromDB =true)]
+        [Cacheable(
+            EnableSaveCacheOnHDD = true,
+            AutoRefreshInterval  = 600,
+            CacheRefreshingKind = Cmn.Cache.CacheRefreshingKind.SqlDependency,
+            EnableToFetchOnlyChangedDataFromDB =true, 
+            EnableCoreSerialization = true
+            )]
         public static IQueryable<Constant> AllConstantCache(IQueryable<Constant> query)
         {
           

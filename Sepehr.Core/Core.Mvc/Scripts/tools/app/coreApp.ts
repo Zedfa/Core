@@ -10,7 +10,7 @@ class coreModules {
         return [
             'ngRoute',
             'kendo.directives',
-            'grdSearchServiceModule',
+            'gridSearchServiceModule',
             'kendoGridViewModule',
             'menuDirectiveModule',
             'viewElementServiceModule',

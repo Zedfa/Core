@@ -14,7 +14,7 @@ using Core.Rep.Interface;
 namespace Core.Rep
 {
 
-    public class UserRepository : RepositoryBase<User> 
+    public class UserRepository : RepositoryBase<User>
     {
         private IDbContextBase _dbContext;
         private IUserProfileRepository _userProfileRepository;
@@ -25,7 +25,7 @@ namespace Core.Rep
             _dbContext = ContextBase;
             _userProfileRepository = AppBase.DependencyInjectionManager.Resolve<IUserProfileRepository>();
         }
-       
+
         public UserRepository(IDbContextBase dbContextBase)
             : base(dbContextBase)
         {
@@ -33,7 +33,7 @@ namespace Core.Rep
             _userProfileRepository = AppBase.DependencyInjectionManager.Resolve<IUserProfileRepository>();
 
         }
-        
+
 
         public User GetUser(string userName, string password)
         {
@@ -48,7 +48,7 @@ namespace Core.Rep
         public override User Create(User t, bool allowSaveChange = true)
         {
             //choon hanooz malom nist mikhaym multi company bashim ya na hameye user ha be sepehr system vasl mishan
-            t.CurrentCompanyId= t.CurrentCompanyId ?? 1;
+            t.CurrentCompanyId = t.CurrentCompanyId ?? 1;
             t.CompanyChartId = t.CompanyChartId ?? 1;
             return base.Create(t, allowSaveChange);
         }
@@ -142,10 +142,10 @@ namespace Core.Rep
         public bool IsUserActive(string userName)
         {
 
-            var foundedUserProfile =_userProfileRepository.All()
+            var foundedUserProfile = _userProfileRepository.All()
                 .Where(a => a.UserName.ToLower() == userName.ToLower()).SingleOrDefault();
 
-            return foundedUserProfile !=null ? foundedUserProfile.User.Active: false;
+            return foundedUserProfile != null ? foundedUserProfile.User.Active : false;
         }
 
         public IQueryable<User> GetAllHeadUsers()
@@ -202,7 +202,12 @@ namespace Core.Rep
                 .FirstOrDefault(user => user.Id.Equals(id));
 
         }
-        [Cacheable(EnableSaveCacheOnHDD = true, EnableUseCacheServer = false, ExpireCacheSecondTime = 100, EnableAutomaticallyAndPeriodicallyRefreshCache = true)]
+        [Cacheable(
+            EnableSaveCacheOnHDD = true,
+            EnableUseCacheServer = false,
+            EnableCoreSerialization = true,
+            AutoRefreshInterval = 100,
+            CacheRefreshingKind = Cmn.Cache.CacheRefreshingKind.Slide)]
         public static IQueryable<User> All_UsersRole_Role_ViewElementRoles_ViewElement_Cache(IQueryable<User> query)
         {
             return query.Include(element => element.UserRoles)
