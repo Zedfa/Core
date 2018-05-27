@@ -14,10 +14,11 @@ ddlDirectiveModule.addDirective("dropDownList", ["$compile", "$http", function (
             url: "@",
             width: "@",
             customChange: "&",
+            onSelect: "&",
             onDataBound: "&",
             dbCategoryName: "@",
             customDataSource: "=?source"
-            // onSelect:"&"
+
         },
         controller: ["$scope", "$element", "$attrs", function ($scope, $element, $attrs) {
             if ($attrs.dbCategoryName && $attrs.dbCategoryName != "null") {
@@ -43,29 +44,29 @@ ddlDirectiveModule.addDirective("dropDownList", ["$compile", "$http", function (
 
 
                 var text = $scope.propertyName, //$scope.model[$scope.propertyName],
-                    val = $scope.propertyId//$scope.model[$scope.propertyId];
+                    val = $scope.propertyId;//$scope.model[$scope.propertyId];
+                    
                 if (text) {
                     e.sender.search(text);
                 }
-                else {
-                    var foundedItem;
+                else if (val) {
+                    var len = e.sender.dataSource.data().length,
+                        foundedIndex = 0;
 
-                    var len = e.sender.dataSource.data().length;
                     for (var i = 0; i < len; i++) {
                         var record = e.sender.dataSource.data()[i];
                         if (record[$scope.valueName] == val) {
-                            foundedItem = i;
-                            return;
+                            foundedIndex = i;
+                            break;
                         }
                     }
-
-                    e.sender.select(foundedItem);
-
-                    setModel(e.sender);
+                    e.sender.select(foundedIndex);
 
                 }
 
-                if ($scope.$eval($attrs.onDataBound)) {
+                setModel(e.sender);
+
+                if ($attrs.onDataBound) {
                     $scope.onDataBound({ args: e, scope: $scope });
                 }
             };
@@ -78,6 +79,7 @@ ddlDirectiveModule.addDirective("dropDownList", ["$compile", "$http", function (
                 }
 
             };
+
             $scope.onSelectItem = function (e) {
                 var selectedItem = e.sender.dataItems()[e.item.index()];
                 if (e.item.index() == -1 && e.sender.dataItems() > 0) {
@@ -89,8 +91,12 @@ ddlDirectiveModule.addDirective("dropDownList", ["$compile", "$http", function (
                 $scope.propertyName = selectedItem[$scope.displayName];
                 $scope.propertyId = selectedItem[$scope.valueName];
 
-                if (typeof $scope.customChange == 'function') {
-                    $scope.customChange({ args: e });
+                //if (typeof $scope.customChange == 'function') {
+                //    $scope.customChange({ args: e });
+                //}
+
+                if (typeof $scope.onSelect == 'function') {
+                    $scope.onSelect({ args: e });
                 }
 
 
@@ -130,28 +136,6 @@ ddlDirectiveModule.addDirective("dropDownList", ["$compile", "$http", function (
                 };
 
             }
-            //else {
-
-            //    scope.$watch("dropdown", (n, o) => {
-
-            //        if (n) {
-            //            scope.isWidgetCreated = true;
-            //        }
-            //    });
-            //    scope.$watch("customDataSource", (n, o) => {
-
-            //        if (n) {
-            //            scope.isDataSourceChanged = true;
-            //        }
-            //    }, true);
-            //    scope.$watch("isWidgetCreated +isDataSourceChanged", (n, o) => {
-            //        if (scope.isWidgetCreated && scope.isDataSourceChanged) {
-            //            scope.dropdown.setDataSource(scope.customDataSource);
-            //            scope.dropdown.refresh();
-            //        }
-            //    });
-
-            //}
         },
 
         template: "<span ><input id='{{id}}' kendo-drop-down-list='dropdown' k-data-text-field='displayName' k-data-value-field='valueName' k-data-source='customDataSource'"

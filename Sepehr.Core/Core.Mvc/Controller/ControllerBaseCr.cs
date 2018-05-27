@@ -19,18 +19,18 @@ namespace Core.Mvc.Controller
         {
             //Core.Cmn.AppBase.TraceViewer.Failure(filterContext.Exception.InnerException + filterContext.Exception.StackTrace + filterContext.Exception.Message);
 
-            ExceptionInfo excepInfo = new ExceptionInfo(filterContext.Exception, false);
+            MvcExceptionInfo excepInfo = new MvcExceptionInfo(filterContext.Exception, false);
 
-            if (!this.HttpContext.User.Identity.Name.ToLower().Equals("admin"))
-            {
-                var constantService = AppBase.DependencyInjectionManager.Resolve<Service.IConstantService>();
-                var applicationFaildMsg = string.Empty;
-                constantService.TryGetValue<string>("ApplicationFaild", out applicationFaildMsg);
+            //if (!this.HttpContext.User.Identity.Name.ToLower().Equals("admin"))
+            //{
+            //    var constantService = AppBase.DependencyInjectionManager.Resolve<Service.IConstantService>();
+            //    var applicationFaildMsg = string.Empty;
+            //    constantService.TryGetValue<string>("ApplicationFaild", out applicationFaildMsg);
 
-                excepInfo.Message = applicationFaildMsg/*Core.Resources.ExceptionMessage.ApplicationFaild*/;
-                excepInfo.Details = "";
-                excepInfo.IsRTL = true;
-            }
+            //    excepInfo.Message = applicationFaildMsg/*Core.Resources.ExceptionMessage.ApplicationFaild*/;
+            //    excepInfo.Details = "";
+            //    excepInfo.IsRTL = true;
+            //}
 
             filterContext.Result = SetException(excepInfo);
             filterContext.ExceptionHandled = true;
@@ -38,7 +38,7 @@ namespace Core.Mvc.Controller
             _logService.Handle(filterContext.Exception, excepInfo.Message);
         }
 
-        private ActionResult SetException(ExceptionInfo exception)
+        private ActionResult SetException(MvcExceptionInfo exception)
         {
             this.HttpContext.Response.Clear();
 
@@ -55,7 +55,7 @@ namespace Core.Mvc.Controller
             };
         }
 
-        public ActionResult ShowException(ExceptionInfo exception)
+        public ActionResult ShowException(MvcExceptionInfo exception)
         {
             return SetException(exception);
         }
@@ -117,6 +117,10 @@ namespace Core.Mvc.Controller
             }
         }
 
+        public CultureInfo GetCurrentCulture()
+        {
+            return System.Threading.Thread.CurrentThread.CurrentUICulture;
+        }
         protected override void Initialize(System.Web.Routing.RequestContext requestContext)
         {
             SetCurrentCulture(requestContext);
@@ -173,8 +177,7 @@ namespace Core.Mvc.Controller
                     //partialView.ExecuteResult(this.ControllerContext);
                 }
             }
-
-            //base.OnResultExecuted(filterContext);
+           
         }
         protected override IAsyncResult BeginExecute(RequestContext requestContext, AsyncCallback callback, object state)
         {
@@ -190,5 +193,6 @@ namespace Core.Mvc.Controller
             IRequest request = null;
             Core.Cmn.AppBase.AllRequests.TryRemove(Thread.CurrentThread.ManagedThreadId, out request);
         }
+
     }
 }

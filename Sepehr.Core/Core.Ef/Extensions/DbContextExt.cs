@@ -17,12 +17,12 @@ namespace Core.Ef.Extensions
     [Injectable(InterfaceType = typeof(IDbContextBaseExtentions))]
     public class IDbContextBaseExtentionsForEf : IDbContextBaseExtentions
     {
-        public List<string> GetKeyColumnNames<T>(IDbContextBase context) where T : EntityBase<T>
+        public List<string> GetKeyColumnNames<T>(IDbContextBase context) where T : ObjectBase 
         {
             return (context as DbContext).Db(typeof(T)).Pks.Select(p => p.ColumnName).ToList();
         }
 
-        public string GetSchemaName<T>(IDbContextBase context) where T : EntityBase<T>
+        public string GetSchemaName<T>(IDbContextBase context) where T : ObjectBase 
         {
             var schemaName = (context as DbContext).Db(typeof(T)).Schema;
             //ObjectContext objectContext = ((IObjectContextAdapter)context).ObjectContext;
@@ -52,7 +52,7 @@ namespace Core.Ef.Extensions
             return schemaName;
         }
 
-        public string GetTableName<T>(IDbContextBase context) where T : EntityBase<T>
+        public string GetTableName<T>(IDbContextBase context) where T : ObjectBase 
         {
             var tableNameResult = (context as DbContext).Db(typeof(T)).TableName;
             //string tableNameResult = null;

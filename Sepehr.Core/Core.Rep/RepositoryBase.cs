@@ -42,7 +42,7 @@ namespace Core.Rep
     }
 
     [Injectable(InterfaceType = typeof(IRepositoryBase<>), DomainName = "Core")]
-    public class RepositoryBase<TObject> : RepositoryBase, IRepositoryBase<TObject>, IRepositoryCache where TObject : EntityBase<TObject>, new()
+    public class RepositoryBase<TObject> : RepositoryBase, IRepositoryBase<TObject>, IRepositoryCache where TObject : ObjectBase, new()
 
     {
         public CultureInfo CurrentCulture { get; set; }
@@ -248,11 +248,25 @@ namespace Core.Rep
 
         public virtual List<TObject> Create(List<TObject> objectList, bool allowSaveChange = true)
         {
-            var result = DbSet.AddRange(objectList);
-            if (allowSaveChange)
-                SaveChanges();
-
-            return result.ToList();
+            List<TObject> result = new List<TObject>();
+            using (var transaction = ContextBase.Database.BeginTransaction())
+            {
+                try
+                {
+                    foreach (var item in objectList)
+                    {
+                        result.Add(Create(item));
+                    }
+                    transaction.Commit();
+                    return result;
+                }
+                catch (Exception ex)
+                {
+                    transaction.Rollback();
+                    Core.Cmn.AppBase.LogService.Handle(ex, "error occurred during craeting list of entities");
+                    throw;
+                }
+            }
         }
 
         public virtual int SaveChanges()
@@ -300,19 +314,25 @@ namespace Core.Rep
             return 0;
         }
 
-        public virtual int Update(Expression<Func<TObject, bool>> predicate, Expression<Func<TObject, TObject>> updatepredicate, bool allowSaveChange = true)
+        // Remarks:
+        //     When executing this method, the statement is immediately executed on the database
+        //     provider and is not part of the change tracking system. Also, changes will not
+        //     be reflected on any entities that have already been materialized in the current
+        //     context.
+        public virtual int Update(Expression<Func<TObject, bool>> predicate, Expression<Func<TObject, TObject>> updatepredicate)
         {
             var res = DbSet.Where(predicate).Update(updatepredicate);
-            if (allowSaveChange)
-                return SaveChanges();
             return res;
         }
 
-        public virtual int Delete(Expression<Func<TObject, bool>> predicate, bool allowSaveChange = true)
+        // Remarks:
+        //     When executing this method, the statement is immediately executed on the database
+        //     provider and is not part of the change tracking system. Also, changes will not
+        //     be reflected on any entities that have already been materialized in the current
+        //     context.
+        public virtual int Delete(Expression<Func<TObject, bool>> predicate)
         {
             var res = DbSet.Where(predicate).Delete();
-            if (allowSaveChange)
-                return SaveChanges();
             return res;
         }
 
@@ -326,11 +346,14 @@ namespace Core.Rep
             return 0;
         }
 
-        public int Delete(IQueryable<TObject> itemsForDeletion, bool allowSaveChange = true)
+        // Remarks:
+        //     When executing this method, the statement is immediately executed on the database
+        //     provider and is not part of the change tracking system. Also, changes will not
+        //     be reflected on any entities that have already been materialized in the current
+        //     context.
+        public int Delete(IQueryable<TObject> itemsForDeletion)
         {
             var res = DbSet.Delete(itemsForDeletion);
-            if (allowSaveChange)
-                return SaveChanges();
             return res;
         }
 
@@ -345,13 +368,13 @@ namespace Core.Rep
             return res;
         }
 
-        public IQueryable<T> Cache<T>(Func<IQueryable<TObject>, IQueryable<T>> func, bool canUseCacheIfPossible = true) where T : IEntity, new()
+        public IQueryable<T> Cache<T>(Func<IQueryable<TObject>, IQueryable<T>> func, bool canUseCacheIfPossible = true) where T : ObjectBase, new()
         {
             if (canUseCacheIfPossible)
             {
                 Stopwatch.Restart();
-                var cacheKey = func.Method.GetHashCode().ToString();
-                var cacheInfo = CacheConfig.CacheInfoDic[cacheKey];
+                string cacheKey;
+                CacheInfo cacheInfo = CacheInfo.GetCacheInfo(func, out cacheKey);
                 var queryableCacheExecution = new QueryableCacheDataProvider<T>(cacheInfo);
                 IQueryable<T> result = queryableCacheExecution.Cache<List<T>>(cacheInfo, cacheInfo.AutoRefreshInterval, cacheKey, canUseCacheIfPossible).AsQueryable();
                 Stopwatch.Stop();
@@ -369,8 +392,8 @@ namespace Core.Rep
             if (canUseCacheIfPossible)
             {
                 Stopwatch.Restart();
-                var cacheKey = func.Method.GetHashCode().ToString();
-                var cacheInfo = CacheConfig.CacheInfoDic[cacheKey];
+                string cacheKey;
+                CacheInfo cacheInfo = CacheInfo.GetCacheInfo(func, out cacheKey);
                 cacheKey += param1;
                 var queryableCacheExecution = new QueryableCacheDataProvider<T, P1>(cacheInfo, param1);
                 IQueryable<T> result = queryableCacheExecution.Cache<List<T>>(cacheInfo, cacheInfo.AutoRefreshInterval, cacheKey, canUseCacheIfPossible).AsQueryable();
@@ -389,8 +412,8 @@ namespace Core.Rep
             if (canUseCacheIfPossible)
             {
                 Stopwatch.Restart();
-                var cacheKey = func.Method.GetHashCode().ToString();
-                var cacheInfo = CacheConfig.CacheInfoDic[cacheKey];
+                string cacheKey;
+                CacheInfo cacheInfo = CacheInfo.GetCacheInfo(func, out cacheKey);
                 cacheKey = cacheKey + param1 + param2;
                 var queryableCacheExecution = new QueryableCacheDataProvider<T, P1, P2>(cacheInfo, param1, param2);
                 IQueryable<T> result = queryableCacheExecution.Cache<List<T>>(cacheInfo, cacheInfo.AutoRefreshInterval, cacheKey, canUseCacheIfPossible).AsQueryable();
@@ -409,8 +432,8 @@ namespace Core.Rep
             if (canUseCacheIfPossible)
             {
                 Stopwatch.Restart();
-                var cacheKey = func.Method.GetHashCode().ToString();
-                var cacheInfo = CacheConfig.CacheInfoDic[cacheKey];
+                string cacheKey;
+                CacheInfo cacheInfo = CacheInfo.GetCacheInfo(func, out cacheKey);
                 cacheKey = cacheKey + param1 + param2 + param3;
                 var queryableCacheExecution = new QueryableCacheDataProvider<T, P1, P2, P3>(cacheInfo, param1, param2, param3);
                 IQueryable<T> result = queryableCacheExecution.Cache<List<T>>(cacheInfo, cacheInfo.AutoRefreshInterval, cacheKey, canUseCacheIfPossible).AsQueryable();
@@ -429,8 +452,8 @@ namespace Core.Rep
             if (canUseCacheIfPossible)
             {
                 Stopwatch.Restart();
-                var cacheKey = func.Method.GetHashCode().ToString();
-                var cacheInfo = CacheConfig.CacheInfoDic[cacheKey];
+                string cacheKey;
+                CacheInfo cacheInfo = CacheInfo.GetCacheInfo(func, out cacheKey);
                 // cacheKey = cacheKey + param1 + param2 + param3 + param4;
                 var queryableCacheExecution = new QueryableCacheDataProvider<T, P1, P2, P3, P4>(cacheInfo, param1, param2, param3, param4);
                 IQueryable<T> result = queryableCacheExecution.Cache<List<T>>(cacheInfo, cacheInfo.AutoRefreshInterval, queryableCacheExecution.GenerateCacheKey(), canUseCacheIfPossible).AsQueryable();
@@ -444,10 +467,10 @@ namespace Core.Rep
             }
         }
 
-        public IQueryable<T> RefreshCache<T>(Func<IQueryable<TObject>, IQueryable<T>> func) where T : EntityBase<T>, new()
+        public IQueryable<T> RefreshCache<T>(Func<IQueryable<TObject>, IQueryable<T>> func) where T : ObjectBase, new()
         {
-            var cacheKey = func.Method.GetHashCode().ToString();
-            var cacheInfo = CacheConfig.CacheInfoDic[cacheKey];
+            string cacheKey;
+            CacheInfo cacheInfo = CacheInfo.GetCacheInfo(func, out cacheKey);
             var queryableCacheExecution = new QueryableCacheDataProvider<T>(cacheInfo);
             var result = CacheBase.RefreshCache<List<T>>(queryableCacheExecution, cacheInfo).AsQueryable();
             return result;

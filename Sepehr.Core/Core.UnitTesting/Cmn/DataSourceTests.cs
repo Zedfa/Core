@@ -24,6 +24,24 @@ namespace Core.UnitTesting.Cmn
             var ds = new DataSource<User>(lst);
             var users = ds.ApplyFilter(item => item.LName, "System").ApplyFilter(item => item.Id, 123).ApplyFilter(item => item.FName, "Sepehr").ApplyFilter(item => item.Email, "somthings").First();
         }
+        [TestMethod]
+        public void All_Test1()
+        {
+            List<User> lst;
+            var count = 4;
+            lst = new List<User>();
+            for (int i = 0; i < count; i++)
+            {
+                lst.Add(new Cmn.EntityInfoTests.User { Id = i, FName = "Sepehr", CompanyChartId = 123456789, LName = "System", UserProfile = new Core.Entity.UserProfile() { Id = 10 } });
+            }
+            var ds = new DataSource<User>(lst);
+            var users = ds.ApplyFilter(item => item.Id, 0).First();
+            var users2 = ds.ApplyFilter(item => item.Id, 3).First();
+            //Assert.AreEqual(users.First().LName, users2.First().LName);
+            //Assert.AreEqual(users.First().Id, users2.First().Id);
+            //Assert.AreEqual(users.First().FName, users2.First().FName);
+            //Assert.AreEqual(users.Count(), users2.Count);
+        }
 
 
         [TestMethod]
@@ -48,6 +66,27 @@ namespace Core.UnitTesting.Cmn
                 Assert.AreEqual(users.FName, users2.FName);
             }
         }
+
+        [TestMethod]
+        public void TestForFirstAndLastItems()
+        {
+            List<User> lst;
+            var count = 4;
+            lst = new List<User>();
+            for (int i = 0; i < count; i++)
+            {
+                lst.Add(new Cmn.EntityInfoTests.User { Id = i, FName = "Sepehr", CompanyChartId = 123456789, LName = "System", UserProfile = new Core.Entity.UserProfile() { Id = 10 } });
+
+            }
+            var ds = new DataSource<User>(lst);
+            var users = ds.ApplyFilter(item => item.Id, 0).First();
+            var users2 = ds.ApplyFilter(item => item.Id, 3).First();
+            //Assert.AreEqual(users.First().LName, users2.First().LName);
+            //Assert.AreEqual(users.First().Id, users2.First().Id);
+            //Assert.AreEqual(users.First().FName, users2.First().FName);
+            //Assert.AreEqual(users.Count(), users2.Count);
+        }
+
         [TestMethod]
         public void All_Test()
         {
@@ -151,7 +190,7 @@ namespace Core.UnitTesting.Cmn
             }
 
             System.Diagnostics.Debug.WriteLine(w1.ElapsedMilliseconds);
-            Assert.IsTrue(w1.ElapsedMilliseconds > w.ElapsedMilliseconds * 200);
+            Assert.IsTrue(w1.ElapsedMilliseconds > w.ElapsedMilliseconds * 20);
         }
         private static List<User> Init(int count)
         {

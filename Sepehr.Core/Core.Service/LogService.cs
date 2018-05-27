@@ -344,13 +344,20 @@ namespace Core.Service
             if (eventLog.Request != null )
             {
                 log.Request = new Request
-                {
-                    IP = eventLog.Request.IP,
+                {                   
                     Url = eventLog.Request.Url,
                     Data = eventLog.Request.Data,
                     Method = eventLog.Request.Method
                 };
-              
+
+                try
+                {
+                    log.Request.IP = eventLog.Request.IP;
+                }
+                catch
+                {
+                    // It may Request is not ready to get IP throw exception!
+                }
             }
             
             if (ex != null)

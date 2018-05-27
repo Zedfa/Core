@@ -10,9 +10,12 @@ using System.Web;
 using Core.Mvc.Infrastructure;
 using Core.Service;
 using Core.Rep.DTO;
+using System.Web.Http.Description;
 
 namespace Core.Mvc.ApiControllers
 {
+    // IgnoreApi baraye inke felan toye swagger nayad ta badan in controller ro barresi konim o age niaz bod toye document swagger biad
+    [ApiExplorerSettings(IgnoreApi = true)]
     public class ViewElementApiController : ApiControllerBase
     {
         private IViewElementService _viewElementService;

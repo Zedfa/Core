@@ -23,17 +23,17 @@ namespace Core.Cmn.Extensions
                 return _iDbContextBaseExtentions;
             }
         }
-        public static List<string> GetKeyColumnNames<T>(this IDbContextBase context) where T : Core.Cmn.EntityBase<T>
+        public static List<string> GetKeyColumnNames<T>(this IDbContextBase context) where T : ObjectBase
         {
             return IDbContextBaseExtentions.GetKeyColumnNames<T>(context);
         }
 
-        public static string GetSchemaName<T>(this IDbContextBase context) where T : Core.Cmn.EntityBase<T>
+        public static string GetSchemaName<T>(this IDbContextBase context) where T : ObjectBase
         {
             return IDbContextBaseExtentions.GetSchemaName<T>(context);
         }
 
-        public static string GetTableName<T>(this IDbContextBase context) where T : Core.Cmn.EntityBase<T>
+        public static string GetTableName<T>(this IDbContextBase context) where T : ObjectBase
         {
             return IDbContextBaseExtentions.GetTableName<T>(context);
         }

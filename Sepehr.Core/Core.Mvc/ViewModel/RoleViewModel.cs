@@ -120,7 +120,7 @@ namespace Core.Mvc.ViewModel
              {
                  if (_lookupInfo == null)
                  {
-                     _lookupInfo = ViewInfo.DeepCopy<GridInfo>();
+                     _lookupInfo = ViewInfo.DeepCopy();
                      _lookupInfo.Features.ReadOnly = true;
                  }
                  return _lookupInfo;
@@ -135,7 +135,7 @@ namespace Core.Mvc.ViewModel
              {
                  if (_lookupInfoWithCompanyRole == null)
                  {
-                     _lookupInfoWithCompanyRole = ViewInfo.DeepCopy<GridInfo>();
+                     _lookupInfoWithCompanyRole = ViewInfo.DeepCopy();
                      _lookupInfoWithCompanyRole.Features.ReadOnly = true;
                      _lookupInfoWithCompanyRole.DataSource.CrudCr.Read.Url = "api/Core/RoleWithCompanyRoleApi";
                  }

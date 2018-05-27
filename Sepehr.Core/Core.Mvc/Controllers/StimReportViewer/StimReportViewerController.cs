@@ -1,6 +1,4 @@
 ﻿using Core.Mvc.Controller;
-using Stimulsoft.Report;
-using Stimulsoft.Report.Mvc;
 using System.Collections.Generic;
 using System.Web.Mvc;
 
@@ -8,6 +6,7 @@ namespace Core.Mvc.Controllers.ReportViewer
 {
     public class StimReportViewerController : ControllerBaseCr
     {
+        /*
         //
         // GET: /ReportViewr/
         public string ReportType { get; set; }
@@ -40,7 +39,7 @@ namespace Core.Mvc.Controllers.ReportViewer
 
             try
             {
-                return StiMvcViewer.GetReportSnapshotResult(HttpContext, report);
+                return StiMvcViewer.GetReportResult(report);
             }
             catch
             {
@@ -50,24 +49,25 @@ namespace Core.Mvc.Controllers.ReportViewer
 
         public ActionResult ViewerEvent()
         {
-            var report = StiMvcViewer.GetReportObject(HttpContext);
+            var report = StiMvcViewer.GetReportObject();
 
-            return StiMvcViewer.ViewerEventResult(HttpContext);
+            return StiMvcViewer.ViewerEventResult();
         }
 
         public ActionResult PrintReport()
         {
-            return StiMvcViewer.PrintReportResult(HttpContext);
+            return StiMvcViewer.PrintReportResult();
         }
 
-        public FileResult ExportReport()
+        public ActionResult ExportReport()
         {
-            return StiMvcViewer.ExportReportResult(HttpContext);
+            return StiMvcViewer.ExportReportResult();
         }
 
         public ActionResult Interaction()
         {
-            return StiMvcViewer.InteractionResult(HttpContext);
+            return StiMvcViewer.InteractionResult();
         }
+        */
     }
 }

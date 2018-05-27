@@ -12,9 +12,12 @@ using Core.Entity;
 
 using Core.Rep.DTO;
 using System;
+using System.Web.Http.Description;
 
 namespace Core.Mvc.ApiControllers
 {
+    // IgnoreApi baraye inke felan toye swagger nayad ta badan in controller ro barresi konim o age niaz bod toye document swagger biad
+    [ApiExplorerSettings(IgnoreApi = true)]
     public class UserApiController : Core.Mvc.Controller.CrudDTOApiControllerBase<User, UserDTO, IUserService>
     {
 

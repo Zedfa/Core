@@ -10,7 +10,7 @@ using System.Reflection;
 namespace Core.UnitTesting.Entity
 {
     public abstract class EntityUnitTestHelperBase<TEntity> : UnitTestBase
-        where TEntity : EntityBase<TEntity>, new()
+        where TEntity : ObjectBase, new()
     {
         private const int DEFAULT_MIN_ENTITY_COUNT = 2;
         private const int DEFAULT_MAX_ENTITY_COUNT = 5;

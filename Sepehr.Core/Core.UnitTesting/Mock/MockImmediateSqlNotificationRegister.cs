@@ -1,5 +1,6 @@
 ﻿using Core.Cmn;
 using Core.Cmn.Attributes;
+using Core.Cmn.Cache;
 using Core.Cmn.Cache.SqlDependency;
 using System;
 using System.Data.SqlClient;
@@ -12,8 +13,9 @@ namespace Core.UnitTesting.Mock
     {
         public event EventHandler<SqlNotificationEventArgs> OnChanged;
 
-        public void Init(IDbContextBase context, IQueryable query)
+        public void Init(IDbContextBase context, IQueryable query, CacheInfo cacheInfo)
         {
+           
         }
     }
 }

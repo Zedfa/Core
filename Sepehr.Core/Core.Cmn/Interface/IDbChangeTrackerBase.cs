@@ -39,7 +39,7 @@ namespace Core.Cmn
             // Returns:
             //     The entries.
        
-             IEnumerable<IDbEntityEntryBase<TEntity>> Entries<TEntity>() where TEntity : _EntityBase;
+             IEnumerable<IDbEntityEntryBase<TEntity>> Entries<TEntity>() where TEntity : ObjectBase;
            
             //
             // Summary:

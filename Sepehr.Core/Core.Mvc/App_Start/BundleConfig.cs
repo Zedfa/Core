@@ -113,9 +113,10 @@ namespace Core.Mvc
 
                  .Include(relativePath + "Scripts/tools/app/directives/menuDirective.js")
                  .Include(relativePath + "Scripts/tools/app/directives/stiReportViewerDirective.js")
-                 .Include(relativePath + "Scripts/tools/app/directives/kendoGridAngularAdapter.js")
+                 .Include(relativePath + "Scripts/tools/app/directives/gridViewDirective.js")
                  .Include(relativePath + "Scripts/tools/app/directives/lookupDirective.js")
                  .Include(relativePath + "Scripts/tools/app/directives/dropDownListDirective.js")
+                 .Include(relativePath + "Scripts/tools/app/directives/autocompleteDirective.js")
                  .Include(relativePath + "Scripts/tools/app/directives/menuContainerDirective.js")
                  .Include(relativePath + "Scripts/tools/app/directives/jqueryDateDirective.js")
                  .Include(relativePath + "Scripts/tools/app/directives/dropDownListDirective.js")
@@ -198,7 +199,7 @@ namespace Core.Mvc
                 ));
 
             bundles.Add(GetExternalScriptBundle());
-
+            bundles.Add(GetExternalStyleBundle());
 
             bundles.IgnoreList.Ignore("*.min.js.map", OptimizationMode.Always);
             bundles.IgnoreList.Ignore("*.js.map", OptimizationMode.Always);
@@ -222,6 +223,33 @@ namespace Core.Mvc
                     if (method.GetMethod("GetScriptUrlsForCore") != null)
                     {
                         List<string> response = (List<string>)method.GetMethod("GetScriptUrlsForCore").Invoke(assembly, null);
+                        if (response != null)
+                        {
+                            response.ForEach(r =>
+                            {
+                                result.Include(r);
+                            });
+                        }
+                    }
+                }
+            }
+            catch { }
+            return result;
+        }
+
+        private static StyleBundle GetExternalStyleBundle()
+        {
+            StyleBundle result = new StyleBundle("~/ExternalStyleBundle");
+            try
+            {
+                
+                var assembly = AppBase.StartupProject; 
+                Type method = assembly.GetType(String.Format("{0}.BundleConfig", AppBase.StartupProject.GetName().Name), false, true);
+                if (method != null)
+                {
+                    if (method.GetMethod("GetStyleUrlsForCore") != null)
+                    {
+                        List<string> response = (List<string>)method.GetMethod("GetStyleUrlsForCore").Invoke(assembly, null);
                         if (response != null)
                         {
                             response.ForEach(r =>

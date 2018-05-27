@@ -4,6 +4,7 @@ using System.Collections;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Data;
+using System.Globalization;
 using System.Linq;
 using System.Linq.Dynamic;
 using System.Runtime.Serialization;
@@ -14,6 +15,7 @@ namespace Core.Cmn.Cache
     [DataContract]
     public abstract class CacheDataProvider : ICacheDataProvider
     {
+        private static readonly CultureInfo DefaultCultureInfo = new CultureInfo("en-US");
         public static ConcurrentDictionary<int, string[]> TimeStamps;
 
         static CacheDataProvider()
@@ -37,16 +39,16 @@ namespace Core.Cmn.Cache
         /// <param name="isForServerSide">this is 'true' if must excecute in cache server...</param>
         public static void CalcAllTimeStampAndSet(IEnumerable resultList, CacheInfo cacheInfo, bool isForServerSide)
         {
-            var dataLst = resultList.Cast<_EntityBase>().ToList();
+            var dataLst = resultList.Cast<ObjectBase>().ToList();
             if (dataLst.Count > 0 && cacheInfo.EnableToFetchOnlyChangedDataFromDB)
             {
-                CalcTimeStampAndSet(cacheInfo, resultList.Cast<_EntityBase>().ToList(), null, isForServerSide);
+                CalcTimeStampAndSet(cacheInfo, resultList.Cast<ObjectBase>().ToList(), null, isForServerSide);
                 if (!string.IsNullOrWhiteSpace(cacheInfo.NameOfNavigationPropsForFetchingOnlyChangedDataFromDB))
                 {
                     var navigationPropsForGettingChangedData = cacheInfo.NameOfNavigationPropsForFetchingOnlyChangedDataFromDB.Split(',');
                     foreach (var prop in navigationPropsForGettingChangedData)
                     {
-                        CalcTimeStampAndSet(cacheInfo, resultList.Cast<_EntityBase>().ToList(), prop, isForServerSide);
+                        CalcTimeStampAndSet(cacheInfo, resultList.Cast<ObjectBase>().ToList(), prop, isForServerSide);
                     }
                 }
             }
@@ -59,7 +61,7 @@ namespace Core.Cmn.Cache
         /// <param name="resultList"></param>
         /// <param name="key"></param>
         /// <param name="isForServerSide">this is 'true' if must excecute in cache server...</param>
-        public static void CalcTimeStampAndSet(CacheInfo cacheInfo, List<_EntityBase> resultList, string key, bool isForServerSide)
+        public static void CalcTimeStampAndSet(CacheInfo cacheInfo, List<ObjectBase> resultList, string key, bool isForServerSide)
         {
             ulong maxTimeStampUnit = 0;
             byte[] maxTimeStamp = null;
@@ -75,7 +77,7 @@ namespace Core.Cmn.Cache
             }
             else
             {
-                IEnumerable<_EntityBase> navData = resultList;
+                IEnumerable<ObjectBase> navData = resultList;
                 var WhereClauseForFetchingOnlyChangedDataFromDB = " or ({0} {1}) ";
                 var props = string.Empty;
                 foreach (var prop in key.Split('.'))
@@ -99,7 +101,7 @@ namespace Core.Cmn.Cache
                     if ((typeof(IEnumerable)).IsAssignableFrom(firstItem[prop].GetType()))
                     {
                         props = prop;
-                        navData = navData.Where(itm => itm[prop] != null).SelectMany(item => ((IEnumerable)item[prop]).Cast<_EntityBase>());
+                        navData = navData.Where((ObjectBase itm) => itm[prop] != null).SelectMany((Func<ObjectBase, IEnumerable<ObjectBase>>)((ObjectBase item) => ((IEnumerable)item[prop]).Cast<ObjectBase>()));
                         //  WhereClauseForFetchingOnlyChangedDataFromDB = string.Format(WhereClauseForFetchingOnlyChangedDataFromDB, props + " != null and ", prop + ".Any( {0}  {1} )");
                         WhereClauseForFetchingOnlyChangedDataFromDB = string.Format(WhereClauseForFetchingOnlyChangedDataFromDB, "", prop + ".Any( {0}  {1} )");
 
@@ -108,7 +110,7 @@ namespace Core.Cmn.Cache
                     else
                     {
                         props += prop;
-                        navData = navData.Where(itm => itm[prop] != null).Select(item => (_EntityBase)item[prop]);
+                        navData = navData.Where((ObjectBase itm) => itm[prop] != null).Select(((ObjectBase item) => (ObjectBase)item[prop]));
                         WhereClauseForFetchingOnlyChangedDataFromDB = string.Format(WhereClauseForFetchingOnlyChangedDataFromDB, props + " != null and {0}", prop + ".{1}");
                     }
 
@@ -206,7 +208,7 @@ namespace Core.Cmn.Cache
             return result;
         }
 
-        public virtual string GenerateCacheKey()
+        protected virtual string GenerateCacheKeyBase()
         {
             return CacheInfo.BasicKey.ToString();
         }
@@ -229,7 +231,7 @@ namespace Core.Cmn.Cache
 
         protected abstract object DeserializeCacheData(byte[] result);
 
-        private static void CalcTimeStamp(List<_EntityBase> resultList, out ulong maxTimeStampUnit, out byte[] maxTimeStamp)
+        private static void CalcTimeStamp(List<ObjectBase> resultList, out ulong maxTimeStampUnit, out byte[] maxTimeStamp)
         {
             maxTimeStampUnit = resultList.Max(item => item.TimeStampUnit);
             maxTimeStamp = BitConverter.GetBytes(maxTimeStampUnit).Reverse().ToArray();
@@ -273,7 +275,7 @@ namespace Core.Cmn.Cache
 
                     proxy.Close();
                     if (CacheInfo.EnableToFetchOnlyChangedDataFromDB)
-                        QueryableCacheDataProvider<_EntityBase>.CalcAllTimeStampAndSet(result as IEnumerable, CacheInfo, false);
+                        QueryableCacheDataProvider<ObjectBase>.CalcAllTimeStampAndSet(result as IEnumerable, CacheInfo, false);
                     return result;
                 }
                 catch (FaultException exc)
@@ -316,6 +318,19 @@ namespace Core.Cmn.Cache
                     //throw ex;
                     throw logerService.Handle(ex, "cache server error report in client side!", true, "Cache");
                 }
+            }
+        }
+        public string GenerateCacheKey()
+        {
+            var culture = System.Threading.Thread.CurrentThread.CurrentCulture;
+            try
+            {
+                System.Threading.Thread.CurrentThread.CurrentCulture = DefaultCultureInfo;
+                return GenerateCacheKeyBase();
+            }
+            finally
+            {
+                System.Threading.Thread.CurrentThread.CurrentCulture = culture;
             }
         }
     }
@@ -483,9 +498,9 @@ namespace Core.Cmn.Cache
         [DataMember]
         public P1 Param1 { get; set; }
 
-        public override string GenerateCacheKey()
+        protected override string GenerateCacheKeyBase()
         {
-            return $"{base.GenerateCacheKey()}_{Param1}";
+            return $"{base.GenerateCacheKeyBase()}_{Param1}";
         }
 
         public override IQueryable GetQuery()
@@ -512,9 +527,9 @@ namespace Core.Cmn.Cache
         [DataMember]
         public P2 Param2 { get; set; }
 
-        public override string GenerateCacheKey()
+        protected override string GenerateCacheKeyBase()
         {
-            return $"{base.GenerateCacheKey()}_{Param1}_{Param2}";
+            return $"{base.GenerateCacheKeyBase()}_{Param1}_{Param2}";
         }
 
         public override IQueryable GetQuery()
@@ -545,9 +560,9 @@ namespace Core.Cmn.Cache
         [DataMember]
         public P3 Param3 { get; set; }
 
-        public override string GenerateCacheKey()
+        protected override string GenerateCacheKeyBase()
         {
-            return $"{base.GenerateCacheKey()}_{Param1}_{Param2}_{Param3}";
+            return $"{base.GenerateCacheKeyBase()}_{Param1}_{Param2}_{Param3}";
         }
 
         public override IQueryable GetQuery()
@@ -582,9 +597,9 @@ namespace Core.Cmn.Cache
         [DataMember]
         public P4 Param4 { get; set; }
 
-        public override string GenerateCacheKey()
+        protected override string GenerateCacheKeyBase()
         {
-            return $"{base.GenerateCacheKey()}_{Param1}_{Param2}_{Param3}_{Param4}";
+            return $"{base.GenerateCacheKeyBase()}_{Param1}_{Param2}_{Param3}_{Param4}";
         }
 
         public override IQueryable GetQuery()

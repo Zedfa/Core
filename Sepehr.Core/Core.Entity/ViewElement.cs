@@ -5,6 +5,7 @@ using System.Runtime.Serialization;
 using Core.Cmn;
 using Core.Entity.Enum;
 using System.ComponentModel.DataAnnotations.Schema;
+using Core.Cmn.Attributes;
 
 namespace Core.Entity
 {
@@ -12,7 +13,7 @@ namespace Core.Entity
     [DataContract]
     public class ViewElement : EntityBase<ViewElement>, IViewElement
     {
-    
+
 
         [Key]
         [DatabaseGenerated(DatabaseGeneratedOption.None)]
@@ -31,19 +32,49 @@ namespace Core.Entity
         public string Title { get; set; }
 
         [Required]
-        [DataMember(IsRequired = true)]      
+        [DataMember]
         public ElementType ElementType { get; set; }
 
         [DataMember]
         public string XMLViewData { get; set; }
         [ForeignKey("ParentId")]
         [DataMember]
-        public virtual ViewElement ParentViewElement { get; set; }
+        [FillNavigationProperyByCache(
+            CacheName = "ViewElementRepository.AllViewElementsCache",
+            ThisEntityRefrencePropertyName = "ParentId",
+            OtherEntityRefrencePropertyName = "Id"
+            )]
+        public virtual ViewElement ParentViewElement
+        {
+            get
+            {
+                return GetNavigationPropertyDataItemFromCache<ViewElement>();
+            }
+            set
+            {
+                SetNavigationPropertyDataList(value);
+            }
+        }
         [DataMember]
         public int? ParentId { get; set; }
 
         [DataMember]
-        public virtual ICollection<ViewElement> ChildrenViewElement { get; set; }
+        [FillNavigationProperyByCache(
+            CacheName = "ViewElementRepository.AllViewElementsCache",
+            ThisEntityRefrencePropertyName = "Id",
+            OtherEntityRefrencePropertyName = "ParentId"
+            )]
+        public virtual ICollection<ViewElement> ChildrenViewElement
+        {
+            get
+            {
+                return GetNavigationPropertyDataListFromCache<ViewElement>();
+            }
+            set
+            {
+                SetNavigationPropertyDataList(value);
+            }
+        }
 
         [DataMember]
         public virtual ICollection<ViewElementRole> ViewElementRoles { get; set; }

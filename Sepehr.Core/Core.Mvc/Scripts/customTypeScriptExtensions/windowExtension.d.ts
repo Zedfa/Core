@@ -1,4 +1,5 @@
-﻿interface Window {
+﻿/// <reference path="../tools/nggridsearch.ts" />
+interface Window {
     areaName: string;
     siteResetor: Function;
     gridSearchInstances: Array<gridInstanceInfo>;

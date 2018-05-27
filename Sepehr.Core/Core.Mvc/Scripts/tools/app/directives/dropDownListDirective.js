@@ -13,6 +13,7 @@ ddlDirectiveModule.addDirective("dropDownList", ["$compile", "$http", function (
                 url: "@",
                 width: "@",
                 customChange: "&",
+                onSelect: "&",
                 onDataBound: "&",
                 dbCategoryName: "@",
                 customDataSource: "=?source"
@@ -38,20 +39,19 @@ ddlDirectiveModule.addDirective("dropDownList", ["$compile", "$http", function (
                         if (text) {
                             e.sender.search(text);
                         }
-                        else {
-                            var foundedItem;
-                            var len = e.sender.dataSource.data().length;
+                        else if (val) {
+                            var len = e.sender.dataSource.data().length, foundedIndex = 0;
                             for (var i = 0; i < len; i++) {
                                 var record = e.sender.dataSource.data()[i];
                                 if (record[$scope.valueName] == val) {
-                                    foundedItem = i;
-                                    return;
+                                    foundedIndex = i;
+                                    break;
                                 }
                             }
-                            e.sender.select(foundedItem);
-                            setModel(e.sender);
+                            e.sender.select(foundedIndex);
                         }
-                        if ($scope.$eval($attrs.onDataBound)) {
+                        setModel(e.sender);
+                        if ($attrs.onDataBound) {
                             $scope.onDataBound({ args: e, scope: $scope });
                         }
                     };
@@ -69,8 +69,8 @@ ddlDirectiveModule.addDirective("dropDownList", ["$compile", "$http", function (
                         $scope.selectedItem = selectedItem;
                         $scope.propertyName = selectedItem[$scope.displayName];
                         $scope.propertyId = selectedItem[$scope.valueName];
-                        if (typeof $scope.customChange == 'function') {
-                            $scope.customChange({ args: e });
+                        if (typeof $scope.onSelect == 'function') {
+                            $scope.onSelect({ args: e });
                         }
                     };
                     var setModel = function (dropdown) {

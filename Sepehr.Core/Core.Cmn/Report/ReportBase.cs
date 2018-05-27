@@ -7,7 +7,7 @@ namespace Core.Cmn.Report
     {
         public abstract string ServiceName { get; }
 
-        public abstract List<ReportDataSource> GetReportData(object reportRequet);
+        public abstract List<ReportDataSource> GetReportData(object reportRequet, int currentUserId);
 
         public abstract string GetReportName(object reportRequet);
 

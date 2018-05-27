@@ -8,12 +8,12 @@ namespace Core.UnitTesting.Mock
     [Injectable(InterfaceType = typeof(IDbContextBaseExtentions), Version = 1000)]
     public class MockIDbContextBaseExtentionsForUnitTest : IDbContextBaseExtentions
     {
-        public List<string> GetKeyColumnNames<T>(IDbContextBase context) where T : EntityBase<T>
+        public List<string> GetKeyColumnNames<T>(IDbContextBase context) where T : ObjectBase 
         {
             return new List<string> { "test" };
         }
 
-        public string GetSchemaName<T>(IDbContextBase context) where T : EntityBase<T>
+        public string GetSchemaName<T>(IDbContextBase context) where T : ObjectBase 
         {
             var schemaName = "test";
             //ObjectContext objectContext = ((IObjectContextAdapter)context).ObjectContext;
@@ -43,7 +43,7 @@ namespace Core.UnitTesting.Mock
             return schemaName;
         }
 
-        public string GetTableName<T>(IDbContextBase context) where T : EntityBase<T>
+        public string GetTableName<T>(IDbContextBase context) where T : ObjectBase 
         {
             var tableNameResult = "test";
             //string tableNameResult = null;

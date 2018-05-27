@@ -56,13 +56,13 @@ namespace Core.Cmn.Cache
                 result = cacheExecution.GetFreshData();
                 if (cacheInfo.EnableToFetchOnlyChangedDataFromDB)
                 {
-                    List<_EntityBase> nlst = (result as IList).Cast<_EntityBase>().ToList();
+                    List<ObjectBase> nlst = (result as IList).Cast<ObjectBase>().ToList();
                     QueryableCacheDataProvider<object>.CalcAllTimeStampAndSet(result as IList, cacheInfo, true);
                     if (nlst.Count > 0)
                     {
-                        foreach (var en in nlst.Cast<_EntityBase>())
+                        foreach (var en in nlst.Cast<ObjectBase>())
                         {
-                            (en as _EntityBase).EnableFillNavigationProperyByCache();
+                            (en as ObjectBase).EnableFillNavigationProperyByCache();
                         }
                     }
                 }
@@ -72,7 +72,7 @@ namespace Core.Cmn.Cache
             return result;
         }
 
-        public static T MergeFreshDataByOldCache<T>(T oldData, T newData, CacheInfo cacheInfo, bool isQueryableCache, out List<_EntityBase> entitiesForDeletion, out List<_EntityBase> entitiesForAddition, out List<_EntityBase> entitiesForUpdates)
+        public static T MergeFreshDataByOldCache<T>(T oldData, T newData, CacheInfo cacheInfo, bool isQueryableCache, out List<ObjectBase> entitiesForDeletion, out List<ObjectBase> entitiesForAddition, out List<ObjectBase> entitiesForUpdates)
         {
             entitiesForDeletion = null;
             entitiesForAddition = null;
@@ -91,16 +91,16 @@ namespace Core.Cmn.Cache
 
                     if (deletedRecords.Count > 0)
                     {
-                        var maxDeletedRecordItem = (_EntityBase)deletedRecords.OrderByDescending(item => ((_EntityBase)item).TimeStampUnit).First();
-                        var maxTimeStampDeletedRecords = ((_EntityBase)maxDeletedRecordItem).TimeStampUnit;
-                        var oldEntityBaseLst = (oldData as IList).Cast<_EntityBase>().ToList();
+                        var maxDeletedRecordItem = (ObjectBase)deletedRecords.OrderByDescending(item => ((ObjectBase)item).TimeStampUnit).First();
+                        var maxTimeStampDeletedRecords = ((ObjectBase)maxDeletedRecordItem).TimeStampUnit;
+                        var oldEntityBaseLst = (oldData as IList).Cast<ObjectBase>().ToList();
                         var oldLst = oldData as IList;
-                        entitiesForDeletion = new List<_EntityBase>();
+                        entitiesForDeletion = new List<ObjectBase>();
                         foreach (var record in deletedRecords)
                         {
                             if (nlst != null && nlst.Count > 0)
                             {
-                                var newItemToRemove = nlst.Cast<_EntityBase>().FirstOrDefault(item => item.CacheId == record.DeletedEntityId);
+                                var newItemToRemove = nlst.Cast<ObjectBase>().FirstOrDefault(item => item.CacheId == record.DeletedEntityId);
                                 if (newItemToRemove != null)
                                 {
                                     nlst.Remove(newItemToRemove);
@@ -117,7 +117,7 @@ namespace Core.Cmn.Cache
 
                                 foreach (var inf in cacheInfo.InfoAndEntityListForFillingNavigationPropertyDic.ToList())
                                 {
-                                    List<_EntityBase> entities;
+                                    List<ObjectBase> entities;
                                     /// attention: Added Tolist Here
                                     //lock (inf.Value)
                                     //{
@@ -128,7 +128,7 @@ namespace Core.Cmn.Cache
                                     }).ToList();
                                     //}
                                     //Where(en => en[inf.Key.ThisEntityRefrencePropertyName].Equals(itemToRemove[inf.Key.OtherEntityRefrencePropertyName])).ToList()
-                                    entities.ForEach(parentEntity =>
+                                    entities.ForEach((Action<ObjectBase>)((ObjectBase parentEntity) =>
                                     {
                                         object navContainer;
                                         if (parentEntity.NavigationPropertyDataDic.TryGetValue(inf.Key.PropertyInfo.Name, out navContainer))
@@ -140,7 +140,7 @@ namespace Core.Cmn.Cache
                                                 if (navPropList.Count > 0)
                                                 {
                                                     IList newNavProp = Activator.CreateInstance(navContainer.GetType()) as IList;
-                                                    navPropList.Cast<_EntityBase>().ToList().ForEach(entity =>
+                                                    navPropList.Cast<ObjectBase>().ToList().ForEach((ObjectBase entity) =>
                                                     {
                                                         if (!entity.Equals(itemToRemove))
                                                         {
@@ -165,7 +165,7 @@ namespace Core.Cmn.Cache
                                         {
                                             parentEntity.CallNavigationPropertyChangedByCache(parentEntity, inf.Key.PropertyInfo.Name);
                                         }
-                                    });
+                                    }));
                                 }
                             }
                         }
@@ -183,11 +183,11 @@ namespace Core.Cmn.Cache
 
                 if (nlst.Count > 0)
                 {
-                    entitiesForAddition = new List<_EntityBase>();
-                    entitiesForUpdates = new List<Cmn._EntityBase>();
-                    var newLst = nlst.Cast<_EntityBase>().ToList();
+                    entitiesForAddition = new List<ObjectBase>();
+                    entitiesForUpdates = new List<ObjectBase>();
+                    var newLst = nlst.Cast<ObjectBase>().ToList();
                     var oldLst = (oldData as IList);
-                    var oldEntityBaseLst = (oldData as IList).Cast<_EntityBase>().ToList();
+                    var oldEntityBaseLst = (oldData as IList).Cast<ObjectBase>().ToList();
                     var result = Activator.CreateInstance<T>() as IList;
                     foreach (var item in oldEntityBaseLst)
                     {
@@ -248,9 +248,9 @@ namespace Core.Cmn.Cache
 
             if (nlst.Count > 0)
             {
-                foreach (var en in nlst.Cast<_EntityBase>())
+                foreach (var en in nlst.Cast<ObjectBase>())
                 {
-                    (en as _EntityBase).EnableFillNavigationProperyByCache();
+                    (en as ObjectBase).EnableFillNavigationProperyByCache();
                 }
             }
 
@@ -265,9 +265,9 @@ namespace Core.Cmn.Cache
         /// <param name="newCacheItem"></param>
         /// <param name="mustDeleteCacheItemFromNavigationProperty">Action in this method could be add or remove from navigationProperty.</param>
         /// <param name="isCacheItemUpdated">cacheItem could be in add or update mode.</param>
-        private static void UpdateNavigationProperties(CacheInfo cacheInfo, _EntityBase newCacheItem, _EntityBase oldCacheItem)
+        private static void UpdateNavigationProperties(CacheInfo cacheInfo, ObjectBase newCacheItem, ObjectBase oldCacheItem)
         {
-            List<KeyValuePair<InfoForFillingNavigationProperty, ConcurrentBag<_EntityBase>>> infoAndEntityListForFillingNavigationPropertyDic;
+            List<KeyValuePair<InfoForFillingNavigationProperty, ConcurrentBag<ObjectBase>>> infoAndEntityListForFillingNavigationPropertyDic;
             infoAndEntityListForFillingNavigationPropertyDic = cacheInfo.InfoAndEntityListForFillingNavigationPropertyDic.ToList();
             foreach (var info in infoAndEntityListForFillingNavigationPropertyDic)
             {
@@ -296,9 +296,9 @@ namespace Core.Cmn.Cache
             }
         }
 
-        private static void UpdateNavigationPropertiesByInfo(_EntityBase cacheItem, bool mustDeleteCacheItemFromNavigationProperty, KeyValuePair<InfoForFillingNavigationProperty, ConcurrentBag<_EntityBase>> info)
+        private static void UpdateNavigationPropertiesByInfo(ObjectBase cacheItem, bool mustDeleteCacheItemFromNavigationProperty, KeyValuePair<InfoForFillingNavigationProperty, ConcurrentBag<ObjectBase>> info)
         {
-            List<_EntityBase> parentEntities = null;
+            List<ObjectBase> parentEntities = null;
             parentEntities = info.Value.
                             Where(en =>
                             {
@@ -306,7 +306,7 @@ namespace Core.Cmn.Cache
                                 return thisPropertyValue != null && thisPropertyValue.Equals(cacheItem[info.Key.OtherEntityRefrencePropertyName]) && !en.IsDeletedForCache;
                             }).ToList();
 
-            parentEntities.ForEach(parentEntity =>
+            parentEntities.ForEach((Action<ObjectBase>)((ObjectBase parentEntity) =>
             {
                 object navContainer;
                 if (parentEntity.NavigationPropertyDataDic.TryGetValue(info.Key.PropertyInfo.Name, out navContainer))
@@ -315,7 +315,7 @@ namespace Core.Cmn.Cache
                     {
                         var navPropList = navContainer as IList;
                         IList newNavProp = Activator.CreateInstance(navContainer.GetType()) as IList;
-                        navPropList.Cast<_EntityBase>().ToList().ForEach(entity =>
+                        navPropList.Cast<ObjectBase>().ToList().ForEach((ObjectBase entity) =>
                         {
                             if (!entity.Equals(cacheItem))
                             {
@@ -342,11 +342,13 @@ namespace Core.Cmn.Cache
                 // object changedEntity = parentEntity;
                 //   parentEntity.OnColumnChanging(inf.Key.PropertyInfo.Name, ref changedEntity);                                        
 
-            });
+            }));
         }
 
         public static T RefreshCache<T>(ICacheDataProvider<T> cacheExecution, CacheInfo cacheInfo)
         {
+            //Core.Cmn.AppBase.TraceWriter.SubmitData(new Trace.TraceDto { Message = $"RefreshCache.Begin {cacheInfo.Name} {Thread.CurrentThread.ManagedThreadId}" });
+
             try
             {
                 cacheInfo.CountOfWaitingThreads++;
@@ -372,6 +374,8 @@ namespace Core.Cmn.Cache
             finally
             {
                 cacheInfo.CountOfWaitingThreads--;
+
+                //Core.Cmn.AppBase.TraceWriter.SubmitData(new Trace.TraceDto { Message = $"RefreshCache.End {cacheInfo.Name} {Thread.CurrentThread.ManagedThreadId}" });
             }
 
         }
@@ -402,9 +406,9 @@ namespace Core.Cmn.Cache
             {
 
                 refreshCacheValue = cacheExecution.GetFreshData();
-                List<_EntityBase> entitiesForDeletion = null;
-                List<_EntityBase> entitiesForAddition = null;
-                List<_EntityBase> entitiesForUpdates = null;
+                List<ObjectBase> entitiesForDeletion = null;
+                List<ObjectBase> entitiesForAddition = null;
+                List<ObjectBase> entitiesForUpdates = null;
                 lock (cacheInfo.InfoAndEntityListForFillingNavigationPropertyDic)
                 {
 

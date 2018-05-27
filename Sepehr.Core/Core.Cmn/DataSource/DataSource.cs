@@ -23,7 +23,7 @@ namespace Core.Cmn.DataSource
         GreaterThan,
         GreaterThanOrEqualTo
     }
-    public class Comparer<T> : IComparer<T> where T : _EntityBase
+    public class Comparer<T> : IComparer<T> where T : ObjectBase
     {
         private Func<T, T, int> _func;
         /// <summary>
@@ -75,7 +75,7 @@ namespace Core.Cmn.DataSource
         }
     }
 
-    public class DataSource<T> : DataSourceQueryable<T> where T : _EntityBase
+    public class DataSource<T> : DataSourceQueryable<T> where T : ObjectBase
     {
         private static Dictionary<Type, int> LastDataSourceIdPerType = new Dictionary<Type, int>();
         protected FirstFilterClause FilterClause;
@@ -171,9 +171,23 @@ namespace Core.Cmn.DataSource
             int low = 0, high = objectsToSearch.Count - 1;
             // get the start index of target number
             int startIndex = -1;
+            int mid = -1;
             while (low <= high)
             {
-                int mid = (high - low) / 2 + low;
+                int dif = (high - low);
+                if (dif == 1)
+                {
+                    if (mid == low)
+                        mid = high;
+                    else
+                        mid = low;
+                }
+                else
+                {
+                    int plas = dif / 2;
+                    mid = plas + low;
+                }
+
                 var source = objectsToSearch[mid];
                 var compareResult = CompareAll(source, filters);
                 if (compareResult == 1)
@@ -185,10 +199,13 @@ namespace Core.Cmn.DataSource
                 else if (compareResult == 0)
                 {
                     if (high == mid)
+                    {
+                        startIndex = mid;
                         break;
+                    }
+
                     startIndex = mid;
                     high = mid;
-
                 }
                 else
                 {
@@ -202,9 +219,22 @@ namespace Core.Cmn.DataSource
             int endIndex = -1;
             low = 0;
             high = objectsToSearch.Count - 1;
+            mid = -1;
             while (low <= high)
             {
-                int mid = (high - low) / 2 + low;
+                int dif = (high - low);
+                if (dif == 1)
+                {
+                    if (mid == low)
+                        mid = high;
+                    else
+                        mid = low;
+                }
+                else
+                {
+                    int plas = dif / 2;
+                    mid = plas + low;
+                }
                 var source = objectsToSearch[mid];
                 int compareResult = CompareAll(source, filters);
                 if (compareResult == 1)
@@ -216,7 +246,11 @@ namespace Core.Cmn.DataSource
                 else if (compareResult == 0)
                 {
                     if (low == mid)
+                    {
+                        endIndex = mid;
                         break;
+                    }
+
                     endIndex = mid;
                     low = mid;
                 }
@@ -504,50 +538,50 @@ namespace Core.Cmn.DataSource
 
         private void WriteRecordIndexForSingleIndex(int index, List<T> newIndex)
         {
-            if (typeof(_EntityBase).IsAssignableFrom(typeof(T)))
+            if (typeof(ObjectBase).IsAssignableFrom(typeof(T)))
             {
                 var i = 0;
-                newIndex.ForEach(obj =>
+                newIndex.ForEach((Action<T>)(obj =>
                 {
-                    if (((_EntityBase)obj).IndexOfIndexableProperties == null)
+                    if (((ObjectBase)obj).IndexOfIndexableProperties == null)
                     {
-                        ((_EntityBase)obj).IndexOfIndexableProperties = new System.Collections.Concurrent.ConcurrentDictionary<int, int[]>();
+                        ((ObjectBase)obj).IndexOfIndexableProperties = new System.Collections.Concurrent.ConcurrentDictionary<int, int[]>();
                     }
 
                     int[] indexRecordsId;
-                    if (!((_EntityBase)obj).IndexOfIndexableProperties.TryGetValue(this.IdPerType, out indexRecordsId))
+                    if (!((ObjectBase)obj).IndexOfIndexableProperties.TryGetValue(this.IdPerType, out indexRecordsId))
                     {
                         indexRecordsId = new int[EntityInfo.IndexableProps.Count];
-                        ((_EntityBase)obj).IndexOfIndexableProperties.TryAdd(this.IdPerType, indexRecordsId);
+                        ((ObjectBase)obj).IndexOfIndexableProperties.TryAdd(this.IdPerType, indexRecordsId);
                     }
 
                     indexRecordsId[index] = i;
                     i++;
-                });
+                }));
             }
         }
         private void WriteRecordIndexForGroupedIndex(int index, List<T> newIndex)
         {
-            if (typeof(_EntityBase).IsAssignableFrom(typeof(T)))
+            if (typeof(ObjectBase).IsAssignableFrom(typeof(T)))
             {
                 var i = 0;
-                newIndex.ForEach(obj =>
+                newIndex.ForEach((Action<T>)(obj =>
                 {
-                    if (((_EntityBase)obj).IndexOfGroupedIndexableProperties == null)
+                    if (((ObjectBase)obj).IndexOfGroupedIndexableProperties == null)
                     {
-                        ((_EntityBase)obj).IndexOfGroupedIndexableProperties = new System.Collections.Concurrent.ConcurrentDictionary<int, int[]>();
+                        ((ObjectBase)obj).IndexOfGroupedIndexableProperties = new System.Collections.Concurrent.ConcurrentDictionary<int, int[]>();
                     }
 
                     int[] indexRecordsId;
-                    if (!((_EntityBase)obj).IndexOfGroupedIndexableProperties.TryGetValue(this.IdPerType, out indexRecordsId))
+                    if (!((ObjectBase)obj).IndexOfGroupedIndexableProperties.TryGetValue(this.IdPerType, out indexRecordsId))
                     {
                         indexRecordsId = new int[EntityInfo.IndexableGroupedProps.Count];
-                        ((_EntityBase)obj).IndexOfGroupedIndexableProperties.TryAdd(this.IdPerType, indexRecordsId);
+                        ((ObjectBase)obj).IndexOfGroupedIndexableProperties.TryAdd(this.IdPerType, indexRecordsId);
                     }
 
                     indexRecordsId[index] = i;
                     i++;
-                });
+                }));
             }
         }
     }

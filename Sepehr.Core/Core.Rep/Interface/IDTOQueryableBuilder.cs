@@ -9,7 +9,7 @@ using System.Threading.Tasks;
 
 namespace Core.Repository
 {
-    public interface IDTOQueryableBuilder<T> where T : EntityBase<T>
+    public interface IDTOQueryableBuilder<T> where T : ObjectBase 
     {
         IQueryable<IDto> GetDtoQueryable(IQueryable<T> queryable);
     }

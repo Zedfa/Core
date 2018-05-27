@@ -36,7 +36,7 @@ namespace Core.Service
     }
 
     [Injectable(InterfaceType = typeof(IServiceBase<>), DomainName = "Core")]
-    public class ServiceBase<T> : ServiceBase, IServiceBase<T>, IServiceCache, IDisposable where T : EntityBase<T>, new()
+    public class ServiceBase<T> : ServiceBase, IServiceBase<T>, IServiceCache, IDisposable where T : ObjectBase, new()
     {
 
         public IDbContextBase ContextBase { get; private set; }
@@ -80,7 +80,6 @@ namespace Core.Service
             }
         }
 
-
         public virtual T Create(T entity, bool allowSaveChange = true)
         {
             return _repositoryBase.Create(entity, allowSaveChange);
@@ -96,14 +95,24 @@ namespace Core.Service
             return _repositoryBase.Delete(entity, allowSaveChange);
         }
 
-        public virtual int Delete(IQueryable<T> itemsForDeletion, bool allowSaveChange = true)
+        // Remarks:
+        //     When executing this method, the statement is immediately executed on the database
+        //     provider and is not part of the change tracking system. Also, changes will not
+        //     be reflected on any entities that have already been materialized in the current
+        //     context.
+        public virtual int Delete(IQueryable<T> itemsForDeletion)
         {
-            return _repositoryBase.Delete(itemsForDeletion, allowSaveChange);
+            return _repositoryBase.Delete(itemsForDeletion);
         }
 
-        public virtual int Delete(Expression<Func<T, bool>> predicate, bool allowSaveChange = true)
+        // Remarks:
+        //     When executing this method, the statement is immediately executed on the database
+        //     provider and is not part of the change tracking system. Also, changes will not
+        //     be reflected on any entities that have already been materialized in the current
+        //     context.
+        public virtual int Delete(Expression<Func<T, bool>> predicate)
         {
-            return _repositoryBase.Delete(predicate, allowSaveChange);
+            return _repositoryBase.Delete(predicate);
         }
 
         public virtual int Delete(List<T> i, bool allowSaveChange = true)
@@ -115,10 +124,14 @@ namespace Core.Service
         {
             return _repositoryBase.Update(entity, allowSaveChange);
         }
-
-        public virtual int Update(Expression<Func<T, bool>> predicate, Expression<Func<T, T>> updatepredicate, bool allowSaveChange = true)
+        // Remarks:
+        //     When executing this method, the statement is immediately executed on the database
+        //     provider and is not part of the change tracking system. Also, changes will not
+        //     be reflected on any entities that have already been materialized in the current
+        //     context.
+        public virtual int Update(Expression<Func<T, bool>> predicate, Expression<Func<T, T>> updatepredicate)
         {
-            return _repositoryBase.Update(predicate, updatepredicate, allowSaveChange);
+            return _repositoryBase.Update(predicate, updatepredicate);
         }
 
         public virtual int Count { get { return _repositoryBase.Count; } }
@@ -217,13 +230,23 @@ namespace Core.Service
 
         private void GetOrCreateCacheInfo(Delegate func, out string cacheKey, out CacheInfo cacheInfo)
         {
-            cacheKey = func.Method.GetHashCode().ToString();
-            cacheInfo = null;
-            if (!CacheConfig.CacheInfoDic.TryGetValue(cacheKey, out cacheInfo))
+            try
             {
+                cacheInfo = CacheInfo.GetCacheInfo(func, out cacheKey);
+            }
+            catch (CacheInfoNotFoundException)
+            {
+                cacheKey = func.Method.GetHashCode().ToString();
                 var att = func.Method.GetAttributeValue<CacheableAttribute, CacheableAttribute>(item => item);
-                CacheConfig.CacheInfoDic[cacheKey] = cacheInfo = CacheConfig.CreateCacheInfo(att, func.Method, func, cacheKey);
-                cacheInfo.Service = this;
+                if (att == null)
+                {
+                    throw new CacheInfoNotFoundException(func);
+                }
+                else
+                {
+                    CacheConfig.CacheInfoDic[cacheKey] = cacheInfo = CacheConfig.CreateCacheInfo(att, func.Method, func, cacheKey);
+                    cacheInfo.Service = this;
+                }
             }
         }
 

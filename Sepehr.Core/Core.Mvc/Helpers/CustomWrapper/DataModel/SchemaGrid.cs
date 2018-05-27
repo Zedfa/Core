@@ -22,20 +22,23 @@ namespace Core.Mvc.Helpers.CustomWrapper.DataModel
         public IDbContextBase IDbContextBase { get { return Service.ServiceBase.DependencyInjectionFactory.CreateInjectionInstance<IDbContextBase>(); } }
         public Type GridViewModelType { get; private set; }
 
-        public Dictionary<string, SearchInfo> SearchInfos { get; private set; }
+        public Dictionary<string, SearchInfo> SearchSchemaList { get; private set; }
 
 
-        public Dictionary<string, LookupConfig> LookupViewInfos { get; set; }
+        public Dictionary<string, LookupConfig> LookupViewSchema { get; set; }
 
-        public Dictionary<string, DropDownListInfo> DropDownInfos { get; set; }
+        public Dictionary<string, DropDownListInfo> DropDownSchema { get; set; }
+
+        public Dictionary<string, AutoCompleteInfo> AutoCompleteSchema { get; set; }
+
 
         public SchemaGrid(Type modelMetaData)
         {
             GridViewModelType = modelMetaData;
-            SearchInfos = new Dictionary<string, SearchInfo>();
-            LookupViewInfos = new Dictionary<string, SearchRelated.LookupConfig>();
-            DropDownInfos = new Dictionary<string, SearchRelated.DropDownListInfo>();
-
+            SearchSchemaList = new Dictionary<string, SearchInfo>();
+            LookupViewSchema = new Dictionary<string, LookupConfig>();
+            DropDownSchema = new Dictionary<string, DropDownListInfo>();
+            AutoCompleteSchema = new Dictionary<string, AutoCompleteInfo>();
         }
 
         protected override void Serialize(IDictionary<string, object> json)
@@ -52,11 +55,11 @@ namespace Core.Mvc.Helpers.CustomWrapper.DataModel
         {
 
             ModelFieldTypeInfo fieldTypeInfo = null;
-            foreach (var sInfo in LookupViewInfos)
+            foreach (var sInfo in LookupViewSchema)
             {
 
                 // type, title, viewModelName, viewModelPropertyName, lookupName, displayName, valueName, bindingName, isMultiselect, width, height
-                InitialiseFieldTypeInfo(ref fieldTypeInfo);
+                InitializeFieldTypeInfo(ref fieldTypeInfo);
                 var SearchRelatedLookpAttr = sInfo.Value;//;(sInfo.Value as SearchLookup);
                 fieldTypeInfo.CustomType = "Lookup";
                 var lookupDic = new Dictionary<string, string>();
@@ -85,9 +88,9 @@ namespace Core.Mvc.Helpers.CustomWrapper.DataModel
         {
 
             ModelFieldTypeInfo fieldTypeInfo = null;
-            foreach (var info in DropDownInfos)
+            foreach (var info in DropDownSchema)
             {
-                InitialiseFieldTypeInfo(ref fieldTypeInfo);
+                InitializeFieldTypeInfo(ref fieldTypeInfo);
                 var dropDownAttribute = info.Value as DropDownListInfo;
                 fieldTypeInfo.CustomType = "Dropdown";
                 var infoDic = new Dictionary<string, string>();
@@ -102,59 +105,86 @@ namespace Core.Mvc.Helpers.CustomWrapper.DataModel
             }
 
         }
+        private void BuildSearchAutoCompleteDictionary(Dictionary<string, object> fieldTypeInfos)
+        {
+
+            ModelFieldTypeInfo fieldTypeInfo = null;
+            foreach (var info in AutoCompleteSchema)
+            {
+                InitializeFieldTypeInfo(ref fieldTypeInfo);
+                var autoCompleteAttribute = info.Value as AutoCompleteInfo;
+                fieldTypeInfo.CustomType = "AutoComplete";
+                var infoDic = new Dictionary<string, string>();
+                infoDic.Add("url", autoCompleteAttribute.Url);
+                infoDic.Add("propertyNameForBinding", autoCompleteAttribute.PropertyNameForBinding);
+                infoDic.Add("valueName", autoCompleteAttribute.ValueName);
+                infoDic.Add("displayName", autoCompleteAttribute.DisplayName);
+                infoDic.Add("searchProperty", autoCompleteAttribute.SearchProperty);
+                infoDic.Add("watermark", autoCompleteAttribute.Watermark);
+
+                fieldTypeInfo.AutoCompleteKeyValue = infoDic;
+
+                fieldTypeInfos.Add(info.Key, fieldTypeInfo.ToJson());
+            }
+
+        }
 
         private Dictionary<string, object> BuildComprehensiveSearchObjectDictionary()
         {
-            Dictionary<string, object> fieldTypeInfos = new Dictionary<string, object>();
+            Dictionary<string, object> schemaMetaData = new Dictionary<string, object>();
 
-            if(LookupViewInfos.Any()){
-                BuildSearchLookupDictionary(fieldTypeInfos) ;
+            if(LookupViewSchema.Any()){
+                BuildSearchLookupDictionary(schemaMetaData) ;
             }
 
-            if (DropDownInfos.Any())
+            if (DropDownSchema.Any())
             {
-               BuildSearchDropDownDictionary(fieldTypeInfos) ;
+               BuildSearchDropDownDictionary(schemaMetaData) ;
             }
 
-            foreach (var sInfo in this.SearchInfos)
+            if (AutoCompleteSchema.Any())
+            {
+                BuildSearchAutoCompleteDictionary(schemaMetaData);
+            }
+
+            foreach (var sInfo in SearchSchemaList)
             {
                 ModelFieldTypeInfo fieldTypeInfo = null;
 
                 if (sInfo.Value is SearchConstantField)
                 {
-                    InitialiseFieldTypeInfo(ref fieldTypeInfo);
+                    InitializeFieldTypeInfo(ref fieldTypeInfo);
                     var SearchRelatedEnumAttr = (sInfo.Value as SearchConstantField);
                     fieldTypeInfo.CustomType = SearchRelatedEnumAttr.CustomType;
-                    //fieldTypeInfo.ModelPropName = SearchRelatedEnumAttr.MainPropertyNameOfModel;
-                    // var enumType = SearchRelatedEnumAttr.EnumType;
-                    fieldTypeInfo.EnumKeyValue = GetConstantsOfSearchingField(SearchRelatedEnumAttr.ConstantsCategoryName);// enumType.GetEnumKeyValuePairEquivalents();
+                   
+                    fieldTypeInfo.EnumKeyValue = GetConstantsOfSearchingField(SearchRelatedEnumAttr.ConstantsCategoryName);
                 }
                 else if (sInfo.Value is SearchDateTimeField)
                 {
-                    InitialiseFieldTypeInfo(ref fieldTypeInfo);
+                    InitializeFieldTypeInfo(ref fieldTypeInfo);
                     var SearchRelatedEnumAttr = (sInfo.Value as SearchDateTimeField);
                     fieldTypeInfo.CustomType = SearchRelatedEnumAttr.CustomType;
                     fieldTypeInfo.ModelPropName = SearchRelatedEnumAttr.MainPropertyNameOfModel;
                 }
                 else if (sInfo.Value is SearchDateField)
                 {
-                    InitialiseFieldTypeInfo(ref fieldTypeInfo);
+                    InitializeFieldTypeInfo(ref fieldTypeInfo);
                     var SearchRelatedEnumAttr = (sInfo.Value as SearchDateField);
                     fieldTypeInfo.CustomType = SearchRelatedEnumAttr.CustomType;
                     fieldTypeInfo.ModelPropName = SearchRelatedEnumAttr.MainPropertyNameOfModel;
                 }
 
 
-                if (fieldTypeInfos != null)
+                if (schemaMetaData != null)
                 {
-                    fieldTypeInfos.Add(sInfo.Key, fieldTypeInfo.ToJson());
+                    schemaMetaData.Add(sInfo.Key, fieldTypeInfo.ToJson());
                 }
 
-            }//end of foreach
+            }
 
 
 
-            return fieldTypeInfos;
+            return schemaMetaData;
         }
 
         private Dictionary<string, string> GetConstantsOfSearchingField(string constantCategoryName)
@@ -170,86 +200,9 @@ namespace Core.Mvc.Helpers.CustomWrapper.DataModel
             return retDic;
         }
 
-
-
-        private Dictionary<string, object> GetColumnWithClrRelatedTypeForSearch()
-        {
-            PropertyInfo[] propInfos = GridViewModelType.GetProperties();
-            var fieldTypeInfos = new Dictionary<string, object>();
-            foreach (var item in propInfos)
-            {
-                var customAttrs = item.GetCustomAttributes(true);
-                ModelFieldTypeInfo fieldTypeInfo = null;
-
-                foreach (var attrItem in customAttrs)
-                {
-                    if (attrItem is SearchRelatedTypeAttribute)
-                    {
-                        InitialiseFieldTypeInfo(ref fieldTypeInfo);
-                        var searchRelatedAttr = (attrItem as SearchRelatedTypeAttribute);
-                        fieldTypeInfo.CustomType = searchRelatedAttr.CustomType;
-                        fieldTypeInfo.ModelPropName = searchRelatedAttr.MainPropertyNameOfModel;
-                        fieldTypeInfo.TrueEquivalent = searchRelatedAttr.TrueEquivalent;
-                        fieldTypeInfo.FalseEquivalent = searchRelatedAttr.FalseEquivalent;
-                        fieldTypeInfo.NavigationProperty = searchRelatedAttr.NavigationProperty;
-                    }
-
-                    else if (attrItem is SearchRelatedEnumInfoAttribute)
-                    {
-                        InitialiseFieldTypeInfo(ref fieldTypeInfo);
-                        var SearchRelatedEnumAttr = (attrItem as SearchRelatedEnumInfoAttribute);
-                        fieldTypeInfo.CustomType = SearchRelatedEnumAttr.CustomType;
-                        fieldTypeInfo.ModelPropName = SearchRelatedEnumAttr.MainPropertyNameOfModel;
-                        var enumType = SearchRelatedEnumAttr.EnumType;
-                        //fieldTypeInfo.EnumKeyValue = enumType.GetEnumKeyValuePairEquivalents();
-                    }
-                    else if (attrItem is SearchLookupAttribute)
-                    {
-                        // type, title, viewModelName, viewModelPropertyName, lookupName, displayName, valueName, bindingName, isMultiselect, width, height
-                        InitialiseFieldTypeInfo(ref fieldTypeInfo);
-                        var SearchRelatedLookpAttr = (attrItem as SearchLookupAttribute);
-                        fieldTypeInfo.CustomType = "Lookup";
-                        var lookupDic = new Dictionary<string, string>();
-                        lookupDic.Add("type", SearchRelatedLookpAttr.LookupType);
-                        lookupDic.Add("title", SearchRelatedLookpAttr.LookupTitle);
-                        lookupDic.Add("viewModelName", SearchRelatedLookpAttr.ViewModelName);
-                        lookupDic.Add("viewModelPropertyName", SearchRelatedLookpAttr.ViewModelGridInfoName);
-                        lookupDic.Add("lookupName", SearchRelatedLookpAttr.LookupName);
-                        lookupDic.Add("displayName", SearchRelatedLookpAttr.NavigateViewModelDisplayName);
-                        lookupDic.Add("valueName", SearchRelatedLookpAttr.NavigateViewModelValueName);
-                        lookupDic.Add("bindingName", SearchRelatedLookpAttr.ModelBindingName);
-                        lookupDic.Add("isMultiselect", SearchRelatedLookpAttr.IsMultiSelect.ToString());
-                        lookupDic.Add("navigatePropertyUnderlayingModelName", SearchRelatedLookpAttr.NavigatePropertyUnderlayingModelName);
-                        lookupDic.Add("navigatePropertyUnderlayingModelIdName", SearchRelatedLookpAttr.NavigatePropertyUnderlayingModelIdName);
-                        fieldTypeInfo.LookupKeyValue = lookupDic;
-                    }
-
-
-                }
-                if (fieldTypeInfo != null)
-                {
-                    fieldTypeInfos.Add(item.Name, fieldTypeInfo.ToJson());
-                }
-            }
-
-            SetExcludingFields(fieldTypeInfos);
-            return fieldTypeInfos;
-        }
-
-        private void SetExcludingFields(Dictionary<string, object> fieldTypeInfos)
-        {
-            var viewModelNonAttrs = GridViewModelType.GetCustomAttributes(false);//.FirstOrDefault(attr => attr.AttributeType.Name == "SearchExcludingFieldsAttribute");
-            foreach (var attrItem in viewModelNonAttrs)
-            {
-                if (attrItem is SearchExcludingFieldsAttribute)
-                {
-                    var attr = (attrItem as SearchExcludingFieldsAttribute);
-                    fieldTypeInfos.Add("excludingFields", attr.FieldsToExcludeFromSearchable);
-                }
-            }
-        }
-
-        private void InitialiseFieldTypeInfo(ref ModelFieldTypeInfo fieldTypeInfo)
+           
+       
+        private void InitializeFieldTypeInfo(ref ModelFieldTypeInfo fieldTypeInfo)
         {
             if (fieldTypeInfo == null)
             {

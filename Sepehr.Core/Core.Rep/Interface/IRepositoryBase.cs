@@ -39,15 +39,15 @@ namespace Core.Repository.Interface
 
        int Delete(T t, bool allowSaveChange=true);
 
-       int Delete(Expression<Func<T, bool>> predicate, bool allowSaveChange = true);
+       int Delete(Expression<Func<T, bool>> predicate);
 
-       int Delete(IQueryable<T> itemsForDeletion, bool allowSaveChange = true);
+       int Delete(IQueryable<T> itemsForDeletion);
 
        int Delete(List<T> itemsForDeletion, bool allowSaveChange = true);
 
        int Update(T t, bool allowSaveChange=true);
 
-       int Update(Expression<Func<T, bool>> predicate, Expression<Func<T, T>> updatepredicate, bool allowSaveChange = true);
+       int Update(Expression<Func<T, bool>> predicate, Expression<Func<T, T>> updatepredicate);
 
        int Update(IQueryable<T> source,Expression<Func<T, T>> predicate);
 

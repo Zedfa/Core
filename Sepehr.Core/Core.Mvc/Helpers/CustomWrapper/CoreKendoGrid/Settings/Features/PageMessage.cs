@@ -36,7 +36,7 @@ namespace Core.Mvc.Helpers.CoreKendoGrid.Settings.Features
 
         protected override void Serialize(IDictionary<string, object> json)
         {
-            json["empty"] = "هیچ داده ایی وجود ندارد";//, " تا ",
+            json["empty"] = "هیچ داده ای وجود ندارد";//, " تا ",
             var fromToMsg = string.Format("{0} {1}", "{0}", " تا {1}");
             json["display"] = "نمایش {0}-{1} از {2} داده";// "Showing {0}-{1} from {2} data items";
             json["of"] = "از";

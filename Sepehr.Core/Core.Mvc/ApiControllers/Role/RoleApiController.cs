@@ -16,8 +16,12 @@ using Core.Mvc.Infrastructure;
 using System.Data.SqlClient;
 using System.Data;
 using Core.Rep.DTO;
+using System.Web.Http.Description;
+
 namespace Core.Mvc.ApiControllers
 {
+    // IgnoreApi baraye inke felan toye swagger nayad ta badan in controller ro barresi konim o age niaz bod toye document swagger biad
+    [ApiExplorerSettings(IgnoreApi = true)]
     public class RoleApiController : Core.Mvc.Controller.CrudDTOApiControllerBase<Role, RoleDTO, IRoleService>
     {
         private IRoleService _roleService;

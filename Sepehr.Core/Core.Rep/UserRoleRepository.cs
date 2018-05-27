@@ -1,26 +1,26 @@
-﻿using System.Linq;
+﻿using Core.Cmn;
+using Core.Cmn.Attributes;
+using Core.Cmn.Extensions;
 using Core.Entity;
 using Core.Rep.DTO.UserRoleDTO;
-using Core.Cmn;
-using Core.Cmn.Extensions;
-using Core.Cmn.Attributes;
+using System.Linq;
 
 namespace Core.Rep
 {
-
     public class UserRoleRepository : RepositoryBase<UserRole>
     {
         #region Variable
-        IDbContextBase _dc;
-        #endregion
 
+        private IDbContextBase _dc;
 
+        #endregion Variable
 
         public UserRoleRepository(IDbContextBase dc)
             : base(dc)
         {
             _dc = dc;
         }
+
         public override IQueryable<UserRole> All(bool canUseCacheIfPossible = true)
         {
             return Cache<UserRole>(AllUserRoleCache, canUseCacheIfPossible);
@@ -28,13 +28,17 @@ namespace Core.Rep
 
         [Cacheable(
             EnableSaveCacheOnHDD = true,
-            EnableUseCacheServer = true,
+            EnableUseCacheServer = false,
             EnableCoreSerialization = true,
-            AutoRefreshInterval = 60
+            AutoRefreshInterval = 3600,
+            CacheRefreshingKind = Cmn.Cache.CacheRefreshingKind.SqlDependency,
+            EnableToFetchOnlyChangedDataFromDB = true
             )]
         public static IQueryable<UserRole> AllUserRoleCache(IQueryable<UserRole> query)
         {
-            return query.AsNoTracking().Include(userRole => userRole.Role).Include(userRole => userRole.User);
+            return query.AsNoTracking()
+                .Include(userRole => userRole.Role)
+                .Include(userRole => userRole.User);
         }
 
         public IQueryable<UserRole> GetRolesByUserId(int userId)
@@ -51,9 +55,9 @@ namespace Core.Rep
                 UserId = userRole.UserId
             });
         }
+
         public int Update(int newRoleId, int oldRoleId, int userId, bool allowSaveChange = true)
         {
-
             var userRole = ContextBase.Set<UserRole>();
             var oldUserRole = userRole.Where(a => a.RoleID == oldRoleId && a.UserId == userId).SingleOrDefault();
             userRole.Remove(oldUserRole);
@@ -69,6 +73,7 @@ namespace Core.Rep
                 SaveChanges();
             return 0;
         }
+
         //public List<User> GetKishUsers()
         //{
         //    return _dc.Set<UserRole>().Where(item => item.RoleID == Constants.KishConstants.KishRole)

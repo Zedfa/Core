@@ -47,7 +47,7 @@ namespace Core.Cmn.Cache
             return Func.Invoke(Param1);
         }
 
-        public override string GenerateCacheKey()
+        protected override string GenerateCacheKeyBase()
         {
             return string.Format("{0}_{1}", CacheInfo.BasicKey, Param1); ;
         }
@@ -68,7 +68,7 @@ namespace Core.Cmn.Cache
             Param1 = param1;
             Param2 = param2;
         }
-        public override string GenerateCacheKey()
+        protected override string GenerateCacheKeyBase()
         {
             return string.Format("{0}_{1}_{2}", CacheInfo.BasicKey, Param1, Param2);
         }
@@ -106,7 +106,7 @@ namespace Core.Cmn.Cache
             return Func.Invoke(Param1, Param2, Param3);
         }
 
-        public override string GenerateCacheKey()
+        protected override string GenerateCacheKeyBase()
         {
             return string.Format("{0}_{1}_{2}_{3}", CacheInfo.BasicKey, Param1, Param2, Param3); ;
         }
@@ -138,7 +138,7 @@ namespace Core.Cmn.Cache
             return Func.Invoke(Param1, Param2, Param3, Param4);
         }
 
-        public override string GenerateCacheKey()
+        protected override string GenerateCacheKeyBase()
         {
             return string.Format("{0}_{1}_{2}_{3}_{4}", CacheInfo.BasicKey, Param1, Param2, Param3, Param4);
         }
@@ -173,7 +173,7 @@ namespace Core.Cmn.Cache
             return Func.Invoke(Param1, Param2, Param3, Param4, Param5);
         }
 
-        public override string GenerateCacheKey()
+        protected override string GenerateCacheKeyBase()
         {
             return string.Format("{0}_{1}_{2}_{3}_{4}_{5}", CacheInfo.BasicKey, Param1, Param2, Param3, Param4, Param5); ;
         }

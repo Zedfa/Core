@@ -9,7 +9,7 @@ using System.Reflection;
 
 namespace Core.UnitTesting.Mock
 {
-    public class MockDbSet<TEntity> : IDbSetBase<TEntity>, IQueryable<TEntity> where TEntity : EntityBase<TEntity>, new()
+    public class MockDbSet<TEntity> : IDbSetBase<TEntity>, IQueryable<TEntity> where TEntity : ObjectBase, new()
     {
         public IList<TEntity> MockEntityList { get; set; }
 

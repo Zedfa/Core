@@ -71,6 +71,7 @@
     @*@Scripts.Render("~/bundles/core/kendo.angular")*@
     @Scripts.Render("~/bundles/core/tools")
     @Scripts.Render("~/ExternalScriptBundle")
+    @Styles.Render("~/ExternalStyleBundle")
     @*@Scripts.Render(String.Format("~/app/scripts/{0}Modules.js", Core.Cmn.ConfigHelper.GetConfigValue<string>("StartupProjectForWebClient").ToLower().Replace(".mvc", "")))*@
 
     @Scripts.Render("~/bundles/core/app")

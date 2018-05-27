@@ -48,7 +48,7 @@ namespace Core.Mvc.Controllers
             var msg = string.Empty;
             _constantService.TryGetValue<string>("IncorrectSecurityCode", out msg);
             if (!Core.Mvc.Helpers.Captcha.CaptchaControl.Validate(value, guid))
-                return ShowException(new ExceptionInfo(msg/*ExceptionMessage.IncorrectSecurityCode*/));
+                return ShowException(new MvcExceptionInfo(msg/*ExceptionMessage.IncorrectSecurityCode*/));
             else
                 return null;
 

@@ -1,15 +1,13 @@
-﻿using System;
+﻿using Core.Cmn;
+using Core.Cmn.Attributes;
+using Core.Entity;
+using Core.Entity.Enum;
+using Core.Rep;
+using Core.Rep.DTO;
+using Core.Service.Models;
+using System;
 using System.Collections.Generic;
 using System.Linq;
-using Core.Entity;
-using Core.Cmn;
-using Core.Rep;
-using Core.Entity.Enum;
-using Core.Service.Models;
-using Core.Rep.DTO;
-using Core.Cmn.Attributes;
-
-
 
 namespace Core.Service
 {
@@ -22,61 +20,59 @@ namespace Core.Service
 
         private ICompanyChartRoleService CompanyChartRoleService { get; set; }
 
-
         private IViewElementRoleService ViewElementRoleService { get; set; }
-
 
         public ViewElementService(IDbContextBase dbContextBase, IUserService userService,
             IUserProfileService userProfileService, ICompanyChartRoleService companyChartRoleService, IViewElementRoleService viewElementRoleService)
             : base(dbContextBase)
         {
-
             _repositoryBase = new ViewElementRepository(ContextBase);
 
             UserService = userService;
             UserProfileService = userProfileService;
             CompanyChartRoleService = companyChartRoleService;
             ViewElementRoleService = viewElementRoleService;
-
         }
+
         public ViewElementService(IDbContextBase dbContextBase)
             : base(dbContextBase)
         {
-
         }
+
         public ViewElement GetViewElementByUniqueName(string uniqueName)
         {
             return (_repositoryBase as ViewElementRepository).GetViewElementByUniqueName(uniqueName);
         }
+
         public IQueryable<ViewElement> GetRootViewElements()
         {
-
             return (_repositoryBase as ViewElementRepository).GetRootViewElements();
         }
+
         public IQueryable<ViewElement> GetChildViewElementByParentId(int? parentId)
         {
             return (_repositoryBase as ViewElementRepository).GetChildViewElementByParentId(parentId);
         }
+
         public ViewElement GetViewElementAndViewElementChildByID(int viewElemntId)
         {
             return (_repositoryBase as ViewElementRepository).GetViewElementAndViewElementChildByID(viewElemntId);
         }
+
         public IList<ViewElement> GetViewElement(int? id)
         {
-
-
             return (_repositoryBase as ViewElementRepository).GetViewElement(id).ToList();
         }
+
         public ViewElement GetViewElementAndChildsById(int id)
         {
             return (_repositoryBase as ViewElementRepository).GetViewElementAndChildsById(id);
         }
+
         //public IList<ViewElement> GetAllViewElement(int? id)
         //{
-
         //    return (_repositoryBase as ViewElementRepository).GetChildViewElementByParentId(id).ToList();
         //}
-
 
         //if (appBase.ViewElementsGrantedToAnonymousUser == null)
         //    {
@@ -85,8 +81,6 @@ namespace Core.Service
 
         //        appBase.ViewElementsGrantedToAnonymousUser = new UserViewElement { UserName = "anonymous", ViewElements = viewElements };
         //    }
-
-
 
         //public bool RoleHasAccess(string userName,string uniqueName, string urlParam = "")
         //{
@@ -104,8 +98,6 @@ namespace Core.Service
 
         //    var accessVElement =
         //        currentUser.ViewElements;
-
-
 
         //    foreach (var item in accessVElement)
         //    {
@@ -134,38 +126,30 @@ namespace Core.Service
         {
             return (_repositoryBase as ViewElementRepository).GetNewViewElementId();
         }
-        public bool RoleHasAccess(int userId, string uniqueName, string urlParam = "")
+
+        public bool HasRoleAccess(int userId, string uniqueName, string urlParam = "")
         {
-
             UserViewElement currentUser = null;
-
 
             var viewElements = ViewElementRoleService.GetViewElementGrantedToUserByUserId(userId);
             currentUser = new UserViewElement { UserId = userId, ViewElements = viewElements };
             appBase.ViewElementsGrantedToUser.TryAdd(userId, currentUser);
 
-
             var accessVElement = currentUser.ViewElements;
 
             foreach (var item in accessVElement)
             {
-
                 if (!string.IsNullOrEmpty(uniqueName))
                 {
                     if (HasRequestedUrlAccessInViewElement(item, uniqueName))
                         return true;
-
                 }
-
             }
             return false;
-
-
         }
-        private bool HasRequestedUrlAccessInViewElement(ViewElementInfo item, string requestedUrl)
+
+        private static bool HasRequestedUrlAccessInViewElement(ViewElementInfo item, string requestedUrl)
         {
-
-
             if (item.ConceptualName.Contains("?"))
             {
                 if (requestedUrl.IndexOf("&_") > 0)
@@ -184,11 +168,20 @@ namespace Core.Service
                     return true;
             }
             return false;
-
         }
 
         public bool HasAnonymousAccess(string requestedUrl)
         {
+            return Cache(HasAnonymousAccessCacheFunction, requestedUrl);
+        }
+
+        [Cacheable(
+            AutoRefreshInterval = 600,
+            EnableCoreSerialization = true
+            )]
+        public static bool HasAnonymousAccessCacheFunction(string requestedUrl)
+        {
+            IViewElementRoleService viewElementRoleService = ServiceBase.DependencyInjectionFactory.CreateInjectionInstance<IViewElementRoleService>();
 
             //if (appBase.ViewElementsGrantedToAnonymousUser == null)
             //{
@@ -197,7 +190,7 @@ namespace Core.Service
 
             //  var userProfile = UserProfileService.Filter(entity => entity.Id.Equals(2)).FirstOrDefault();
             // 2 => Anonymous userProfile
-            var viewElements = ViewElementRoleService.GetViewElementGrantedToUserByUserId(2);
+            var viewElements = viewElementRoleService.GetViewElementGrantedToUserByUserId(2);
 
             appBase.ViewElementsGrantedToAnonymousUser = new UserViewElement { UserId = 2, ViewElements = viewElements };
             //}
@@ -207,10 +200,10 @@ namespace Core.Service
                 return false;
             else return true;
         }
+
         public List<ViewElementDTO> GetAccessibleViewElements(int userId)
         {
             return Cache(GetViewElementByUserId, userId);
-
         }
 
         [Cacheable(
@@ -222,14 +215,11 @@ namespace Core.Service
             var roleList = new List<Role>();
             var ViewElementDTOList = new List<ViewElementDTO>();
 
-
             var roles = DependencyInjectionFactory.CreateInjectionInstance<IUserService>().FindUserRoles(userId);
             if (roles.Any())
                 roleList = roles.ToList();
             foreach (var role in roleList)
             {
-
-
                 var viewElements = role.ViewElementRoles
                     .Select(viewElementRole => new ViewElementDTO
                     {
@@ -237,15 +227,12 @@ namespace Core.Service
                         Title = viewElementRole.ViewElement.Title
                     });
                 ViewElementDTOList.AddRange(viewElements);
-
-
             }
             return ViewElementDTOList;
         }
 
         public MenuItem AccessibleViewElements(int userId)
         {
-
             var allNodes = new List<MenuItem>();
             MenuItem rootMenuItem = new MenuItem() { Name = "RootMenu", ViewElement = new ViewElement() };
 
@@ -267,14 +254,10 @@ namespace Core.Service
                 var userPosition = CompanyChartRoleService.Filter(a => a.CompanyChartId == companyId).Select(a => a.Role).ToList();
                 if (userPosition != null)
                     roleList = userPosition;
-
             }
-
 
             foreach (var role in roleList)
             {
-
-
                 var viewElements =
                     role
                     .ViewElementRoles
@@ -286,8 +269,6 @@ namespace Core.Service
                 {
                     GetParentMenuFromViewElement(c, ref allNodes);
                 });
-
-
             }
             OrderMenuItems(rootMenuItem);
             return rootMenuItem;
@@ -301,11 +282,8 @@ namespace Core.Service
             {
                 if (child.Childeren.Count() > 0)
                     OrderMenuItems(child);
-
             }
-
         }
-
 
         public bool IsDuplicateUniqueName(string uniqueName, int viewElementId)
         {
@@ -314,9 +292,9 @@ namespace Core.Service
 
         public int Delete(int id, string userName)
         {
-
             return (_repositoryBase as ViewElementRepository).Delete(id, userName);
         }
+
         //public override void Create(List<ViewElement> objectList, bool allowSaveChange = true)
         //{
         //     (_repositoryBase as ViewElementRepository).Create(objectList, allowSaveChange);
@@ -335,12 +313,10 @@ namespace Core.Service
                         Title = viewElement.Title,
                         ViewElement = viewElement,
                         SortOrder = viewElement.SortOrder
-
                     };
                     allNodes.Add(parent);
                     parent.Childeren = GetChildren(parent, ref allNodes);
                     parent.Parent = GetParent(parent, ref allNodes);
-
                 }
 
                 return parent;
@@ -362,7 +338,6 @@ namespace Core.Service
             }
             else
             {
-
                 if (viewElement.ParentId != null)
                     return GetParentMenuFromViewElement(Find(viewElement.ParentId), ref allNodes);
                 else
@@ -387,12 +362,10 @@ namespace Core.Service
                     allNodes.Add(parent);
                     parent.Parent = GetParent(parent, ref allNodes);
                     parent.Childeren.Add(menuItem);
-
                 }
                 else
                 {
                     parent = allNodes.Single(n => n.Name == "RootMenu");
-
                 }
             }
             if (!parent.Childeren.Any(m => m.ViewElement.Id == menuItem.ViewElement.Id && !menuItem.ViewElement.InVisible))
@@ -422,7 +395,6 @@ namespace Core.Service
                             ViewElement = c,
                             Parent = menuItem,
                             SortOrder = c.SortOrder
-
                         };
 
                         child.Childeren = GetChildren(child, ref nodes);
@@ -436,40 +408,29 @@ namespace Core.Service
 
         private bool HasAccessViewElement(ViewElement vElement, string urlString)
         {
-
             if (vElement.UniqueName.Split('#')[1] == urlString)
             {
                 return true;
             }
 
-
             if (vElement.ChildrenViewElement != null)
                 foreach (var childElement in vElement.ChildrenViewElement)
                 {
-
                     if (HasAccessViewElement(childElement, urlString)) return true;
-
-
                 }
 
             return false;
-
         }
-
 
         //public override IQueryable<ViewElement> Filter(System.Linq.Expressions.Expression<Func<ViewElement, bool>> predicate, bool allowFilterDeleted = true)
         //{
         //    return _viewElementRepository.Filter(predicate, allowFilterDeleted).Include("ViewElementRoles").Include("ViewElementRoles.Role");
         //}
 
-
         public override ViewElement Find(System.Linq.Expressions.Expression<Func<ViewElement, bool>> predicate, bool allowFilterDeleted = true)
         {
             return base.Find(predicate, allowFilterDeleted);
         }
-
-
-
 
         public int? parentMenuId { get; set; }
     }

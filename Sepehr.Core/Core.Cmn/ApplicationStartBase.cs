@@ -16,7 +16,7 @@ namespace Core.Cmn
     {
         WebClientModuleManagement = 1000,
         CreateInstanceDIFactory = 2000,
-        TraceViewerService = 3000,
+        TraceWriterService = 3000,
         LogServiceBase = 4000,
         SetDefaultCulture = 5000,
         CreateRepositoryCacheConfig = 6000,

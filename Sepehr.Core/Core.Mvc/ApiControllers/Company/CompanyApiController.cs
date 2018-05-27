@@ -14,12 +14,12 @@ using Kendo.Mvc.UI;
 using Core.Mvc.Controller;
 using Core.Service;
 using Core.Entity;
+using System.Web.Http.Description;
 
 namespace Core.Mvc.ApiControllers
 {
-    /// <summary>
-
-
+    // IgnoreApi baraye inke felan toye swagger nayad ta badan in controller ro barresi konim o age niaz bod toye document swagger biad
+    [ApiExplorerSettings(IgnoreApi = true)]
     public class CompanyApiController : CrudApiControllerBase<Company, CompanyViewModel, IServiceBase<Company>>
     {
         //

@@ -22,7 +22,6 @@ namespace Core.Cmn.Extensions
         }
         /// <summary>
         /// in method character haye numebre farsi mesle ٠١٢٣٤٥٦٧٨٩ ro tabdil mikone ke 0123456789
-        /// http://stackoverflow.com/questions/5879437/how-to-convert-arabic-number-to-int
         /// </summary>
         /// <param name="input"></param>
         /// <returns></returns>
@@ -311,7 +310,7 @@ namespace Core.Cmn.Extensions
                 //eLog.UserId = "DateExt";
                 //eLog.CustomMessage = "parse " + persianDate + "ShamsiToMiladi" + x;
                 //_logService.Handle(eLog);
-                _logService.Handle(ex, customMessage:"parse " + persianDate + "ShamsiToMiladi", source:"DateExt");
+                _logService.Handle(ex, customMessage: "parse " + persianDate + "ShamsiToMiladi", source: "DateExt");
 
             }
             return DateTime.Now;
@@ -477,5 +476,18 @@ namespace Core.Cmn.Extensions
         {
             return System.Text.RegularExpressions.Regex.Replace(value, @"^[\s,]+|[\s,]+$", "");
         }
+        public static string IgnoreInvalidCharactors(this string text)
+        {
+           string invalidChars = @"[^\x09\x0A\x0D\x20-\xD7FF\xE000-\xFFFD\x10000-x10FFFF]";
+          var result = Regex.Replace(text, invalidChars, "").Replace("\u0010", "");
+            if(result != text)
+            {
+
+            }
+            return result;
+
+        }
+
+
     }
 }

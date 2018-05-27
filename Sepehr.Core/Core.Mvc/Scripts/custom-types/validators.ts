@@ -1,13 +1,17 @@
 ﻿/// <reference path="../typings/jquery/jquery.d.ts" />
 interface IValidator {
     //message: string;
-    //widgetValidator: kendo.ui.Validator;
     Validate: Function;
+    model: any;
+    element: JQuery;
+    message: string;
+
 }
 
 class ValidatorBase implements IValidator {
-    public message: string = "ورود اطلاعات الزامی است";
+    public message: string = "";
     public element: JQuery;
+    model: any;
 
     public Validate(element): boolean {
 
@@ -15,52 +19,48 @@ class ValidatorBase implements IValidator {
     }
 }
 
-class RequiredValidator extends ValidatorBase {
-    //private _message: string;
+class RequiredValidator implements IValidator {
+    message: string;
+    element: JQuery;
+    model: any;
 
-    //get message(): string {
-    //    return this._message;
-    //}
-    //set message(val: string) {
-    //    this._message = val;
-    //}
-    //public message: string = "";
-    public element: JQuery;
-    constructor(element: JQuery, message: string) {
-        super();
-        this.element = element.addClass("required-validation");
-        //this.message = message;
-
+    constructor() {
+        this.message = "ورود اطلاعات الزامی است";
+        this.element.addClass("required-validation");
+        return this;
     }
+    public Validate(): boolean {
 
-    public Validate(element): boolean {
-        
-        var text = element.val(),
+        var text = this.element.val(),
             result = false;
 
-        if (text && text.trim() != "") { result = true; }
+        if (text && text.trim() != "") {
+            result = true;
+        }
 
         return result;
 
     }
 }
 
-class MaxLengthValidator extends ValidatorBase {
-   
+class MaxLengthValidator implements IValidator {
+    message: string;
+    element: JQuery;
+    model: any;
     len: number;
-    constructor(len: number, message: string) {
-        super();
-        this.message = message;
-        this.len = len;
-       
+    constructor() {
+
+        this.message = "طول رشته مجاز نیست";
     }
 
-    Validate(element): boolean {
-        
-        var text = element.val(),
+    Validate(): boolean {
+
+        var text = this.element.val(),
             result = false;
 
-        if (text.length < this.len) { result = true; }
+        if (text.length < this.len) {
+            result = true;
+        }
 
         return result;
 

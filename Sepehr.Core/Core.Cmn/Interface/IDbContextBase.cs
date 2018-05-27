@@ -66,15 +66,15 @@ namespace Core.Cmn
     {
         IDatabase Database { get; }
         IDbContextConfigurationBase Configuration { get; }
-        IDbSetBase<T> Set<T>() where T : EntityBase<T>, new();
-        // DbSetBase<T> Set<T>() where T : EntityBase<T>, new();
+        IDbSetBase<T> Set<T>() where T : ObjectBase , new();
+        // DbSetBase<T> Set<T>() where T : ObjectBase , new();
         ///remark:DbSet Must be Implemented.
         //DbSet<T> Set<T>() where T : class;
 
         int SaveChanges();
         //DbChangeTracker ChangeTracker;
         //IEnumerable<DbEntityValidationResult> GetValidationErrors();
-        void SetContextState<T>(EntityBase<T> entity, EntityState entityState) where T : EntityBase<T>, new();
+        void SetContextState<T>(T entity, EntityState entityState) where T : ObjectBase , new();
         // DbEntityEntry<TEntity> Entry<TEntity>(TEntity entity) where TEntity : class;
         bool DisableExceptionLogger { get; set; }
         IDbChangeTrackerBase ChangeTracker { get; }

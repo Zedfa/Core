@@ -11,7 +11,7 @@ namespace Core.Entity
 {
     [Serializable]
     [DataContract(Name = "ViewModelBase")]
-    public abstract class ViewModelBase<T> : ModelBase<T>, IViewModelBase<T>, IViewModel where T : IEntity, new()
+    public abstract class ViewModelBase<T> : ModelBase<T>, IViewModelBase<T>, IViewModel where T : ObjectBase, new()
     {
 
         public ViewModelBase()
@@ -29,7 +29,7 @@ namespace Core.Entity
         }
 
         public static ViewModel GetViewModel<ViewModel>(T model)
-            //where T : EntityBase<T>, new()
+            //where T : ObjectBase , new()
             where ViewModel : ViewModelBase<T>, new()
         {
             var culture = System.Threading.Thread.CurrentThread.CurrentUICulture;
@@ -42,7 +42,7 @@ namespace Core.Entity
         }
 
         public static ViewModel GetViewModel<ViewModel>(T model, CultureInfo cultureInfo)
-            //where T : EntityBase<T>, new()
+            //where T : ObjectBase , new()
       where ViewModel : ViewModelBase<T>, new()
         {
             var vm = new ViewModel()
@@ -54,7 +54,7 @@ namespace Core.Entity
         }
 
         public static IEnumerable<ViewModel> GetViewModels<ViewModel>(IEnumerable<T> models)
-            //where T : EntityBase<T>, new()
+            //where T : ObjectBase , new()
 
             where ViewModel : ViewModelBase<T>, new()
         {
@@ -76,7 +76,7 @@ namespace Core.Entity
 
 
         public static IEnumerable<ViewModel> GetViewModels<ViewModel>(IEnumerable<T> models, CultureInfo cultureInfo)
-            //where T : EntityBase<T>, new()
+            //where T : ObjectBase , new()
             where ViewModel : ViewModelBase<T>, new()
         {
             if (models != null)

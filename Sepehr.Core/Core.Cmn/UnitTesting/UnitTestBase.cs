@@ -280,7 +280,7 @@ namespace Core.Cmn.UnitTesting
             return CULTURES[_rand.Next() % CULTURES.Length];
         }
 
-        protected TEntity BuildSampleEntity<TEntity>() where TEntity : EntityBase<TEntity>, new()
+        protected TEntity BuildSampleEntity<TEntity>() where TEntity : ObjectBase, new()
         {
             TEntity entity = new TEntity();
             PropertyInfo[] properties = typeof(TEntity).GetProperties(BindingFlags.Public | BindingFlags.Instance | BindingFlags.DeclaredOnly);

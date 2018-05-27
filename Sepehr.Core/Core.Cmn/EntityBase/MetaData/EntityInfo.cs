@@ -231,14 +231,14 @@ namespace Core.Cmn
             }
         }
 
-        ConcurrentBag<ConcurrentBag<_EntityBase>> _allNavigationPropertyDataList;
-        internal ConcurrentBag<ConcurrentBag<_EntityBase>> AllNavigationPropertyDataList
+        ConcurrentBag<ConcurrentBag<ObjectBase>> _allNavigationPropertyDataList;
+        internal ConcurrentBag<ConcurrentBag<ObjectBase>> AllNavigationPropertyDataList
         {
             get
             {
                 if (_allNavigationPropertyDataList == null)
                 {
-                    _allNavigationPropertyDataList = new ConcurrentBag<ConcurrentBag<_EntityBase>>();
+                    _allNavigationPropertyDataList = new ConcurrentBag<ConcurrentBag<ObjectBase>>();
                 }
                 return _allNavigationPropertyDataList;
             }
@@ -290,7 +290,7 @@ namespace Core.Cmn
         public static void BuildEntityInfoDic(IList<Type> allTypes)
         {
             EntityInfo.EntityInfoDic = new Dictionary<Type, EntityInfo>();
-            Type entityBaseType = typeof(_EntityBase);
+            Type entityBaseType = typeof(ObjectBase);
             List<Type> allTypeOfEntities = allTypes.Where(type => entityBaseType.IsAssignableFrom(type)).ToList();
             allTypeOfEntities.ForEach(type =>
             {

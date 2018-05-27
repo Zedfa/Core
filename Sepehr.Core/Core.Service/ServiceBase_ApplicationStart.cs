@@ -1,5 +1,6 @@
 ﻿using Core.Cmn;
 using Core.Cmn.Cache;
+using Core.Cmn.Interface;
 using System;
 using System.Globalization;
 using System.Text;
@@ -66,19 +67,37 @@ namespace Core.Service
     {
         public override void OnApplicationStart()
         {
-            Core.Cmn.AppBase.TraceViewer = ServiceBase.DependencyInjectionFactory.CreateInjectionInstance<ITraceViewer>();
-           // var eventListener = new TraceViewerEventListener();
+
+            Core.Cmn.AppBase.TraceWriter = ServiceBase.DependencyInjectionFactory.CreateInjectionInstance<ITraceWriter>();
+
+            ////long traceSize = 0;
+            ////bool traceIsOn = false;
+            ////string traceName = string.Empty;
+            ////if (ConfigHelper.TryGetConfigValue<bool>( Cmn.GeneralConstant.EnableTrace, out traceIsOn) &&
+            ////    ConfigHelper.TryGetConfigValue<string>(Cmn.GeneralConstant.TraceName, out traceName) &&
+            ////    ConfigHelper.TryGetConfigValue<long>(Cmn.GeneralConstant.TraceSize, out traceSize))
+            ////{
+
+
+            ////    Core.Cmn.AppBase.SharedMemoryConfig.Open();
+
+            ////    Core.Cmn.AppBase.Trace.Open();
+            ////}
+            //// var eventListener = new TraceViewerEventListener();
+
+            //Core.Cmn.AppBase.TraceWriter = ServiceBase.DependencyInjectionFactory.CreateInjectionInstance<ITraceWriterService>();
+
         }
         public override Enum ExecutionPriorityOnApplicationStart
         {
             get
             {
-                return Core.Cmn.ExecutionPriorityOnApplicationStart.TraceViewerService;
+                return Core.Cmn.ExecutionPriorityOnApplicationStart.TraceWriterService;
             }
         }
     }
 }
 
 
-   
+
 

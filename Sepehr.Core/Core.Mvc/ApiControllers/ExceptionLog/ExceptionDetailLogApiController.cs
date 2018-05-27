@@ -10,9 +10,12 @@ using System.Net;
 using System.Net.Http;
 using System.Web.Http;
 using Core.Mvc.Extensions.FilterRelated;
+using System.Web.Http.Description;
 
 namespace Core.Mvc.ApiControllers.ExceptionLog
 {
+    // IgnoreApi baraye inke felan toye swagger nayad ta badan in controller ro barresi konim o age niaz bod toye document swagger biad
+    [ApiExplorerSettings(IgnoreApi = true)]
     public class ExceptionDetailLogApiController : Core.Mvc.Controller.ApiControllerBase
     {
         public HttpResponseMessage GetAllExceptionDetailLogs([System.Web.Http.ModelBinding.ModelBinder(typeof(Core.Mvc.ModelBinders.DataSourceRequestModelBinder))]DataSourceRequest request, int? ID)

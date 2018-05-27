@@ -102,7 +102,7 @@ namespace Core.UnitTesting.Mock
         {
         }
 
-        public DbEntityEntryBase<TEntity> Entry<TEntity>(TEntity entity) where TEntity : _EntityBase
+        public DbEntityEntryBase<TEntity> Entry<TEntity>(TEntity entity) where TEntity : ObjectBase
         {
             return null;
         }
@@ -139,7 +139,7 @@ namespace Core.UnitTesting.Mock
             return count;
         }
 
-        public IDbSetBase<TEntity> Set<TEntity>() where TEntity : EntityBase<TEntity>, new()
+        public IDbSetBase<TEntity> Set<TEntity>() where TEntity : ObjectBase, new()
         {
             // check core entities
             IDbSetBase<TEntity> result = GetEntitySetCore<TEntity>();
@@ -153,7 +153,7 @@ namespace Core.UnitTesting.Mock
             return result;
         }
 
-        public void SetContextState<T>(EntityBase<T> entity, EntityState entityState) where T : EntityBase<T>, new()
+        public void SetContextState<T>(T entity, EntityState entityState) where T : ObjectBase , new()
         {
             _stateMap[entity] = entityState;
         }
@@ -242,7 +242,7 @@ namespace Core.UnitTesting.Mock
             return found;
         }
 
-        protected virtual IDbSetBase<TEntity> GetEntitySetProject<TEntity>() where TEntity : EntityBase<TEntity>, new()
+        protected virtual IDbSetBase<TEntity> GetEntitySetProject<TEntity>() where TEntity : ObjectBase, new()
         {
             return EntityUnitTestHelperBase<TEntity>.GetMockData();
             // will be overridden in child classes
@@ -313,7 +313,7 @@ namespace Core.UnitTesting.Mock
             }
         }
 
-        private IDbSetBase<TEntity> GetEntitySetCore<TEntity>() where TEntity : EntityBase<TEntity>, new()
+        private IDbSetBase<TEntity> GetEntitySetCore<TEntity>() where TEntity : ObjectBase, new()
         {
             IDbSetBase<TEntity> result = null;
 

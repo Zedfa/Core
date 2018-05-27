@@ -1,11 +1,8 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Drawing;
 using System.Drawing.Imaging;
+using System.IO;
+using System.Linq;
 
 namespace Core.Cmn
 {
@@ -29,7 +26,7 @@ namespace Core.Cmn
         /// <returns>byte array</returns>
         public static byte[] ImageToByteArray(string imagefilePath)
         {
-            Image image =  Image.FromFile(imagefilePath);
+            Image image = Image.FromFile(imagefilePath);
             byte[] imageByte = ImageToByteArraybyMemoryStream(image);
             return imageByte;
         }
@@ -51,12 +48,11 @@ namespace Core.Cmn
             }
         }
 
-
         /// <summary>
         /// Converts an image,which is in form of a byte array,to System.Drawing.Image
         /// </summary>
         /// <param name="imageByte">Image file byte[] representation</param>
-        public static void ConvertByteArrayToImageSaveItToFileSystem(byte[] imageByte , string targetFileSystemSavingPath)
+        public static void ConvertByteArrayToImageSaveItToFileSystem(byte[] imageByte, string targetFileSystemSavingPath)
         {
             using (var ms = new MemoryStream(imageByte))
             {
@@ -65,9 +61,38 @@ namespace Core.Cmn
             }
         }
 
+        public static string GetImageMimeType(byte[] imageBinary)
+        {
+            System.Drawing.Image image = ImageHelper.BinaryToImage((byte[])imageBinary);
+
+            if (image.RawFormat.Equals(ImageFormat.Bmp))
+            {
+                return "image/bmp";
+            }
+            else if (image.RawFormat.Equals(ImageFormat.Gif))
+            {
+                return "image/gif";
+            }
+            else if (image.RawFormat.Equals(ImageFormat.Jpeg))
+            {
+                return "image/jpeg";
+            }
+            else if (image.RawFormat.Equals(ImageFormat.Png))
+            {
+                return "image/png";
+            }
+            else if (image.RawFormat.Equals(ImageFormat.Tiff))
+            {
+                return "image/tiff";
+            }
+            else
+            {
+                throw new Exception("image mimeType is not acceptable.error accoured in imagehelper/GetImageMimeType");
+            }
+        }
 
         /// <summary>
-        /// 
+        ///
         /// </summary>
         /// <param name="image"></param>
         /// <returns></returns>
@@ -96,10 +121,9 @@ namespace Core.Cmn
                 case "tiff":
                 case "gif":
                     return true;
-                   
+
                 default:
                     return false;
-                   
             }
         }
 
@@ -150,7 +174,7 @@ namespace Core.Cmn
                 int lnNewWidth = 0;
                 int lnNewHeight = 0;
 
-                //*** If the image is smaller than a thumbnail just return it 
+                //*** If the image is smaller than a thumbnail just return it
                 if (loBMP.Width < lnWidth && loBMP.Height < lnHeight)
                 {
                     return loBMP;
@@ -177,7 +201,7 @@ namespace Core.Cmn
                 g.DrawImage(loBMP, 0, 0, lnNewWidth, lnNewHeight);
                 loBMP.Dispose();
             }
-            catch 
+            catch
             {
                 //throw (new Exception(ex.Message + Environment.NewLine + lcFilename));
             }
@@ -209,7 +233,7 @@ namespace Core.Cmn
                     int lnNewWidth = 0;
                     int lnNewHeight = 0;
 
-                    //*** If the image is smaller than a thumbnail just return it 
+                    //*** If the image is smaller than a thumbnail just return it
                     if (loBMP.Width < lnWidth && loBMP.Height < lnHeight)
                     {
                         return loBMP;
@@ -248,6 +272,5 @@ namespace Core.Cmn
                 throw (new Exception("Image does not exists ! " + Environment.NewLine + lcFilename));
             }
         }
-
     }
 }

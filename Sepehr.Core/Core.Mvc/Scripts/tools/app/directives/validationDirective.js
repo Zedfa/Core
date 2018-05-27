@@ -5,22 +5,25 @@ validationDirective.addDirective("validations", ["$compile", function ($compile)
             replace: true,
             link: function (scope, element, attrs) {
                 if (scope.$eval(attrs.validations)) {
-                    var rules = scope.$eval(attrs.validations), widgetValidator = element.kendoValidator().data("kendoValidator"), validateFuncArray = [], ruleName = '';
+                    var rules = scope.$eval(attrs.validations), widgetValidator = element.kendoValidator().data("kendoValidator"), validateFuncArray = [], thisArgs = { model: scope, element: element, message: "" }, ruleName = '';
                     $.each(rules, function (index, item) {
                         var validationClass, validatorFunc = window[item.type];
+                        thisArgs.message = item.message;
                         if (item.params) {
                             var variablesList = new Array();
-                            variablesList.push(null),
-                                variablesList.push(element),
-                                variablesList.push(item.message);
                             $.each(item.params, function (i, paramList) {
-                                variablesList.push(scope.$eval(paramList) ? scope.$eval(paramList) : paramList);
+                                try {
+                                    variablesList.push(scope.$eval(paramList));
+                                }
+                                catch (ex) {
+                                    console.log("object " + paramList.split("\'")[1] + "doesn't exist in the scope");
+                                }
                             });
-                            validationClass = new (Function.prototype.bind.apply(validatorFunc, variablesList));
                         }
-                        else {
-                            validationClass = new (Function.prototype.bind.apply(validatorFunc, [null, element, item.message]));
-                        }
+                        validatorFunc.prototype.message = thisArgs.message,
+                            validatorFunc.prototype.model = thisArgs.model,
+                            validatorFunc.prototype.element = thisArgs.element;
+                        validationClass = new validatorFunc();
                         validateFuncArray.push({ name: item.type, instance: validationClass, variables: item.params });
                         ruleName += item.type;
                     });
@@ -28,12 +31,18 @@ validationDirective.addDirective("validations", ["$compile", function ($compile)
                         var result = true;
                         $.each(validateFuncArray, function (index, item) {
                             var args = new Array();
+                            var thisArgs = { model: scope, element: el, message: item.instance.message };
                             $.each(item.variables, function (i, variable) {
-                                args.push(scope.$eval(variable) ? scope.$eval(variable) : variable);
+                                try {
+                                    args.push(scope.$eval(variable));
+                                }
+                                catch (ex) {
+                                    console.log("object " + variable.split("\'")[1] + "doesn't exist in the scope");
+                                }
                             });
-                            result = result && item.instance.Validate(el, args);
+                            result = result && item.instance.Validate.apply(thisArgs, args);
                             if (!result) {
-                                widgetValidator.options.messages[ruleName] = item.instance.message;
+                                widgetValidator.options.messages[ruleName] = thisArgs.message;
                                 return result;
                             }
                         });

@@ -189,7 +189,7 @@ namespace Core.Mvc.ViewModel
             {
                 if (_lookupInfo == null)
                 {
-                    _lookupInfo = ViewInfo.DeepCopy<GridInfo>();
+                    _lookupInfo = ViewInfo.DeepCopy();
                     _lookupInfo.Features.ReadOnly = true;
                     _lookupInfo.ColumnsInfo.Remove(
                         _lookupInfo.ColumnsInfo.FirstOrDefault(column => column.Field == "CompanyPhone"));

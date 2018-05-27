@@ -1,4 +1,5 @@
-﻿var userRoleControllerModule = new SepehrModule.MainModule("userRoleControllerModule", []);
+﻿/// <reference path="../../../scripts/tools/filterdatasource.ts" />
+var userRoleControllerModule = new SepehrModule.MainModule("userRoleControllerModule", []);
 
 
 userRoleControllerModule.addController('userRoleController', ['$scope', ($scope) => {

@@ -34,28 +34,49 @@ namespace Core.Mvc.Controllers.Report
         public ActionResult Index(string serviceName, string Paramas)
         {
             IReportService iReportService = ReportConfig.GetReportServiceByName(serviceName);
-            IReportRequest requestParams = Newtonsoft.Json.JsonConvert.DeserializeObject(Paramas, iReportService.RequetType) as IReportRequest;
+            IReportRequest reportRequest = Newtonsoft.Json.JsonConvert.DeserializeObject(Paramas, iReportService.RequetType) as IReportRequest;
+
             byte[] reportData = new Core.Report.ReportManagement().GetReportPDF(
-                requestParams,
+                reportRequest,
                 iReportService,
-                System.Web.Hosting.HostingEnvironment.MapPath("~")
+                System.Web.Hosting.HostingEnvironment.MapPath("~"),
+                GetCurrentUserId()
                 );
 
-            return GetReportFileContent(reportData, requestParams);
+            return GetReportFileContent(reportData, reportRequest);
         }
 
         [HttpGet]
         public ActionResult GetExcel(string serviceName, string Paramas)
         {
             IReportService iReportService = ReportConfig.GetReportServiceByName(serviceName);
-            IReportRequest requestParams = Newtonsoft.Json.JsonConvert.DeserializeObject(Paramas, iReportService.RequetType) as IReportRequest;
+            IReportRequest reportRequest = Newtonsoft.Json.JsonConvert.DeserializeObject(Paramas, iReportService.RequetType) as IReportRequest;
+
             byte[] reportData = new Core.Report.ReportManagement().GetReportExcel(
-                requestParams,
+                reportRequest,
                 iReportService,
-                System.Web.Hosting.HostingEnvironment.MapPath("~")
+                System.Web.Hosting.HostingEnvironment.MapPath("~"),
+                GetCurrentUserId()
                 );
 
-            return GetReportFileContent(reportData, requestParams);
+            return GetReportFileContent(reportData, reportRequest);
+        }
+
+        private int GetCurrentUserId()
+        {
+            /// in session felan faghat to narmafzare sepehr darim
+            if (
+                System.Web.HttpContext.Current != null
+                &&
+                System.Web.HttpContext.Current.Session["AgencyUser_ID"] != null
+                )
+            {
+                return Convert.ToInt32(System.Web.HttpContext.Current.Session["AgencyUser_ID"]);
+            }
+            else
+            {
+                return 0;
+            }
         }
     }
 }

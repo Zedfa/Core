@@ -4,6 +4,7 @@ using Core.Mvc.ViewModels;
 using System;
 using Core.Mvc.Helpers.CustomWrapper.DataSource;
 using Core.Mvc.Helpers.CustomWrapper.DataModel;
+using Core.Cmn.Extensions;
 
 namespace Core.Mvc.Helpers.CoreKendoGrid.Settings
 {
@@ -68,7 +69,11 @@ namespace Core.Mvc.Helpers.CoreKendoGrid.Settings
         {
             return _cultureInfo;
         }
+        public GridInfo DeepCopy() {
+           return ObjectExtention.DeepCopy<GridInfo>(this, true);
+        }
         //private static string _gridID;
         //public static string GridID { get { return _gridID; } set { lock (value) { _gridID = value; } } }
+        
     }
 }

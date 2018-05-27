@@ -394,7 +394,7 @@ namespace Core.Mvc.ViewModel
             {
                 if (_lookupAllUser == null)
                 {
-                    _lookupAllUser = ViewInfo.DeepCopy<GridInfo>();
+                    _lookupAllUser = ViewInfo.DeepCopy();
                     _lookupAllUser.Features.ReadOnly = true;
                     _lookupAllUser.DataSource.CrudCr.Read.Url = "api/SuppliersUsersApi/GetEntities";
 

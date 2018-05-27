@@ -10,11 +10,24 @@ namespace Core.Cmn.Cache
     [DataContract(Name = "CacheInfo")]
     public class CacheInfo
     {
+        public static CacheInfo GetCacheInfo(Delegate func, out string cacheKey)
+        {
+            cacheKey = func.Method.GetHashCode().ToString();
+            CacheInfo cacheInfo;
+            if (CacheConfig.CacheInfoDic.TryGetValue(cacheKey, out cacheInfo))
+            {
+                return cacheInfo;
+            }
+            else
+            {
+                throw new CacheInfoNotFoundException(func);
+            }
+        }
         public CacheInfo()
         {
             MaxTimeStamesDic = new ConcurrentDictionary<string, ulong>();
             WhereClauseForFetchingOnlyChangedDataFromDB_Dic = new ConcurrentDictionary<string, string>();
-            InfoAndEntityListForFillingNavigationPropertyDic = new ConcurrentDictionary<InfoForFillingNavigationProperty, ConcurrentBag<_EntityBase>>();
+            InfoAndEntityListForFillingNavigationPropertyDic = new ConcurrentDictionary<InfoForFillingNavigationProperty, ConcurrentBag<ObjectBase>>();
             NotYetGetCacheData = true;
         }
 
@@ -158,8 +171,8 @@ namespace Core.Cmn.Cache
 
         public int CountOfWaitingThreads { get; set; }
 
-        [IgnoreDataMember]       
-        public ConcurrentDictionary<InfoForFillingNavigationProperty, ConcurrentBag<_EntityBase>> InfoAndEntityListForFillingNavigationPropertyDic { get; set; }
+        [IgnoreDataMember]
+        public ConcurrentDictionary<InfoForFillingNavigationProperty, ConcurrentBag<ObjectBase>> InfoAndEntityListForFillingNavigationPropertyDic { get; set; }
 
         [DataMember]
         public bool DisableCache { get; set; }
@@ -188,17 +201,17 @@ namespace Core.Cmn.Cache
 
         public event EventHandler<CacheChangeEventArgs> OnDeleteEntities;
 
-        public void CallOnAddEntities(List<_EntityBase> changedEntities)
+        public void CallOnAddEntities(List<ObjectBase> changedEntities)
         {
             OnAddEntities?.Invoke(this, new CacheChangeEventArgs() { ChangedEntities = changedEntities });
         }
 
-        public void CallOnUpdateEntities(List<_EntityBase> changedEntities)
+        public void CallOnUpdateEntities(List<ObjectBase> changedEntities)
         {
             OnUpdateEntities?.Invoke(this, new CacheChangeEventArgs() { ChangedEntities = changedEntities });
         }
 
-        public void CallOnDeleteEntities(List<_EntityBase> changedEntities)
+        public void CallOnDeleteEntities(List<ObjectBase> changedEntities)
         {
             OnDeleteEntities?.Invoke(this, new CacheChangeEventArgs() { ChangedEntities = changedEntities });
         }
@@ -209,17 +222,17 @@ namespace Core.Cmn.Cache
 
         public event EventHandler<CacheChangeEventArgs> AfterDeleteEntities;
 
-        public void CallAfterAddEntities(List<_EntityBase> changedEntities)
+        public void CallAfterAddEntities(List<ObjectBase> changedEntities)
         {
             AfterAddEntities?.Invoke(this, new CacheChangeEventArgs() { ChangedEntities = changedEntities });
         }
 
-        public void CallAfterUpdateEntities(List<_EntityBase> changedEntities)
+        public void CallAfterUpdateEntities(List<ObjectBase> changedEntities)
         {
             AfterUpdateEntities?.Invoke(this, new CacheChangeEventArgs() { ChangedEntities = changedEntities });
         }
 
-        public void CallAfterDeleteEntities(List<_EntityBase> changedEntities)
+        public void CallAfterDeleteEntities(List<ObjectBase> changedEntities)
         {
             AfterDeleteEntities?.Invoke(this, new CacheChangeEventArgs() { ChangedEntities = changedEntities });
         }
@@ -227,7 +240,7 @@ namespace Core.Cmn.Cache
 
     public class CacheChangeEventArgs : EventArgs
     {
-        public List<_EntityBase> ChangedEntities { get; set; }
+        public List<ObjectBase> ChangedEntities { get; set; }
     }
 
     public enum CacheRefreshingKind

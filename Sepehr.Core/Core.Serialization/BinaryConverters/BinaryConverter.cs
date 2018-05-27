@@ -44,17 +44,32 @@ namespace Core.Serialization.BinaryConverters
                                         var dynamicGivenType = currentBinaryConverter.CurrentType;
                                         referenceIds[currentReferenceId] = currentBinaryConverter.CreateInstance(reader, dynamicGivenType, context);
                                         obj = currentBinaryConverter.DeserializeBaseCaller(reader, dynamicGivenType, context);
+                                        var currentType = obj.GetType();
+                                        if (currentType.IsValueType || currentType.IsSimple())
+                                        {
+                                            referenceIds[currentReferenceId] = obj;
+                                        }
                                     }
                                     else
                                     {
                                         referenceIds[currentReferenceId] = CreateInstance(reader, objectType, context);
                                         obj = DeserializeBase(reader, objectType, context);
+                                        var currentType = obj.GetType();
+                                        if (currentType.IsValueType || currentType.IsSimple())
+                                        {
+                                            referenceIds[currentReferenceId] = obj;
+                                        }
                                     }
                                 }
                                 else
                                 {
                                     referenceIds[currentReferenceId] = CreateInstance(reader, objectType, context);
                                     obj = DeserializeBase(reader, objectType, context);
+                                    var currentType = obj.GetType();
+                                    if (currentType.IsValueType || currentType.IsSimple())
+                                    {
+                                        referenceIds[currentReferenceId] = obj;
+                                    }
                                 }
                             }
                         }
@@ -71,17 +86,32 @@ namespace Core.Serialization.BinaryConverters
                                     var dynamicGivenType = currentBinaryConverter.CurrentType;
                                     referenceIds[currentReferenceId] = currentBinaryConverter.CreateInstance(reader, objectType, context);
                                     obj = currentBinaryConverter.DeserializeBaseCaller(reader, dynamicGivenType, context);
+                                    var currentType = obj.GetType();
+                                    if (currentType.IsValueType || currentType.IsSimple())
+                                    {
+                                        referenceIds[currentReferenceId] = obj;
+                                    }
                                 }
                                 else
                                 {
                                     referenceIds[currentReferenceId] = CreateInstance(reader, objectType, context);
                                     obj = DeserializeBase(reader, objectType, context);
+                                    var currentType = obj.GetType();
+                                    if (currentType.IsValueType || currentType.IsSimple())
+                                    {
+                                        referenceIds[currentReferenceId] = obj;
+                                    }
                                 }
                             }
                             else
                             {
                                 referenceIds[currentReferenceId] = CreateInstance(reader, objectType, context);
                                 obj = DeserializeBase(reader, objectType, context);
+                                var currentType = obj.GetType();
+                                if (currentType.IsValueType || currentType.IsSimple())
+                                {
+                                    referenceIds[currentReferenceId] = obj;
+                                }
                             }
                         }
                     }

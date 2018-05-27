@@ -6,8 +6,7 @@ using System.Net;
 using System.Net.Http;
 using Kendo.Mvc.Extensions;
 using Core.Service;
-
-
+using System.Web.Http.Description;
 
 namespace Core.Mvc.ApiControllers
 {
@@ -15,7 +14,8 @@ namespace Core.Mvc.ApiControllers
     ///تعریف ساختار سازمانی در این بخش انجام می شود 
     ///Created on Date :
 
-
+    // IgnoreApi baraye inke felan toye swagger nayad ta badan in controller ro barresi konim o age niaz bod toye document swagger biad
+    [ApiExplorerSettings(IgnoreApi = true)]
     public class CompanyChartApiController :Core.Mvc.Controller.ApiControllerBase //CrudApiControllerBase<CompanyChart, CompanyChartViewModel, ICompanyChartService>
     {
         private ICompanyChartService _companyChartService;

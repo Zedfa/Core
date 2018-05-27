@@ -1,31 +1,20 @@
-﻿using Core.Cmn;
-using Core.Service;
+﻿using Core.Service;
 using System;
-using System.Collections.Generic;
 using System.Collections.Specialized;
-using System.Linq;
-using System.Net.Http;
-using System.Security.Cryptography;
-using System.Web;
 using System.Web.Http.Controllers;
-using System.Web.Mvc;
-
-
 
 namespace Core.Mvc.Infrastructure
 {
-
     [AttributeUsage(AttributeTargets.Class | AttributeTargets.Method, AllowMultiple = false, Inherited = true)]
-
     public class AuthorizationBaseApi : _AuthorizationBaseApi
     {
         protected override bool _IsAuthorized(HttpActionContext actionContext)
         {
             return this.IsAuthorized(actionContext);
         }
+
         protected new virtual bool IsAuthorized(HttpActionContext actionContext)
         {
-
             string controller = actionContext.ActionDescriptor.ControllerDescriptor.ControllerName;
             string action = actionContext.ActionDescriptor.ActionName;
             string query = actionContext.Request.RequestUri.Query;
@@ -34,12 +23,11 @@ namespace Core.Mvc.Infrastructure
             var viewElementService = ServiceBase.DependencyInjectionFactory.CreateInjectionInstance<IViewElementService>();
 
             var requestedUrl = string.Format("{0}/{1}", controller, action);
-
+            return true;
             if (queryString.Count > 0)
             {
                 var queryParams = MakeUrlParameters(queryString);
                 requestedUrl = string.Format("{0}?{1}", requestedUrl, queryParams);
-
             }
 
             if (viewElementService.HasAnonymousAccess(requestedUrl))
@@ -59,7 +47,6 @@ namespace Core.Mvc.Infrastructure
             //       var passCode = Security.GetMd5Hash(MD5.Create(), string.Format("{0}{1}", encodedUserName, foundUserProfile.Password));
             //       if (CustomMembershipProvider.ValidatePassCode(passCode))
             //        {
-
             //           return viewElementService.RoleHasAccess(foundUserProfile.Id, requestedUrl);
 
             //        }
@@ -67,7 +54,7 @@ namespace Core.Mvc.Infrastructure
             //}
             if (userId.HasValue && CustomMembershipProvider.IsCurrentUserAuthenticate())
             {
-                return viewElementService.RoleHasAccess(userId.Value, requestedUrl);
+                return viewElementService.HasRoleAccess(userId.Value, requestedUrl);
             }
 
             return false;
@@ -82,7 +69,6 @@ namespace Core.Mvc.Infrastructure
                 queryString.Remove("_");
             }
 
-
             if (queryString.HasKeys())
             {
                 foreach (var qs in queryString)
@@ -91,15 +77,10 @@ namespace Core.Mvc.Infrastructure
                     {
                         urlParam = qs + "=" + queryString[qs.ToString()] + "&";
                     }
-
-
                 }
                 queryParams = urlParam.Remove(urlParam.Length - 1, 1);
             }
             return queryParams;
         }
-
     }
-
-
 }

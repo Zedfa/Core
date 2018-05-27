@@ -13,7 +13,7 @@ using System.Linq;
 namespace Core.UnitTesting.Service
 {
     public abstract class ServiceUnitTestBase<TService, TRepository, TEntity> : UnitTestBase
-        where TEntity : EntityBase<TEntity>, new()
+        where TEntity : ObjectBase, new()
         where TRepository : IRepositoryBase<TEntity>
         where TService : IServiceBase<TEntity>
     {

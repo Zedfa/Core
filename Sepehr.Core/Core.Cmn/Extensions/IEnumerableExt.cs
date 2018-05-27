@@ -19,5 +19,10 @@ namespace Core.Cmn.Extensions
                 }
             }
         }
+        public static IEnumerable<TSource> TakeLast<TSource>(this IEnumerable<TSource> source, int count)
+        {
+            return source.Skip(Math.Max(0, source.Count() - count));
+
+        }
     }
 }

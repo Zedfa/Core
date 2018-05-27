@@ -97,7 +97,6 @@
     <Compile Include="Cmn\EntityInfoTests.cs" />
     <Compile Include="Cmn\StringExtTests.cs" />
     <Compile Include="Cmn\TypeExtTests.cs" />
-    <Compile Include="Cmn\HttpHelperTest.cs" />
     <Compile Include="Cmn\Watch_tests.cs" />
     <Compile Include="Entity\LogUnitTestHelper.cs" />
     <Compile Include="Entity\ExceptionLogUnitTestHelper.cs" />

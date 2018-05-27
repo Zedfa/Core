@@ -1,29 +1,24 @@
 ﻿using Core.Cmn.Attributes;
 using System;
 using Core.Cmn;
-using Microsoft.Diagnostics.Tracing;
 using System.Linq;
-
+using System.Collections.Generic;
+using System.Collections;
+using Core.Cmn.Trace;
+using System.ServiceModel;
 
 namespace Core.Service.Trace
 {
-    [EventSource(Name = "TraceViewerService")]
+   
     [Injectable(InterfaceType = typeof(ITraceViewer), DomainName = "Core", LifeTime = LifetimeManagement.ContainerControlledLifetime)]
-    public sealed class TraceViewerService : EventSource, ITraceViewer
+    public sealed class TraceViewerService :  ITraceViewer
     {
-        private static object _justForLock = new object();
         private static int _countOfInstances;
-        private IConstantService _constanService;
-
-        string ITraceViewer.Name
-        {
-            get
-            {
-                return this.Name;
-            }
-
-        }
-
+        private static object _justForLock = new object();
+        
+   
+        private string EndpointUri { get { return ConfigHelper.GetConfigValue<string>(GeneralConstant.TraceServiceUri); } }
+      
         public TraceViewerService()
         {
             lock (_justForLock)
@@ -36,69 +31,253 @@ namespace Core.Service.Trace
                 else
                 {
                     _countOfInstances++;
-                    _constanService = ServiceBase.DependencyInjectionFactory.CreateInjectionInstance<IConstantService>();
-
+                  
                 }
             }
         }
-        [NonEvent]
-        private bool IsTraceEnabled(string traceKey)
+
+
+
+        #region read from wcf service
+      
+        public List<TraceDto> GetTracesViaWCF(string filter)
         {
-            var result = true;
-           // age key be method dade beshe va dar database ham in key vojod dashte bashad , value ra set mikonad(enable ya disable) . dar gheyre in sorat hamishe enable ast;
-            result = !string.IsNullOrEmpty(traceKey) && _constanService.All().Any(constant => constant.Key.Equals(traceKey)) ? _constanService.GetValueByCategory<bool>(traceKey, Core.Cmn.GeneralConstant.TraceConfig) : true;
+            if (string.IsNullOrEmpty(EndpointUri))
+                return null;
+            EndpointAddress endpointAddress = new EndpointAddress(EndpointUri);//("net.tcp://localhost:65000/TraceService");
+            NetTcpBinding binding = new NetTcpBinding();
+            binding.MaxBufferPoolSize = int.MaxValue;
+            binding.MaxReceivedMessageSize = int.MaxValue;
+            binding.MaxBufferSize = int.MaxValue;
+            binding.ReaderQuotas.MaxArrayLength = int.MaxValue;
+            binding.ReaderQuotas.MaxBytesPerRead = int.MaxValue;
+            binding.ReaderQuotas.MaxDepth = int.MaxValue;
+            binding.ReaderQuotas.MaxNameTableCharCount = int.MaxValue;
+            binding.ReaderQuotas.MaxStringContentLength = int.MaxValue;
+            binding.Security.Mode = SecurityMode.None;
+            binding.CloseTimeout = new TimeSpan(0, 2, 0);
+            binding.OpenTimeout = new TimeSpan(0, 2, 0);
+            binding.ReceiveTimeout = new TimeSpan(0, 2, 0);
+            binding.SendTimeout = new TimeSpan(0, 2, 0);
+            binding.Security.Message.ClientCredentialType = MessageCredentialType.None;
+            binding.Security.Transport.ClientCredentialType = TcpClientCredentialType.None;
+
+            List<TraceDto> result = null;
+
+            using (TraceProxyService proxy = new TraceProxyService(binding, endpointAddress))
+            {
+
+                try
+                {
+                    var byteTraceList = proxy.GetTracesViaWCF(filter);
+                    result = Core.Cmn.Extensions.SerializationExtensions.DeSerializeBinaryToObject<List<TraceDto>>(byteTraceList); //Core.Serialization.BinaryConverter.Deserialize<List<Source>>(proxy.GetTracesViaWCF(filter));
+
+                    proxy.Close();
+
+                }
+                catch (FaultException exc)
+                {
+                    if (exc is System.ServiceModel.FaultException<System.ServiceModel.ExceptionDetail>)
+                    {
+
+                        proxy.Abort();
+
+                    }
+                    else
+                    {
+
+                        proxy.Abort();
+
+                    }
+                }
+                catch (Exception ex)
+                {
+                    proxy.Abort();
+                }
+            }
             return result;
         }
 
-
-        [Event(1, Message = "{0}", Level = EventLevel.Error, Channel = EventChannel.Admin)]
-        public void Failure(string message, string traceKey = "")
+        public List<TraceDto> GetTracesByWriterViaWCF(string filter, string writer)
         {
+            if (string.IsNullOrEmpty(EndpointUri))
+                return null;
+            EndpointAddress endpointAddress = new EndpointAddress(EndpointUri);//("net.tcp://localhost:65000/TraceService");
+            NetTcpBinding binding = new NetTcpBinding();
+            binding.MaxBufferPoolSize = int.MaxValue;
+            binding.MaxReceivedMessageSize = int.MaxValue;
+            binding.MaxBufferSize = int.MaxValue;
+            binding.ReaderQuotas.MaxArrayLength = int.MaxValue;
+            binding.ReaderQuotas.MaxBytesPerRead = int.MaxValue;
+            binding.ReaderQuotas.MaxDepth = int.MaxValue;
+            binding.ReaderQuotas.MaxNameTableCharCount = int.MaxValue;
+            binding.ReaderQuotas.MaxStringContentLength = int.MaxValue;
+            binding.Security.Mode = SecurityMode.None;
+            binding.CloseTimeout = new TimeSpan(0, 2, 0);
+            binding.OpenTimeout = new TimeSpan(0, 2, 0);
+            binding.ReceiveTimeout = new TimeSpan(0, 2, 0);
+            binding.SendTimeout = new TimeSpan(0, 2, 0);
+            binding.Security.Message.ClientCredentialType = MessageCredentialType.None;
+            binding.Security.Transport.ClientCredentialType = TcpClientCredentialType.None;
 
-            if (IsTraceEnabled(traceKey))
-                WriteEvent(1, message, traceKey);
+            List<TraceDto> result = null;
+
+            using (TraceProxyService proxy = new TraceProxyService(binding, endpointAddress))
+            {
+
+                try
+                {
+                    var byteTraceList = proxy.GetTracesByWriterViaWCF(filter, writer);
+                    result = Core.Cmn.Extensions.SerializationExtensions.DeSerializeBinaryToObject<List<TraceDto>>(byteTraceList); //Core.Serialization.BinaryConverter.Deserialize<List<Source>>(proxy.GetTracesViaWCF(filter));
+
+                    proxy.Close();
+
+                }
+                catch (FaultException exc)
+                {
+                    if (exc is System.ServiceModel.FaultException<System.ServiceModel.ExceptionDetail>)
+                    {
+
+                        proxy.Abort();
+
+                    }
+                    else
+                    {
+
+                        proxy.Abort();
+
+                    }
+                }
+                catch (Exception ex)
+                {
+                    proxy.Abort();
+                }
+            }
+            return result;
+        }
+        public List<string> GetTraceWritersViaWCF()
+        {
+            if (string.IsNullOrEmpty(EndpointUri))
+                return null;
+
+            EndpointAddress endpointAddress = new EndpointAddress(EndpointUri);
+            NetTcpBinding binding = new NetTcpBinding();
+            binding.MaxBufferPoolSize = int.MaxValue;
+            binding.MaxReceivedMessageSize = int.MaxValue;
+            binding.MaxBufferSize = int.MaxValue;
+            binding.ReaderQuotas.MaxArrayLength = int.MaxValue;
+            binding.ReaderQuotas.MaxBytesPerRead = int.MaxValue;
+            binding.ReaderQuotas.MaxDepth = int.MaxValue;
+            binding.ReaderQuotas.MaxNameTableCharCount = int.MaxValue;
+            binding.ReaderQuotas.MaxStringContentLength = int.MaxValue;
+            binding.Security.Mode = SecurityMode.None;
+            binding.CloseTimeout = new TimeSpan(0, 2, 0);
+            binding.OpenTimeout = new TimeSpan(0, 2, 0);
+            binding.ReceiveTimeout = new TimeSpan(0, 2, 0);
+            binding.SendTimeout = new TimeSpan(0, 2, 0);
+            binding.Security.Message.ClientCredentialType = MessageCredentialType.None;
+            binding.Security.Transport.ClientCredentialType = TcpClientCredentialType.None;
+
+            List<string> result = null;
+
+            using (TraceProxyService proxy = new TraceProxyService(binding, endpointAddress))
+            {
+
+                try
+                {
+                    var byteWriterList = proxy.GetTraceWritersViaWCF();
+                    result = Core.Cmn.Extensions.SerializationExtensions.DeSerializeBinaryToObject<List<string>>(byteWriterList); //Core.cmn.BinaryConverter.Deserialize<List<string>>(proxy.GetTraceWritersViaWCF());
+
+                    proxy.Close();
+
+                }
+                catch (FaultException exc)
+                {
+                    if (exc is System.ServiceModel.FaultException<System.ServiceModel.ExceptionDetail>)
+                    {
+
+                        proxy.Abort();
+
+                    }
+                    else
+                    {
+
+                        proxy.Abort();
+
+                    }
+                }
+                catch (Exception ex)
+                {
+                    proxy.Abort();
+                }
+            }
+            return result;
         }
 
-        [Event(2, Message = "{0}", Level = EventLevel.Informational, Channel = EventChannel.Admin)]
-        public void Inform(string message, string traceKey = "")
+        public void DeleteWriterTraces(DateTime startDate, DateTime endDate, string writer)
         {
+            if (string.IsNullOrEmpty(EndpointUri))
+                return ;
 
-            if (IsTraceEnabled(traceKey))
-                WriteEvent(2, message, traceKey);
+            EndpointAddress endpointAddress = new EndpointAddress(EndpointUri);
+            NetTcpBinding binding = new NetTcpBinding();
+            binding.MaxBufferPoolSize = int.MaxValue;
+            binding.MaxReceivedMessageSize = int.MaxValue;
+            binding.MaxBufferSize = int.MaxValue;
+            binding.ReaderQuotas.MaxArrayLength = int.MaxValue;
+            binding.ReaderQuotas.MaxBytesPerRead = int.MaxValue;
+            binding.ReaderQuotas.MaxDepth = int.MaxValue;
+            binding.ReaderQuotas.MaxNameTableCharCount = int.MaxValue;
+            binding.ReaderQuotas.MaxStringContentLength = int.MaxValue;
+            binding.Security.Mode = SecurityMode.None;
+            binding.CloseTimeout = new TimeSpan(0, 2, 0);
+            binding.OpenTimeout = new TimeSpan(0, 2, 0);
+            binding.ReceiveTimeout = new TimeSpan(0, 2, 0);
+            binding.SendTimeout = new TimeSpan(0, 2, 0);
+            binding.Security.Message.ClientCredentialType = MessageCredentialType.None;
+            binding.Security.Transport.ClientCredentialType = TcpClientCredentialType.None;
+
+          
+
+            using (TraceProxyService proxy = new TraceProxyService(binding, endpointAddress))
+            {
+
+                try
+                {
+                   proxy.DeleteWriterTraces(startDate,endDate,writer);
+
+                    proxy.Close();
+
+                }
+                catch (FaultException exc)
+                {
+                    if (exc is System.ServiceModel.FaultException<System.ServiceModel.ExceptionDetail>)
+                    {
+
+                        proxy.Abort();
+
+                    }
+                    else
+                    {
+
+                        proxy.Abort();
+
+                    }
+                }
+                catch (Exception ex)
+                {
+                    proxy.Abort();
+                }
+            }
+          
+
         }
 
-        [Event(3, Message = "{0}", Level = EventLevel.Warning, Channel = EventChannel.Admin)]
-        public void Attention(string message, string traceKey = "")
-        {
 
-            if (IsTraceEnabled(traceKey))
-                WriteEvent(3, message, traceKey);
+            #endregion
+
+
         }
-
-        #region Keywords / Tasks / Opcodes
-
-        /// <summary>
-        /// By defining keywords, we can turn on events independently.   Because we defined the 'Request'
-        /// and 'Debug' keywords and assigned the 'Request' keywords to the first three events, these 
-        /// can be turned on and off by setting this bit when you enable the EventSource.   Similarly
-        /// the 'Debug' event can be turned on and off independently.  
-        /// </summary>
-        //public class Keywords   // This is a bitvector
-        //{
-        //    public const EventKeywords Requests = (EventKeywords)0x0001;
-        //    public const EventKeywords Debug = (EventKeywords)0x0002;
-        //}
-
-        //public class Tasks
-        //{
-        //    public const EventTask Request = (EventTask)0x1;
-        //}
-
-
-        #endregion
-
-    }
-
 
 }
 

@@ -1,24 +1,16 @@
-﻿
+﻿using Core.Mvc.Attribute.Validation;
 using Core.Mvc.Helpers.CustomWrapper.Infrastructure;
-using Core.Mvc.Helpers.CoreKendoGrid.Infrastructure;
-using Kendo.Mvc;
-using Kendo.Mvc.UI;
+using Core.Mvc.Helpers.CustomWrapper.SearchRelated;
+using Core.Mvc.Helpers.Lookup;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Web.Script.Serialization;
-using Core.Mvc.Helpers.CustomWrapper.SearchRelated;
-using Core.Mvc.Helpers.Lookup;
-using Core.Mvc.Helpers.CoreKendoGrid;
-using Core.Mvc.Attribute.Validation;
 
 namespace Core.Mvc.Helpers.CoreKendoGrid
-{   
+{
     [Serializable()]
     public class Column : JsonObjectBase
-    {   
+    {
         public Column()
         {
             Sortable = true;
@@ -29,7 +21,7 @@ namespace Core.Mvc.Helpers.CoreKendoGrid
             //SearchInfo = new KeyValuePair<string, ISearch>();
         }
 
-        public Dictionary<AggregateType,string> Aggregates { get; set; }
+        public Dictionary<AggregateType, string> Aggregates { get; set; }
         public string Title { get; set; }
         public string Field { get; set; }
         public string Format { get; set; }
@@ -37,12 +29,12 @@ namespace Core.Mvc.Helpers.CoreKendoGrid
         public bool Filterable { get; set; }
         public bool Groupable { get; set; }
 
-        public bool  Searchable { get; set; }
+        public bool Searchable { get; set; }
 
         public string ConstantsCategoryName { get; set; }
 
         //private List<IValidationRule> _validationRules;
-        //public List<IValidationRule> ValidationRules { 
+        //public List<IValidationRule> ValidationRules {
         //    get {
         //        return _validationRules ?? new List<IValidationRule>();
         //}
@@ -51,14 +43,17 @@ namespace Core.Mvc.Helpers.CoreKendoGrid
         //    }
         //}
         public List<ValidationRuleInfo> ValidationRules { get; set; }
+
         public List<ColumnCommand> Commands { get; set; }
-        public string GridID { get; set; } 
+        public string GridID { get; set; }
+
         /// <summary>
         /// None encoded string which can be used to hold Html elements.
         /// </summary>
         public string Template { get; set; }//
+
         /// <summary>
-        /// When Grid scrolling is enabled (by default), the Grid table layout style is "fixed". 
+        /// When Grid scrolling is enabled (by default), the Grid table layout style is "fixed".
         /// This means that all width-less columns will be equally wide no matter what their content is.
         /// When Grid scrolling is disabled, the Grid table layout style is "auto", i.e. the column widths
         /// are determined by the browser and cell content, if not set explicitly
@@ -67,22 +62,25 @@ namespace Core.Mvc.Helpers.CoreKendoGrid
 
         private Dictionary<string, object> GetValidationRules()
         {
-            var validationDic = new Dictionary<string,object>();
-            if (ValidationRules != null) { 
-            ValidationRules.ForEach(rules => {
+            var validationDic = new Dictionary<string, object>();
+            if (ValidationRules != null)
+            {
+                ValidationRules.ForEach(rules =>
+                {
                     //if (vr is RequiredValidation)
                     //{
                     //    var valRule = vr as RequiredValidation;
                     //    valDic.Add("RequiredValidator", valRule.ToJson());
                     //}
-                var name = rules.Name;
-                var instance = rules.ToJson();
-                validationDic.Add(name, instance);
-                 });
-             }
+                    var name = rules.Name;
+                    var instance = rules.ToJson();
+                    validationDic.Add(name, instance);
+                });
+            }
 
             return validationDic;
         }
+
         protected override void Serialize(IDictionary<string, object> json)
         {
             if (Commands == null)
@@ -92,7 +90,6 @@ namespace Core.Mvc.Helpers.CoreKendoGrid
                 {
                     json["format"] = Format;
                 }
-
             }
             else
             {
@@ -102,30 +99,28 @@ namespace Core.Mvc.Helpers.CoreKendoGrid
             {
                 json["template"] = Template;
             }
-            
+
             json["title"] = string.IsNullOrEmpty(Title) ? string.Empty : Title;
-            
+
             json["width"] = string.IsNullOrEmpty(Width) ? string.Empty : Width;
-            
+
             json["hidden"] = Hidden;
-            
+
             json["sortable"] = Sortable;
-            
+
             json["searchable"] = Searchable;
-            
-            json["filterable"] = Filterable; 
-            
+
+            json["filterable"] = Filterable;
+
             json["groupable"] = Groupable;
-            
+
             json["encoded"] = Encoded;
-            
+
             json["editor"] = null;
-            
+
             json["isCurrency"] = IsCurrency;
 
             json["validationRules"] = GetValidationRules();
-
-            
 
             if (this.Aggregates != null)
             {
@@ -155,7 +150,6 @@ namespace Core.Mvc.Helpers.CoreKendoGrid
 
         public void DefineCustomCommand()
         {
-
         }
 
         public string ClientTemplate
@@ -202,13 +196,11 @@ namespace Core.Mvc.Helpers.CoreKendoGrid
 
         public bool CustomCommand { get; set; }
 
-
-        //public KeyValuePair<string,SearchInfo> SearchInfo { get; set; }
-
         public ILookupView LookupViewInfo { get; set; }
 
         public DropDownListInfo DropDownListInfo { get; set; }
-        public string ReturnedLookupValuePath { get; set; }
+
+        public AutoCompleteInfo AutoCompleteInfo { get; set; }
 
         public Type Type { get; set; }
 

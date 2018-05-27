@@ -1,11 +1,10 @@
 ﻿using Core.Cmn;
 using Core.Cmn.Attributes;
-using System;
 using Core.Cmn.Extensions;
+using Core.Entity;
+using System;
 using System.Collections.Generic;
 using System.Linq;
-using Core.Entity;
-
 using System.Linq.Expressions;
 
 namespace Core.Rep
@@ -13,51 +12,52 @@ namespace Core.Rep
     [Injectable(InterfaceType = typeof(IConstantRepository), DomainName = "Accounting")]
     public class ConstantRepository : RepositoryBase<Constant>, IConstantRepository
     {
-
         #region Const
+
         private const string GENERAL_CONFIG_NAME = "GeneralConfig";
         private const string DEFAULT_LANGUAGE_KEY = "DefaultLanguage";
         private const string DEFAULT_CULTURE = "fa-IR";
-        #endregion
+
+        #endregion Const
 
         #region Variable
 
-        IDbContextBase _dc;
+        private IDbContextBase _dc;
         //private ILogService _logService = AppBase.LogService;
-        #endregion
+
+        #endregion Variable
 
         #region Constructors
 
         public ConstantRepository()
             : base()
         {
-
         }
+
         public ConstantRepository(IDbContextBase dc)
             : base(dc)
         {
             _dc = dc;
         }
 
-        #endregion
+        #endregion Constructors
 
         #region Methods
+
         [Cacheable(
             EnableSaveCacheOnHDD = true,
-            AutoRefreshInterval  = 600,
+            AutoRefreshInterval = 600,
             CacheRefreshingKind = Cmn.Cache.CacheRefreshingKind.SqlDependency,
-            EnableToFetchOnlyChangedDataFromDB =true, 
+            EnableToFetchOnlyChangedDataFromDB = true,
             EnableCoreSerialization = true
             )]
         public static IQueryable<Constant> AllConstantCache(IQueryable<Constant> query)
         {
-          
             return query.Include(item => item.ConstantCategory).AsNoTracking();
         }
 
-        public override IQueryable<Constant> All(bool canUseCacheIfPossible = true)
+        public IQueryable<Constant> AllCache(bool canUseCacheIfPossible = true)
         {
-
             return Cache<Constant>(AllConstantCache, canUseCacheIfPossible);
         }
 
@@ -65,16 +65,10 @@ namespace Core.Rep
         {
             try
             {
-                return All().First(c => c.Key == key);
+                return AllCache().First(c => c.Key == key);
             }
             catch (Exception ex)
             {
-                //var eLog = AppBase.LogService.GetEventLogObj();
-                //eLog.UserId = "constantRepository";
-                //eLog.CustomMessage = "This Name[" + key + "] not found in constants table.";
-                //eLog.LogFileName = "constantRepository";
-                //eLog.OccuredException = ex;
-                //AppBase.LogService.Handle(eLog);
                 AppBase.LogService.Handle(ex, "This Name[" + key + "] not found in constants table.");
 
                 return null;
@@ -84,7 +78,7 @@ namespace Core.Rep
         public T TryGetValueByKey<T>(string key, bool useCache = true)
         {
             IList<Constant> result =
-                 All(useCache)
+                 AllCache(useCache)
                 .Where(item => item.Key == key)
                 .ToList();
 
@@ -110,7 +104,7 @@ namespace Core.Rep
         public bool TryGetValue<T>(string key, out T value, bool useCache = true)
         {
             IList<Constant> result =
-                All(useCache)
+                AllCache(useCache)
                 .Where(item => item.Key == key)
                 .ToList();
 
@@ -141,52 +135,77 @@ namespace Core.Rep
             }
         }
 
-
         private List<Constant> GetConstantsOfCategory(Expression<Func<Constant, bool>> predicate, bool useCache)
         {
-            return All(useCache).Where(predicate).ToList();
+            return AllCache(useCache)
+                .Where(predicate)
+                .ToList();
         }
 
         public List<Constant> GetConstantsOfCategory(string constantCat, bool useCache = true)
         {
             try
             {
-                return GetConstantsOfCategory(con => con.ConstantCategory.Name == constantCat, useCache);
+                return
+                    GetConstantsOfCategory(con =>
+                    con.ConstantCategory.Name == constantCat, useCache
+                    );
             }
             catch (Exception ex)
             {
-                //var eLog = AppBase.LogService.GetEventLogObj();
-                //eLog.UserId = "constantRepository";
-                //eLog.CustomMessage = "This Name[" + constantCat + "] not found in constantCategories in constant table.";
-                //eLog.LogFileName = "constantRepository";
-                //eLog.OccuredException = ex;
-                //AppBase.LogService.Handle(eLog);
                 AppBase.LogService.Handle(ex, "This Name[" + constantCat + "] not found in constantCategories in constant table.");
                 return null;
             }
         }
+
         public List<Constant> GetConstantsByCategoryAndCulture(string constantCat, string cultureName, bool useCache = true)
         {
             try
             {
-                return GetConstantsOfCategory(constant => constant.ConstantCategory.Name == constantCat && constant.Culture == cultureName, useCache);
+                return
+                    GetConstantsOfCategory(constant =>
+                    constant.ConstantCategory.Name == constantCat
+                    &&
+                    constant.Culture == cultureName, useCache
+                    );
             }
             catch (Exception ex)
             {
-                //var eLog = AppBase.LogService.GetEventLogObj();
-                //eLog.UserId = "constantRepository";
-                //eLog.CustomMessage = "This Name[" + constantCat + "] not found in constantCategories in constant table.";
-                //eLog.LogFileName = "constantRepository";
-                //eLog.OccuredException = ex;
-                //AppBase.LogService.Handle(eLog);
                 AppBase.LogService.Handle(ex, "This Name[" + constantCat + "] not found in constantCategories in constant table.");
 
                 return null;
             }
         }
-        #endregion
 
+        public Constant GetByCategoryNameAndKey(
+            string categoryName,
+            string key
+            )
+        {
+            return AllCache()
+            .FirstOrDefault(item =>
+                item.ConstantCategory.Name == categoryName
+                &&
+                item.Key == key
+            );
+        }
 
+        public void UpdateValue(
+            int constantId,
+            string newValue
+            )
+        {
+            IQueryable<Constant> source =
+                this.All()
+                .Where(c => c.ID == constantId);
+
+            Update(source, item => new Constant
+            {
+                Value = newValue
+            });
+        }
+
+        #endregion Methods
 
         //IQueryable<IDTO> IDTOQueryableBuilder<Log>.GetDtoQueryable(IQueryable<Log> queryable)
         //{

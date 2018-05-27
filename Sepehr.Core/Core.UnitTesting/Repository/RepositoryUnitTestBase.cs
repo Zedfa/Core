@@ -12,7 +12,7 @@ using System.Linq;
 namespace Core.UnitTesting.Repository
 {
     public abstract class RepositoryUnitTestBase<TRepository, TEntity> : UnitTestBase
-        where TEntity : EntityBase<TEntity>, new()
+        where TEntity : ObjectBase, new()
         where TRepository : IRepositoryBase<TEntity>
 
     {

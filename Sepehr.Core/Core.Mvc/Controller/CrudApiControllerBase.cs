@@ -15,7 +15,7 @@ using Core.Ef.Exceptions;
 namespace Core.Mvc.Controller
 {
     public class CrudApiControllerBase<EntityT, ViewModelT, ServiceT> : Core.Mvc.Controller.ApiControllerBase
-        where EntityT : EntityBase<EntityT>, new()
+        where EntityT : ObjectBase, new()
         where ViewModelT : IViewModelBase<EntityT>, new()
         where ServiceT : IServiceBase<EntityT>
     {

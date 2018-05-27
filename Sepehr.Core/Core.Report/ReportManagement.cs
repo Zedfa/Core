@@ -54,7 +54,8 @@ namespace Core.Report
         public byte[] GetReportPDF(
             IReportRequest reportRequest,
             IReportService reportService,
-            string serverRootPath
+            string serverRootPath,
+            int currentUserId
             )
         {
             string reportFileName = string.Format(@"{0}\{1}_Fa.mrt",
@@ -63,7 +64,7 @@ namespace Core.Report
                 );
 
             byte[] reportTemplate = Core.Cmn.FileHelper.ReadFile(reportFileName);
-            List<ReportDataSource> reportData = reportService.GetReportData(reportRequest);
+            List<ReportDataSource> reportData = reportService.GetReportData(reportRequest, currentUserId);
 
             return GetPdfBytes(reportTemplate, reportData);            
         }
@@ -71,7 +72,8 @@ namespace Core.Report
         public byte[] GetReportExcel(
             IReportRequest reportRequest,
             IReportService reportService,
-            string serverRootPath
+            string serverRootPath,
+            int currentUserId
             )
         {
             string reportFileName = string.Format(@"{0}\{1}_Fa.mrt",
@@ -80,7 +82,7 @@ namespace Core.Report
                 );
 
             byte[] reportTemplate = Core.Cmn.FileHelper.ReadFile(reportFileName);
-            List<ReportDataSource> reportData = reportService.GetReportData(reportRequest);
+            List<ReportDataSource> reportData = reportService.GetReportData(reportRequest, currentUserId);
 
             return GetExcelBytes(reportTemplate, reportData);            
         }

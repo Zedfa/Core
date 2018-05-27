@@ -43,14 +43,35 @@ namespace Core.Cmn.Cache
         /// <param name="context">an instance of DbContext is used to get an ObjectQuery object</param>
         /// <param name="query">an instance of IQueryable is used to get ObjectQuery object, and then get
         /// connection string and command string to register SqlDependency nitification. </param>
-        public ImmediateSqlNotificationRegister(IDbContextBase context, IQueryable query)
+        public ImmediateSqlNotificationRegister(IDbContextBase context, IQueryable query, CacheInfo cacheInfo)
         {
-            Init(context, query);
+            Init(context, query, cacheInfo);
         }
 
-        public void Init(IDbContextBase context, IQueryable query)
+        public void Init(IDbContextBase context, IQueryable query, CacheInfo cacheInfo)
         {
-            Init(context, query, 500);
+            CacheInfo = cacheInfo;
+            using (var trace = new Trace.TraceDto())
+            {
+                trace.TraceKey = "CacheSqlDependency";
+                trace.Data["CacheName"] = cacheInfo.Name;
+                trace.Data["DateTime"] = DateTime.Now.ToString();
+                trace.Message = $"CacheSql Dependency {cacheInfo.Name} before init at {DateTime.Now.ToString()} ...";
+                trace.Data["State"] = "initialize";
+                Core.Cmn.AppBase.TraceWriter.SubmitData(trace);
+            }
+
+            Init(context, query, 500, cacheInfo);
+
+            using (var trace = new Trace.TraceDto())
+            {
+                trace.TraceKey = "CacheSqlDependency";
+                trace.Data["CacheName"] = cacheInfo.Name;
+                trace.Data["DateTime"] = DateTime.Now.ToString();
+                trace.Message = $"CacheSql Dependency {cacheInfo.Name} was initilized at {DateTime.Now.ToString()} ...";
+                trace.Data["State"] = "initialize";
+                Core.Cmn.AppBase.TraceWriter.SubmitData(trace);
+            }
         }
 
         // Summary:
@@ -69,6 +90,8 @@ namespace Core.Cmn.Cache
         public SqlConnection Connection
         { get { return connection; } }
 
+        public CacheInfo CacheInfo { get; private set; }
+
         /// <summary>
         /// Starts the notification of SqlDependency
         /// </summary>
@@ -76,7 +99,7 @@ namespace Core.Cmn.Cache
         public static void StartMonitor(IDbContextBase context)
         {
             try
-            {               
+            {
                 System.Data.SqlClient.SqlDependency.Start(((IDbContextInternal)context).ConnectionString);
             }
             catch (Exception ex)
@@ -110,7 +133,7 @@ namespace Core.Cmn.Cache
             GC.SuppressFinalize(this);
         }
 
-        private void Init(IDbContextBase context, IQueryable query, int delayForRetryOnError)
+        private void Init(IDbContextBase context, IQueryable query, int delayForRetryOnError, CacheInfo cacheInfo)
         {
             try
             {
@@ -125,7 +148,19 @@ namespace Core.Cmn.Cache
             {
                 try
                 {
+                    using (var trace = new Trace.TraceDto())
+                    {
+                        trace.TraceKey = "CacheSqlDependency";
+                        trace.Data["CacheName"] = cacheInfo.Name;
+                        trace.Data["DateTime"] = DateTime.Now.ToString();
+                        trace.Data["Exception"] = ex.ToString();
+                        trace.Message = $"CacheSql Dependency {cacheInfo.Name} has faced with an exception at {DateTime.Now.ToString()} ...";
+                        trace.Data["State"] = "initialize";
+                        Core.Cmn.AppBase.TraceWriter.SubmitData(trace);
+                    }
+
                     Core.Cmn.AppBase.LogService.Handle(ex, $"Exception on initialize ImmediateNotificationRegister for cache on SqlDependency, the query is {iquery}...");
+
                 }
                 catch
                 {
@@ -133,7 +168,7 @@ namespace Core.Cmn.Cache
                 }
 
                 Task.Delay(delayForRetryOnError).Wait();
-                Init(context, query, delayForRetryOnError + 1000);
+                Init(context, query, delayForRetryOnError + 1000, cacheInfo);
             }
         }
         protected void Dispose(Boolean disposed)
@@ -164,6 +199,18 @@ namespace Core.Cmn.Cache
             // Move the original SqlDependency event handler.
             if (e.Type == SqlNotificationType.Subscribe || e.Info == SqlNotificationInfo.Error)
             {
+                using (var trace = new Trace.TraceDto())
+                {
+                    trace.TraceKey = "CacheSqlDependency";
+                    trace.Data["CacheName"] = CacheInfo.Name;
+                    trace.Data["DateTime"] = DateTime.Now.ToString();
+                    trace.Message = $"CacheSql Dependency {CacheInfo.Name} has faced with an Error at {DateTime.Now.ToString()} ...";
+                    trace.Data["State"] = "Error";
+                    trace.Data["Type"] = e.Type.ToString();
+                    trace.Data["Info"] = e.Info.ToString();
+                    Core.Cmn.AppBase.TraceWriter.SubmitData(trace);
+                }
+
                 Core.Cmn.AppBase.LogService.Write($"Some thing is wrong on SqlDependency Change, the query is {iquery} and SqlNotificationInfo is {e.Info} and Source is {e.Source}...");
             }
 
@@ -177,6 +224,19 @@ namespace Core.Cmn.Cache
                 }
                 catch (Exception ex)
                 {
+                    using (var trace = new Trace.TraceDto())
+                    {
+                        trace.TraceKey = "CacheSqlDependency";
+                        trace.Data["CacheName"] = CacheInfo.Name;
+                        trace.Data["DateTime"] = DateTime.Now.ToString();
+                        trace.Message = $"CacheSql Dependency {CacheInfo.Name} has faced with an exception at {DateTime.Now.ToString()} ...";
+                        trace.Data["State"] = "Error";
+                        trace.Data["Exception"] = ex.ToString();
+                        trace.Data["Type"] = e.Type.ToString();
+                        trace.Data["Info"] = e.Info.ToString();
+                        Core.Cmn.AppBase.TraceWriter.SubmitData(trace);
+                    }
+
                     Core.Cmn.AppBase.LogService.Handle(ex, $"Exception on executing cache on SqlDependency Change, the query is {iquery}...");
                 }
             }

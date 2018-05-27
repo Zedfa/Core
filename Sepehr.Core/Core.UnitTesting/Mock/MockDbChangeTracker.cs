@@ -22,7 +22,7 @@ namespace Core.UnitTesting.Mock
             throw new NotImplementedException();
         }
 
-        public IEnumerable<IDbEntityEntryBase<TEntity>> Entries<TEntity>() where TEntity : _EntityBase
+        public IEnumerable<IDbEntityEntryBase<TEntity>> Entries<TEntity>() where TEntity : ObjectBase
         {
             throw new NotImplementedException();
         }

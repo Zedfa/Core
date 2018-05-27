@@ -23,7 +23,7 @@ namespace Core.Ef
             return _changeTracker.Entries().Select(entry => new DbEntityEntryBase(entry)).AsEnumerable();
         }
 
-        public IEnumerable<IDbEntityEntryBase<TEntity>> Entries<TEntity>() where TEntity : _EntityBase
+        public IEnumerable<IDbEntityEntryBase<TEntity>> Entries<TEntity>() where TEntity : ObjectBase
         {
             return _changeTracker.Entries<TEntity>().Select(entry => new DbEntityEntryBase<TEntity>(entry)).AsEnumerable();
         }

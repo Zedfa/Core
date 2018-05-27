@@ -83,9 +83,7 @@ $(function () {
         }
     });
    
-    var tooltipAnimation: kendo.ui.TooltipAnimation = { open: { duration: 5000 } };
-    var tooltipOpt: kendo.ui.TooltipOptions = { duration: 5000, position: "top", width: 100, height: 40, content: $("#toolTipContainer").html()}
-    $("#memberInfo").kendoTooltip(tooltipOpt);
+  
 
 });
 
@@ -104,7 +102,7 @@ function showChangePassWindow() {
         visible: false,
         resizable: true,
         scrollable: false,
-        content: getAreaUrl("Account", "ChangePassword")
+        content: { url: getAreaUrl("Account", "ChangePassword"), data: null }
     }).data("kendoWindow");
     win.center().open();
 }
@@ -123,7 +121,7 @@ function showLoginWindow():void {
         visible: false,
         resizable: true,
         scrollable: false,
-        content: getAreaUrl("Account", "LogOn"),
+        content: { url: getAreaUrl("Account", "LogOn"), data: null },
         close: (e) => {
             e.preventDefault();
         }

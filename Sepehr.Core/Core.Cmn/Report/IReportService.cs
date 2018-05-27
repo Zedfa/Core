@@ -7,7 +7,16 @@ namespace Core.Cmn.Report
     {
         string ServiceName { get; }
 
-        List<ReportDataSource> GetReportData(object reportRequet);
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="reportRequet"></param>
+        /// <param name="currentUserId">
+        /// moghe generate kardane ye report, momkene bekhaim check konim ke aya user
+        /// be in data dastresi dare ya na.
+        /// </param>
+        /// <returns></returns>
+        List<ReportDataSource> GetReportData(object reportRequet, int currentUserId);
 
         string GetReportName(object reportRequet);
 

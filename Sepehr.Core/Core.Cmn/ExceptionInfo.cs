@@ -9,44 +9,31 @@ namespace Core.Cmn
     public class ExceptionInfo
     {
         public string Message { get; set; }
-        public string Details { get; set; }
+        public ExceptionInfo InnerException { get; set; }
         public string StackTrace { get; set; }
-        public bool IsRTL { get; set; }
         public string Source { get; set; }
+        public Dictionary<string, string> Data { get; set; }
+        public ExceptionInfo(string message)
+        {
+            Message = message;
+        }
 
-        private int? _statusCode;
-        public int? StatusCode
+        public ExceptionInfo(Exception excp)
         {
-            get
-            {
-                if (_statusCode == null)
-                    _statusCode = 500;
+            Message = excp.Message;
 
-                return _statusCode;
-            }
-            set
-            {
-                _statusCode = value.Value;
-            }
-        }
-        public ExceptionInfo(string message, int status, bool isRTL )
-        {
-            this.Message = message;
-            this.StatusCode = status;
-            this.IsRTL = isRTL;
-        }
-        public ExceptionInfo(string message, bool isRTL = true)
-        {
-            this.Message = message;
-            this.IsRTL = isRTL;
-        }
-        public ExceptionInfo(Exception excp, bool isRTL = true)
-        {
-            this.Message = excp.Message;
-            this.Details = excp.InnerException != null ? excp.InnerException.Message : string.Empty;
-            this.StackTrace = excp.StackTrace;
-            this.IsRTL = isRTL;
+            StackTrace = excp.StackTrace;
+
             Source = excp.Source;
+
+            Data = new Dictionary<string, string>();
+
+            foreach (string key in excp.Data.Keys)
+            {
+                Data.Add(key, excp.Data[key]?.ToString());
+            }
+            InnerException = excp.InnerException != null ? new ExceptionInfo(excp.InnerException) : null;
+
         }
     }
 }

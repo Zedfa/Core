@@ -431,9 +431,10 @@ namespace Core.Cmn.FarsiUtils
         /// </summary>
         /// <param name="MonthNo">Month no to evaluate in integer</param>
         /// <returns>number of days in the evaluated month</returns>
-        internal static int MonthDays(int MonthNo)
+        internal static int MonthDays(int jYear, int MonthNo)
         {
-            return (JDayTable[1, MonthNo - 1]);
+            int ileapYear = JLeap(jYear);
+            return (JDayTable[ileapYear, MonthNo - 1]);
         }
 
         #endregion

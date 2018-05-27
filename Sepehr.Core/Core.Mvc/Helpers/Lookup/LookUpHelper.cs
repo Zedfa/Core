@@ -115,7 +115,7 @@ namespace Core.Mvc.Helpers
             ///we must new from static instance to set  info itself
 
 
-            var info = gridInfo.DeepCopy<GridInfo>();
+            var info = gridInfo.DeepCopy();
             info.GridID = gridID;
             info.ClientDependentFeatures = clientDependentFeature;
 
@@ -342,7 +342,7 @@ namespace Core.Mvc.Helpers
             ///we must new from static instance to set  info itself
 
 
-            var info = gridInfo.DeepCopy<GridInfo>();
+            var info = gridInfo.DeepCopy();
             info.GridID = gridID;
             info.ClientDependentFeatures = clientDependentFeature;
 

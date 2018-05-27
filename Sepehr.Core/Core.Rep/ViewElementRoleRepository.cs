@@ -1,39 +1,45 @@
-﻿using System.Collections.Generic;
-using System.Linq;
-using Core.Entity;
-using Core.Cmn.Extensions;
+﻿using Core.Cmn;
 using Core.Cmn.Attributes;
-using Core.Cmn;
+using Core.Cmn.Extensions;
+using Core.Entity;
+using System.Collections.Generic;
+using System.Linq;
 
 namespace Core.Rep
 {
-
     public class ViewElementRoleRepository : RepositoryBase<ViewElementRole>
     {
         private IDbContextBase _dbContext;
-        ViewElementRepository viewElementRepository;
+        private ViewElementRepository viewElementRepository;
+
         public ViewElementRoleRepository(IDbContextBase dbContext)
             : base(dbContext)
         {
             _dbContext = dbContext;
             viewElementRepository = new ViewElementRepository(dbContext);
-
         }
-
 
         [Cacheable(
             EnableSaveCacheOnHDD = true,
             EnableUseCacheServer = false,
-            AutoRefreshInterval = 15,
-            EnableCoreSerialization = true
+            AutoRefreshInterval = 3600,
+            CacheRefreshingKind = Cmn.Cache.CacheRefreshingKind.SqlDependency,
+            EnableToFetchOnlyChangedDataFromDB = true,
+            EnableCoreSerialization = true,
+            // این گزینه فقط در صورت استفاده از اسکریپ ویوالمنت ها ست میشود
+            // درصورت استفاده از پنل برای مدریت ویوالمنتها باید فالس شود
+            DisableToSyncDeletedRecord_JustIfEnableToFetchOnlyChangedDataFromDB = true
             )]
         public static IQueryable<ViewElementRole> AllViewElementsCache(IQueryable<ViewElementRole> query)
         {
-
-            return query.Include(element => element.Role)
-                .Include(element => element.ViewElement)
-                .Include(element => element.ViewElement.ChildrenViewElement).Include(element => element.ViewElement.ParentViewElement);
+            return query
+                                  //.Include(element => element.Role)
+                                  //         .Include(element => element.ViewElement)
+                                  //             .Include(element => element.ViewElement.ChildrenViewElement)
+                                  //                  .Include(element => element.ViewElement.ParentViewElement)
+                                  ;
         }
+
         public IQueryable<ViewElementRole> AllCache(bool canUseCacheIfPossible = true)
         {
             return Cache(AllViewElementsCache, canUseCacheIfPossible);
@@ -42,17 +48,20 @@ namespace Core.Rep
         public override IQueryable<ViewElementRole> Filter(System.Linq.Expressions.Expression<System.Func<ViewElementRole, bool>> predicate, bool allowFilterDeleted = true)
         {
             return AllCache().Where(predicate).AsQueryable();
-
         }
+
         public List<int> GetViewElementsIdByRoleId(int? roleId)
         {
             return _dbContext.Set<ViewElementRole>().Where(a => a.RoleId == roleId).Select(viewElementRole => viewElementRole.ViewElementId).ToList();
         }
+
         public IQueryable<ViewElement> GetViewElementsByRoleId(int? roleId)
         {
             return AllCache().Include(viewElement => viewElement.ViewElement).Where(a => a.RoleId == roleId).Select(viewElementRole => viewElementRole.ViewElement);
         }
-        List<int?> parentslist = new List<int?>();
+
+        private List<int?> parentslist = new List<int?>();
+
         private List<int?> GetParents(ViewElement viewElement)
         {
             if (viewElement.ParentId != null)
@@ -62,9 +71,8 @@ namespace Core.Rep
             }
 
             return parentslist;
-
-
         }
+
         public int UpdateByRoleId(
             int roleId,
             List<int> insertedViewElementList,
@@ -72,7 +80,6 @@ namespace Core.Rep
             bool allowSaveChange = true
             )
         {
-
             List<ViewElementRole> existanceViewElementRole = this
                 .All()
                 .Include(viewElement => viewElement.ViewElement.ParentViewElement)
@@ -86,7 +93,6 @@ namespace Core.Rep
             {
                 if (existanceViewElementRole.Any(vle => vle.ViewElementId == viewElementId) == false)
                 {
-
                     Create(new ViewElementRole
                     {
                         ViewElementId = viewElementId,
@@ -95,11 +101,11 @@ namespace Core.Rep
                 }
             }
 
-
-            #endregion
+            #endregion Add ViewElemntRole to DB
 
             #region Delete removed ViewElementRole
 
+            //ToDo: It would have transaction...
             foreach (int viewElementId in deletedviewElementList)
             {
                 if (existanceViewElementRole.Any(viewElement => viewElement.ViewElementId == viewElementId))
@@ -107,8 +113,7 @@ namespace Core.Rep
                     var deletedViewElement = existanceViewElementRole
                         .First(viewElement => viewElement.ViewElementId == viewElementId);
 
-                    Delete(vle => vle.ViewElementId == viewElementId && vle.RoleId == roleId, false);
-
+                    Delete(vle => vle.ViewElementId == viewElementId && vle.RoleId == roleId);
 
                     var similarToDeletedViewElement = existanceViewElementRole
                         .Where(viewElement => viewElement.ViewElement.UniqueName.Trim() == deletedViewElement.ViewElement.UniqueName.Trim()
@@ -117,24 +122,20 @@ namespace Core.Rep
 
                     foreach (var item in similarToDeletedViewElement)
                     {
-
-                        Delete(vle => vle.ViewElementId == item.ViewElementId && vle.RoleId == roleId, false);
+                        Delete(vle => vle.ViewElementId == item.ViewElementId && vle.RoleId == roleId);
                         var parents = GetParents(item.ViewElement);
                         if (parents != null)
                         {
                             foreach (var parent in parents)
                             {
-
-                                Delete(vle => vle.ViewElementId == parent && vle.RoleId == roleId, false);
+                                Delete(vle => vle.ViewElementId == parent && vle.RoleId == roleId);
                             }
                         }
                     }
-
-
                 }
             }
 
-            #endregion
+            #endregion Delete removed ViewElementRole
 
             if (allowSaveChange)
             {
@@ -145,6 +146,7 @@ namespace Core.Rep
                 return 0;
             }
         }
+
         public int Create(List<int> insertedViewElement, List<int> deletedviewElementRole, int roleId,
             bool allowSaveChange = true)
         {
@@ -168,15 +170,11 @@ namespace Core.Rep
                     .ToList();
             var existedItemForAdd = fff.Where(item => !deleteElement.Contains(item)).ToList();
 
-
             foreach (int item in existedItemForAdd)
             {
                 if (!insertedViewElement.Contains(item))
                     insertedViewElement.Add(item);
             }
-
-
-
 
             foreach (var vId in existedVElement)
             {
@@ -185,9 +183,7 @@ namespace Core.Rep
                 {
                     ContextBase.Set<ViewElementRole>().Remove(findedVElement);
                 }
-
             }
-
 
             foreach (var velementId in insertedViewElement)
             {
@@ -197,7 +193,6 @@ namespace Core.Rep
                 {
                     foreach (var childElement in founded.ChildrenViewElement)
                     {
-
                         var parentElement = viewElementRepository.GetViewElementAndChildsById(childElement.ParentId ?? 0);
                         List<ViewElement> resultElements;
                         resultElements = GetHiddenEelements(parentElement);
@@ -209,37 +204,28 @@ namespace Core.Rep
                                 if (!addedViewElemetId.Any(a => a.Equals(hElement.Id)))
                                     Create(new ViewElementRole()
                                     {
-
                                         RoleId = roleId,
                                         ViewElementId = hElement.Id
-
                                     }, false);
                                 //...
                                 addedViewElemetId.Add(hElement.Id);
                                 allViewElements.Add(founded);
                             }
-
                         }
-
                     }
-
                 }
-
 
                 //foundVelement.Roles.Add(findedRole);
                 if (!addedViewElemetId.Any(a => a.Equals(founded.Id)))
                     Create(new ViewElementRole()
                     {
-
                         RoleId = roleId,
                         ViewElementId = founded.Id
-
                     }, false);
                 //...
                 addedViewElemetId.Add(founded.Id);
                 allViewElements.Add(founded);
             }
-
 
             //...
 
@@ -254,11 +240,7 @@ namespace Core.Rep
                         if (!allParentViewElements.Any(a => a.Id == foundParent.Id))
                             allParentViewElements.Add(foundParent);
                     }
-
-
-
                 }
-
             }
 
             foreach (var parent in allParentViewElements)
@@ -272,10 +254,8 @@ namespace Core.Rep
                         if (!addedViewElemetId.Any(a => a.Equals(hItem.Id)))
                             Create(new ViewElementRole()
                             {
-
                                 RoleId = roleId,
                                 ViewElementId = hItem.Id
-
                             }, false);
                         addedViewElemetId.Add(hItem.Id);
                         allViewElements.Add(hItem);
@@ -308,20 +288,20 @@ namespace Core.Rep
                 }
             return resultElements;
         }
+
         public IQueryable<ViewElementRole> All_ViewElement_Role()
         {
             return AllCache().Include(item => item.Role).Include(item => item.ViewElement);
         }
+
         public IQueryable<ViewElement> GetRootViewElementsBasedOnCompany(int? id, int companyId)
         {
-
             var allViewElementsBasedOnCompany = All_ViewElement_Role()
                 .Where(viewElementRole => viewElementRole.Role.CurrentCompanyId == companyId &&
                     viewElementRole.ViewElement.ParentId == id &&
                     viewElementRole.ViewElement.IsHidden != true &&
                     viewElementRole.ViewElement.InVisible == false)
                     .Select(viewElement => viewElement.ViewElement);
-
 
             return allViewElementsBasedOnCompany;
         }

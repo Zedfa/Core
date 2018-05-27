@@ -44,6 +44,7 @@
     <PlatformTarget>AnyCPU</PlatformTarget>
     <ErrorReport>prompt</ErrorReport>
     <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
+    <CheckForOverflowUnderflow>true</CheckForOverflowUnderflow>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|x64'">
     <OutputPath>bin\x64\Release\</OutputPath>
@@ -129,6 +130,7 @@
     <Compile Include="Attributes\UnitTestAttribute.cs" />
     <Compile Include="Cache\CacheConfig.cs" />
     <Compile Include="Cache\CacheData.cs" />
+    <Compile Include="Exceptions\CacheInfoNotFoundException.cs" />
     <Compile Include="Cache\CacheService.cs" />
     <Compile Include="Cache\CacheBase.cs" />
     <Compile Include="Cache\CacheInfo.cs" />
@@ -169,6 +171,7 @@
     <Compile Include="Exceptions\ServiceBrokerIsNotEnabledException.cs" />
     <Compile Include="Extensions\ExceptionExt.cs" />
     <Compile Include="Extensions\IDbContextExt.cs" />
+    <Compile Include="Extensions\IntegerExt.cs" />
     <Compile Include="Extensions\Interfaces\IBatchExtensions.cs" />
     <Compile Include="Extensions\IEnumerableExt.cs" />
     <Compile Include="Extensions\Interfaces\IDbContextBaseExtentions.cs" />
@@ -178,7 +181,12 @@
     <Compile Include="FileHelper.cs" />
     <Compile Include="GeneralConstant.cs" />
     <Compile Include="ApplicationStartBase.cs" />
-    <Compile Include="HttpHelper.cs" />
+    <Compile Include="WebApi\DeleteHelper.cs" />
+    <Compile Include="WebApi\GetHelper.cs" />
+    <Compile Include="WebApi\Base\WebApiHelper.cs" />
+    <Compile Include="WebApi\Base\WebApiHelperResponse.cs" />
+    <Compile Include="WebApi\PostHelper.cs" />
+    <Compile Include="WebApi\PutHelper.cs" />
     <Compile Include="Interface\ICacheManagementRepository.cs" />
     <Compile Include="DependencyInjection\IDependencyInjectionManager.cs" />
     <Compile Include="Interface\ICheckSqlServiceBrockerRepository.cs" />
@@ -203,6 +211,7 @@
     <Compile Include="Interface\IDbSetBase.cs" />
     <Compile Include="Interface\IRequest.cs" />
     <Compile Include="Interface\ITraceViewer.cs" />
+    <Compile Include="Interface\ITraceWriter.cs" />
     <Compile Include="Interface\IUserRequest.cs" />
     <Compile Include="IPAddressRange.cs" />
     <Compile Include="Monitoring\Watch.cs" />
@@ -240,6 +249,15 @@
     <Compile Include="Resources\Localizer.cs" />
     <Compile Include="Resources\StringID.cs" />
     <Compile Include="Security.cs" />
+    <Compile Include="SharedMemory\ConfigManagerBase.cs" />
+    <Compile Include="SharedMemory\Models\Config.cs" />
+    <Compile Include="SharedMemory\SharedMemoryBase.cs" />
+    <Compile Include="Trace\ITraceHostService.cs" />
+    <Compile Include="Trace\TraceDto.cs" />
+    <Compile Include="SharedMemory\Reader.cs" />
+    <Compile Include="SharedMemory\Writer.cs" />
+    <Compile Include="Trace\TraceProxyService.cs" />
+    <Compile Include="Trace\TraceWriterDto.cs" />
     <Compile Include="UnitTesting\UnitTestBase.cs" />
   </ItemGroup>
   <ItemGroup>
@@ -260,7 +278,7 @@
       <Name>Core.Serialization</Name>
     </ProjectReference>
   </ItemGroup>
-  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <Import Project="$(SolutionDir)\.nuget\NuGet.targets" Condition="Exists('$(SolutionDir)\.nuget\NuGet.targets')" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.

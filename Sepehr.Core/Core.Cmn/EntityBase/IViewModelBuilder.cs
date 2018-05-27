@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace Core.Cmn.EntityBase
 {
-    interface IViewModelBuilder<T> where T : EntityBase<T> , new()
+    interface IViewModelBuilder<T> where T : ObjectBase  , new()
     {
         IModelBase<T> GetViewModel<ViewModel>(T model);
     }

@@ -122,7 +122,10 @@ namespace Core.Cmn.Cache
                 serviceAssemblies = serviceAssemblies.Where(ass => ass.FullName.ToLower().Contains("core.service")).ToList();
             }
 
-            serviceAssemblies.ForEach(ass => BuildCachesInAssembly(dBContext, ass, false));
+            serviceAssemblies.ForEach(ass =>
+            {
+                BuildCachesInAssembly(dBContext, ass, false);
+            });
             if (Core.Cmn.ConfigHelper.GetConfigValue<bool>("EnableCacheServerListener") && !IsCacheServerServiceStart)
                 StartCacheServerService();
 
@@ -190,7 +193,8 @@ namespace Core.Cmn.Cache
             tArgs.Add(methodInfo.ReturnType);
             var cacheDataProviderGenericType = cacheDataProviderType.MakeGenericType(tArgs.ToArray());
             CacheWCFTypeHelper.typeList.Add(cacheDataProviderGenericType);
-            CacheWCFTypeHelper.typeList.Add(methodInfo.ReturnType);
+            if (!typeof(Core.Cmn.DataSource.DataSource).IsAssignableFrom(methodInfo.ReturnType))
+                CacheWCFTypeHelper.typeList.Add(methodInfo.ReturnType);
             return cacheDataProviderGenericType;
         }
 
@@ -320,20 +324,60 @@ namespace Core.Cmn.Cache
                                                    AppBase.DependencyInjectionManager.Resolve(typeOfSqlNotifier,
                                                    new ParameterOverride("context", ((IQueryableCacheDataProvider)queryableCacheExecution).DbContext),
                                                    new ParameterOverride("query", ((IQueryableCacheDataProvider)queryableCacheExecution).GetQuery()));
+
+                                                using (var trace = new Trace.TraceDto())
+                                                {
+                                                    trace.TraceKey = "CacheSqlDependency";
+                                                    trace.Data["CacheName"] = currentCacheInfo.Name;
+                                                    trace.Data["DateTime"] = DateTime.Now.ToString();
+                                                    trace.Message = $"CacheSql Dependency {currentCacheInfo.Name} before configouration on startup at {DateTime.Now.ToString()} ...";
+                                                    trace.Data["State"] = "config";
+                                                    Core.Cmn.AppBase.TraceWriter.SubmitData(trace);
+                                                }
+
                                                 immediateSqlNotificationRegister.OnChanged += (object sender, SqlNotificationEventArgs e) =>
                                                 {
                                                     if (currentCacheInfo.CountOfWaitingThreads < 3)
                                                     {
+                                                        using (var trace = new Trace.TraceDto())
+                                                        {
+                                                            trace.TraceKey = "CacheSqlDependency";
+                                                            trace.Data["CacheName"] = currentCacheInfo.Name;
+                                                            trace.Data["DateTime"] = DateTime.Now.ToString();
+                                                            trace.Message = $"CacheSql Dependency {currentCacheInfo.Name} before changing at {DateTime.Now.ToString()} ...";
+                                                            trace.Data["State"] = "changing";
+                                                            Core.Cmn.AppBase.TraceWriter.SubmitData(trace);
+                                                        }
+
                                                         Stopwatch stopwatch = new Stopwatch();
                                                         stopwatch.Start();
                                                         ((IQueryableCacheDataProvider)queryableCacheExecution).DbContext = AppBase.DependencyInjectionFactory.CreateContextInstance();
-                                                        immediateSqlNotificationRegister.Init(((IQueryableCacheDataProvider)queryableCacheExecution).DbContext, ((IQueryableCacheDataProvider)queryableCacheExecution).GetQuery());
+                                                        immediateSqlNotificationRegister.Init(((IQueryableCacheDataProvider)queryableCacheExecution).DbContext, ((IQueryableCacheDataProvider)queryableCacheExecution).GetQuery(), currentCacheInfo);
                                                         ExcecuteQueryForRefreshingSqlDependencyCache(currentCacheInfo, returnCacheType, queryableCacheExecution, 500);
                                                         stopwatch.Stop();
                                                         currentCacheInfo.FrequencyOfBuilding += 1;
                                                         currentCacheInfo.BuildingTime += new TimeSpan(stopwatch.ElapsedTicks);
+                                                        using (var trace = new Trace.TraceDto())
+                                                        {
+                                                            trace.TraceKey = "CacheSqlDependency";
+                                                            trace.Data["CacheName"] = currentCacheInfo.Name;
+                                                            trace.Data["DateTime"] = DateTime.Now.ToString();
+                                                            trace.Message = $"CacheSql Dependency {currentCacheInfo.Name} was changed at {DateTime.Now.ToString()} ...";
+                                                            trace.Data["State"] = "changing";
+                                                            Core.Cmn.AppBase.TraceWriter.SubmitData(trace);
+                                                        }
                                                     }
                                                 };
+
+                                                using (var trace = new Trace.TraceDto())
+                                                {
+                                                    trace.TraceKey = "CacheSqlDependency";
+                                                    trace.Data["CacheName"] = currentCacheInfo.Name;
+                                                    trace.Data["DateTime"] = DateTime.Now.ToString();
+                                                    trace.Message = $"CacheSql Dependency {currentCacheInfo.Name} was configured on startup at {DateTime.Now.ToString()} ...";
+                                                    trace.Data["State"] = "config";
+                                                    Core.Cmn.AppBase.TraceWriter.SubmitData(trace);
+                                                }
                                             }
                                         }
                                     }
@@ -347,7 +391,9 @@ namespace Core.Cmn.Cache
                                 {
                                     if (isRepositoryAssembly)
                                         throw new NotSupportedException("Functional Cache just can use in Service Layer.");
+
                                     var Service = (IServiceCache)Activator.CreateInstance(methodInfo.DeclaringType, Activator.CreateInstance(dBContext));
+                                    Core.Cmn.AppBase.TraceWriter.SubmitData(new Trace.TraceDto { Message = $"{currentCacheInfo.Name} BuildCachesInAssembly start..." });
                                     currentCacheInfo.Service = Service;
                                     Type cacheDataProviderType = null;
                                     if (parames.Length == 0)
@@ -413,6 +459,8 @@ namespace Core.Cmn.Cache
 
                                         AddAndGetCacheDataProviderTypeForSerialization(methodInfo, cacheDataProviderType);
                                     }
+
+                                    Core.Cmn.AppBase.TraceWriter.SubmitData(new Trace.TraceDto { Message = $"{currentCacheInfo.Name} BuildCachesInAssembly done." });
                                 }
                             }
                             catch (Exception exception)
@@ -441,10 +489,40 @@ namespace Core.Cmn.Cache
         {
             try
             {
+                using (var trace = new Trace.TraceDto())
+                {
+                    trace.TraceKey = "CacheSqlDependency";
+                    trace.Data["CacheName"] = currentCacheInfo.Name;
+                    trace.Data["DateTime"] = DateTime.Now.ToString();
+                    trace.Data["State"] = "ExcecuteQuery";
+                    trace.Message = $"CacheSql Dependency {currentCacheInfo.Name} before ExcecuteQuery at {DateTime.Now.ToString()} ...";
+                    Core.Cmn.AppBase.TraceWriter.SubmitData(trace);
+                }
+
                 (typeof(CacheBase)).GetMethod("RefreshCache").MakeGenericMethod(returnCacheType).Invoke(null, new object[] { queryableCacheExecution, currentCacheInfo });
+
+                using (var trace = new Trace.TraceDto())
+                {
+                    trace.TraceKey = "CacheSqlDependency";
+                    trace.Data["CacheName"] = currentCacheInfo.Name;
+                    trace.Data["DateTime"] = DateTime.Now.ToString();
+                    trace.Data["State"] = "ExcecuteQuery";
+                    trace.Message = $"CacheSql Dependency {currentCacheInfo.Name} after ExcecuteQuery at {DateTime.Now.ToString()} ...";
+                    Core.Cmn.AppBase.TraceWriter.SubmitData(trace);
+                }
             }
             catch (Exception ex)
             {
+                using (var trace = new Trace.TraceDto())
+                {
+                    trace.TraceKey = "CacheSqlDependency";
+                    trace.Data["CacheName"] = currentCacheInfo.Name;
+                    trace.Data["DateTime"] = DateTime.Now.ToString();
+                    trace.Data["State"] = "ExcecuteQuery";
+                    trace.Message = $"CacheSql Dependency {currentCacheInfo.Name} on ExcecuteQuery has faced with an exception at {DateTime.Now.ToString()} ...";
+                    Core.Cmn.AppBase.TraceWriter.SubmitData(trace);
+                }
+
                 Task.Delay(delay).Wait();
                 ((IQueryableCacheDataProvider)queryableCacheExecution).DbContext = AppBase.DependencyInjectionFactory.CreateContextInstance();
                 try

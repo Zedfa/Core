@@ -1,18 +1,16 @@
-﻿using System;
-using System.Linq;
+﻿using Core.Cmn;
+using Core.Cmn.Attributes;
 using Core.Cmn.Extensions;
 using Core.Entity;
-using Core.Cmn.Attributes;
-using Core.Cmn;
 using Core.Rep.Interface;
+using System;
+using System.Linq;
 
 namespace Core.Rep
 {
     [Injectable(InterfaceType = typeof(IUserProfileRepository), DomainName = "Core")]
-
     public class UserProfileRepository : RepositoryBase<UserProfile>, IUserProfileRepository
     {
-
         public UserProfileRepository(IDbContextBase dbContextBase)
             : base(dbContextBase)
         {
@@ -20,10 +18,10 @@ namespace Core.Rep
 
         [Cacheable(
             EnableSaveCacheOnHDD = true,
-            EnableUseCacheServer = true,
+            EnableUseCacheServer = false,
             EnableCoreSerialization = true,
-            AutoRefreshInterval = 5,
-            CacheRefreshingKind = Cmn.Cache.CacheRefreshingKind.Slide,
+            AutoRefreshInterval = 3600,
+            CacheRefreshingKind = Cmn.Cache.CacheRefreshingKind.SqlDependency,
             EnableToFetchOnlyChangedDataFromDB = true,
             NameOfNavigationPropsForFetchingOnlyChangedDataFromDB = "User"
             )]
@@ -36,7 +34,6 @@ namespace Core.Rep
         {
             return Cache(AllUserProfileCache, canUseCacheIfPossible);
         }
-
 
         //[Cacheable(EnableUseCacheServer = true, ExpireCacheSecondTime = 60, EnableAutomaticallyAndPeriodicallyRefreshCache = true, EnableToFetchOnlyChangedDataFromDB = true,
         //    NameOfNavigationPropsForFetchingOnlyChangedDataFromDB = "User")]

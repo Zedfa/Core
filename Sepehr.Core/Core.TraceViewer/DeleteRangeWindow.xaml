@@ -1,0 +1,60 @@
+﻿<Window x:Class="Core.TraceViewer.DeleteRangeWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:Core.TraceViewer"
+        mc:Ignorable="d"
+     
+        Title="Delete Range" Height="200" Width="400" >
+    <Grid VerticalAlignment="Stretch" Margin="0,0,0,0" Width="auto" Height="auto" HorizontalAlignment="Stretch" Background="Black"  >
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="1.2*"/>
+       
+            <ColumnDefinition  Width="5*"/>
+
+        </Grid.ColumnDefinitions>
+        <Grid.RowDefinitions >
+
+            <RowDefinition Height="30"></RowDefinition>
+            <RowDefinition Height="30"></RowDefinition>
+            <RowDefinition Height="30"></RowDefinition>
+            <RowDefinition Height="30"></RowDefinition>
+
+
+        </Grid.RowDefinitions>
+
+        <Grid Grid.Column="0" Grid.Row="0">
+            <Label Background="#FFF7F2F2">Start Date</Label>
+        </Grid>
+       
+        <Grid Grid.Column="1" Grid.Row="0">
+            <TextBox Margin="0 2 0 0" Text="{Binding Path=FilterBase.StartDate.Operand , Mode=TwoWay}"/>
+        </Grid>
+
+        <Grid Grid.Column="0" Grid.Row="1">
+            <Label Background="#FFF7F2F2">End Date</Label>
+        </Grid>
+        
+        <Grid Grid.Column="1" Grid.Row="1">
+            <TextBox Margin="0 2 0 0" Text="{Binding Path=FilterBase.EndDate.Operand , Mode=TwoWay}"/>
+        </Grid>
+
+        <Grid Grid.Column="0" Grid.Row="2">
+            <Label Background="#FFF7F2F2">Writer</Label>
+        </Grid>
+        
+        <Grid Grid.Column="1" Grid.Row="2">
+            <ComboBox SelectedIndex="0"  Name="cmbTraceWriters" ItemsSource="{Binding WriterList}" SelectedItem="{Binding FilterBase.Writer.Operand}"  >
+            </ComboBox>
+        </Grid>
+
+
+        <Grid Grid.Column="1" Grid.Row="3"  >
+            <StackPanel  Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Top">
+                <Button Name="btnConfirm" Margin="0 2 1 0" Width="50" Click="btnConfirm_Click">OK</Button>
+                <Button Name="btnCancel" Margin="0 2 1 0" Width="50" Click="btnCancel_Click">Cancel</Button>
+            </StackPanel>
+        </Grid>
+    </Grid>
+</Window>

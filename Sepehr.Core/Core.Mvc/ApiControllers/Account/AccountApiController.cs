@@ -15,9 +15,12 @@ using Core.Mvc.ViewModel.Account;
 using System.Configuration;
 using Core.Cmn;
 using System.Security.Cryptography;
+using System.Web.Http.Description;
 
 namespace Core.Mvc.ApiControllers
 {
+    // IgnoreApi baraye inke felan toye swagger nayad ta badan in controller ro barresi konim o age niaz bod toye document swagger biad
+    [ApiExplorerSettings(IgnoreApi = true)]
     public class AccountApiController : Core.Mvc.Controller.ApiControllerBase
     {
 

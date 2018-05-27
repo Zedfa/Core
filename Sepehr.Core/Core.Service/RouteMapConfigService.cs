@@ -1,27 +1,21 @@
 ﻿using Core.Cmn.Attributes;
 using Core.Entity;
 using Core.Rep;
-using System;
-using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Core.Service
 {
     [Injectable(InterfaceType = typeof(IServiceBase<RouteMapConfig>), DomainName = "Core")]
-    public class RouteMapConfigService : ServiceBase<RouteMapConfig>,IServiceBase<RouteMapConfig>
+    public class RouteMapConfigService : ServiceBase<RouteMapConfig>
     {
-       
-        public RouteMapConfigService():base()
+        public RouteMapConfigService() : base()
         {
             _repositoryBase = new RouteMapConfigRepository();
         }
+
         public override IQueryable<RouteMapConfig> All(bool canUseCache = true)
         {
-            return _repositoryBase.All(canUseCache);   
+            return _repositoryBase.All(canUseCache);
         }
-
-
     }
 }

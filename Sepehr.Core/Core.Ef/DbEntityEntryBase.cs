@@ -88,7 +88,7 @@ namespace Core.Ef
     // Type parameters:
     //   TEntity:
     //     The type of the entity.
-    public class DbEntityEntryBase<TEntity> : IDbEntityEntryBase<TEntity> where TEntity : _EntityBase
+    public class DbEntityEntryBase<TEntity> : IDbEntityEntryBase<TEntity> where TEntity : ObjectBase
     {
         System.Data.Entity.Infrastructure.DbEntityEntry<TEntity> _dbEntityEntry;
         public DbEntityEntryBase(System.Data.Entity.Infrastructure.DbEntityEntry<TEntity> entry)

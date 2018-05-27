@@ -1,5 +1,8 @@
 ﻿using Core.Cmn.Cache;
 using Core.Cmn.DependencyInjection;
+using Core.Cmn.Interface;
+using Core.Cmn.SharedMemory;
+using Core.Cmn.Trace;
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
@@ -33,8 +36,25 @@ namespace Core.Cmn
                 return _dependencyInjectionFactory;
             }
         }
-        public static ITraceViewer TraceViewer { get; set; }
 
+        public static List<Config> SharedMemoryList
+        {
+            get
+            {
+                return ConfigManagerBase.GetConfig().ReadAllSequences();
+            }
+
+            set
+            {
+
+                ConfigManagerBase.GetConfig().OverWriteSequences(value);
+            }
+        }
+
+
+        // public static ITraceViewer TraceViewer { get; set; }
+
+        public static ITraceWriter TraceWriter { get; set; }
 
         static AppBase()
         {
@@ -93,6 +113,9 @@ namespace Core.Cmn
                 return AppDomain.CurrentDomain.RelativeSearchPath != null;
             }
         }
+
+
+
         public static IEnumerable<Assembly> GetAssemblies()
         {
 
@@ -164,9 +187,7 @@ namespace Core.Cmn
 
             System.Threading.ThreadPool.GetMinThreads(out workerThreads, out portThreads);
 
-            //LogService.Handle(null, "", $"MinThreads: workerThreads({workerThreads}) portThreads({portThreads})");
-            LogService.Write($"MinThreads: workerThreads({workerThreads}) portThreads({portThreads})");
-
+            TraceWriter.SubmitData(new TraceDto { Message = $"MinThreads: workerThreads({workerThreads}) portThreads({portThreads})" });
         }
 
         private static void LogMaxThreads()
@@ -176,8 +197,7 @@ namespace Core.Cmn
 
             System.Threading.ThreadPool.GetMaxThreads(out workerThreads, out portThreads);
 
-            //LogService.Handle(null, "", $"MaxThreads: workerThreads({workerThreads}) portThreads({portThreads})");
-            LogService.Write($"MaxThreads: workerThreads({workerThreads}) portThreads({portThreads})");
+            TraceWriter.SubmitData(new TraceDto { Message = $"MaxThreads: workerThreads({workerThreads}) portThreads({portThreads})" });            
         }
 
         public static void StartApplication()
@@ -188,10 +208,12 @@ namespace Core.Cmn
                 {
                     Stopwatch s = new Stopwatch();
                     s.Start();
+
                     StartupProject = Assembly.GetCallingAssembly();
                     List<Type> allTypes = GetAlltypes().ToList();
                     UnityDependencyInjectionManager dependencyInjectionManager = new UnityDependencyInjectionManager(allTypes);
                     DependencyInjectionManager = dependencyInjectionManager;
+
                     List<ApplicationStartBase> applicationStartInstaces = GetAllApplicationStart(allTypes).Select(type => Activator.CreateInstance(type) as ApplicationStartBase)
                         .OrderBy(item => item.ExecutionPriorityBeforeApplicationStart).ToList();
 
@@ -200,25 +222,36 @@ namespace Core.Cmn
                         instanceType.BeforeApplicationStart();
                     });
 
+                    Core.Cmn.AppBase.TraceWriter = Core.Cmn.AppBase.DependencyInjectionFactory.CreateInjectionInstance<ITraceWriter>();
+                    TraceWriter.SubmitData(new TraceDto { Message = $"Preparing App took {s.Elapsed.TotalSeconds} seconds." });
+                    TraceWriter.SubmitData(new TraceDto { Message = "Staring App..." });
+
+                    ////LogService = Core.Cmn.AppBase.DependencyInjectionFactory.CreateInjectionInstance<ILogService>();                    
+
+                    TraceWriter.SubmitData(new TraceDto { Message = "EntityInfo.BuildEntityInfoDic starting..." });
                     EntityInfo.BuildEntityInfoDic(allTypes);
+                    TraceWriter.SubmitData(new TraceDto { Message = "EntityInfo.BuildEntityInfoDic done." });
 
-                    applicationStartInstaces.OrderBy(i => i.ExecutionPriorityOnApplicationStart).ToList().ForEach(instance =>
+                    applicationStartInstaces.OrderBy(i => Convert.ToInt32(i.ExecutionPriorityOnApplicationStart)).ToList().ForEach(instance =>
                       {
+                          TraceWriter.SubmitData(new TraceDto { Message = $"{instance.GetType().FullName} starting..." });
                           instance.OnApplicationStart();
-
+                          TraceWriter.SubmitData(new TraceDto { Message = $"{instance.GetType().FullName} done." });
                       });
 
                     ///The line below converts ConcurrentDictionary to Dictionary, because after building cache we never add any CacheInfo 
                     ///to our Dictionary so we did not need a ConcurrentDictionary any more for ThreadSafty.
                     Cache.CacheConfig.CacheInfoDic = Cache.CacheConfig.CacheInfoDic.ToDictionary(item => item.Key, item => item.Value);
-                    LogService.Write("Application started");
-                    LogService.Write($"Is64BitProcess: {Environment.Is64BitProcess}");
-                    LogService.Write($"ProcessorCount: {Environment.ProcessorCount}");
+
+                    TraceWriter.SubmitData(new TraceDto { Message = $"Is64BitProcess: {Environment.Is64BitProcess}" });
+                    TraceWriter.SubmitData(new TraceDto { Message = $"ProcessorCount: {Environment.ProcessorCount}" });
                     LogMinThreads();
                     LogMaxThreads();
 
 
                     _isApplicationStarted = true;
+
+                    TraceWriter.SubmitData(new TraceDto { Message = $"App startup took {s.Elapsed.TotalSeconds} seconds." });
                     s.Stop();
                 }
                 else

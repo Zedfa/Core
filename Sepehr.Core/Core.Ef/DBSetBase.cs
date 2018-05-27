@@ -9,7 +9,7 @@ using Core.Cmn;
 
 namespace Core.Ef
 {
-    public class DBSetBase<T> : IDbSetBase<T> where T : EntityBase<T>
+    public class DBSetBase<T> : IDbSetBase<T> where T : ObjectBase 
     {
         private DbSet<T> _dbSet;
         public DBSetBase(DbSet<T> dbSet)

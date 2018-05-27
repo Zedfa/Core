@@ -283,16 +283,21 @@ namespace Core.Mvc.Helpers.CoreKendoGrid
                         {
                             lookupConfig.ModelBindingName = grid.PropertyNameForBinding;
                         }
-                        dsSchema.LookupViewInfos.Add(column.Field, lookupConfig);
+                        dsSchema.LookupViewSchema.Add(column.Field, lookupConfig);
                     }
 
 
                 }
+
                 else if (column.DropDownListInfo != null)
                 {
-                    var info = column.DropDownListInfo;
 
-                    dsSchema.DropDownInfos.Add(column.Field, info);
+                    dsSchema.DropDownSchema.Add(column.Field, column.DropDownListInfo);
+
+                }
+                else if (column.AutoCompleteInfo != null) {
+
+                    dsSchema.AutoCompleteSchema.Add(column.Field, column.AutoCompleteInfo);
 
                 }
                 else if (!string.IsNullOrEmpty(column.ConstantsCategoryName) && column.LookupViewInfo == null)
@@ -300,14 +305,14 @@ namespace Core.Mvc.Helpers.CoreKendoGrid
                     var searchInfo = new SearchConstantField();
                     searchInfo.HasCustomTypeOf(SearchRelatedTypes.Enum);
                     searchInfo.ConstantsCategoryName = column.ConstantsCategoryName;
-                    dsSchema.SearchInfos.Add(column.Field, searchInfo);
+                    dsSchema.SearchSchemaList.Add(column.Field, searchInfo);
                 }
                 else if (string.IsNullOrEmpty(column.ConstantsCategoryName) && column.LookupViewInfo == null && DefineIfColumnIsOfTypeDateTime(column.Type, column.Field))
                 {
                     var searchInfo = new SearchDateField();
                     searchInfo.HasCustomTypeOf(column.Type == typeof(Core.Cmn.FarsiUtils.PersianDate) ? SearchRelatedTypes.PersianDate : SearchRelatedTypes.Date);
                     //searchInfo.ConstantsCategoryName = column.ConstantsCategoryName;
-                    dsSchema.SearchInfos.Add(column.Field.Split('.')[0], searchInfo);
+                    dsSchema.SearchSchemaList.Add(column.Field.Split('.')[0], searchInfo);
                 }
             });
             //columnsConfig.Where(cc => cc.SearchInfo.Key != null && cc.SearchInfo.Value != null).Select(cc => cc.SearchInfo).ToList<KeyValuePair<string, ISearch>>().ForEach(item =>

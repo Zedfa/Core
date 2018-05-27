@@ -10,10 +10,12 @@ using Core.Mvc.ViewModel;
 using Core.Entity;
 using Core.Service;
 using Core.Mvc.Controller;
-
+using System.Web.Http.Description;
 
 namespace Core.Mvc.ApiControllers
 {
+    // IgnoreApi baraye inke felan toye swagger nayad ta badan in controller ro barresi konim o age niaz bod toye document swagger biad
+    [ApiExplorerSettings(IgnoreApi = true)]
     public class UserLoggedApiController : CrudApiControllerBase<CoreUserLog, UserLoggedViewModel, IServiceBase<CoreUserLog>>
     {
         private IServiceBase<CoreUserLog> _userLogService;

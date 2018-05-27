@@ -82,6 +82,10 @@
       <Private>True</Private>
       <HintPath>..\..\NugetPackages\Microsoft.Web.Infrastructure.1.0.0.0\lib\net40\Microsoft.Web.Infrastructure.dll</HintPath>
     </Reference>
+    <Reference Include="Newtonsoft.Json, Version=10.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\NugetPackages\Newtonsoft.Json.10.0.2\lib\net45\Newtonsoft.Json.dll</HintPath>
+    </Reference>
     <Reference Include="System" />
     <Reference Include="System.ComponentModel.DataAnnotations" />
     <Reference Include="System.Configuration" />
@@ -98,6 +102,8 @@
     <Reference Include="System.DirectoryServices.AccountManagement" />
     <Reference Include="System.DirectoryServices.Protocols" />
     <Reference Include="System.Runtime.Caching" />
+    <Reference Include="System.Runtime.Serialization" />
+    <Reference Include="System.ServiceModel" />
     <Reference Include="System.Xml.Linq" />
     <Reference Include="System.Data.DataSetExtensions" />
     <Reference Include="Microsoft.CSharp" />
@@ -173,7 +179,10 @@
     <Compile Include="SearchInfoViewModel.cs" />
     <Compile Include="ServiceBase.cs" />
     <Compile Include="ServiceBase_ApplicationStart.cs" />
+    <Compile Include="ShareMemory\ISharedMemoryService.cs" />
+    <Compile Include="ShareMemory\SharedMemoryService.cs" />
     <Compile Include="Trace\TraceViewerService.cs" />
+    <Compile Include="Trace\TraceWriterService.cs" />
     <Compile Include="UserProfileService.cs" />
     <Compile Include="UserRoleService.cs">
       <SubType>Code</SubType>

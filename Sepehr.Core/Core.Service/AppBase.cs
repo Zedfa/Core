@@ -150,47 +150,27 @@ namespace Core.Service
 
         public static ViewElementInfo GetMenuItemPathByUniqueName(int userId, string uniqueName)
         {
-            //if (userId == 0)
-            //{
+         
             var commonViewElement = AppBase._viewElementsGrantedToAnonymousUser.ViewElements
                                    .FirstOrDefault(element => element.ConceptualName.Split('#')[0].ToLower() == uniqueName.ToLower());
 
-            //if (commonViewElement != null)
-            //{
+       
             if (commonViewElement != null)
                 return commonViewElement;
-            //}
-            //else
-            //{
-            //    var errorViewElement = AppBase._viewElementsGrantedToAnonymousUser.ViewElements
-            //                     .FirstOrDefault(element => element.ConceptualName.Split('#')[0].ToLower() == "Error".ToLower());
-            //    return errorViewElement;
-            //}
-            //}
-
-
+          
             UserViewElement currentUser = null;
-            if (AppBase._viewElementsGrantedToUser.TryGetValue(userId, out currentUser))
+            if (AppBase._viewElementsGrantedToUser !=null &&  AppBase._viewElementsGrantedToUser.TryGetValue(userId, out currentUser))
             {
 
                 var viewElement = currentUser.ViewElements
                                         .FirstOrDefault(element => element.ConceptualName.Split('#')[0].ToLower() == uniqueName.ToLower());
 
-                //if (viewElement != null)
-                //{
+           
                 return viewElement;
-                //}
-                //else
-                //{
-                //    var errorViewElement = currentUser.ViewElements
-                //        .FirstOrDefault(element => element.ConceptualName.Split('#')[0].ToLower() == "Error".ToLower());
-                //    return errorViewElement;
-                //}
-
-
-
+             
             }
-            throw new Exception("The entered url does not exits in any Role");
+            return null;
+            //throw new Exception("The entered url does not exist in any Role");
 
         }
 

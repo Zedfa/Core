@@ -70,6 +70,7 @@
     <Compile Include="BinaryConverters\HashSetBinaryConverter.cs" />
     <Compile Include="BinaryConverters\ISerializableTypeBinaryConverter.cs" />
     <Compile Include="BinaryConverters\NullBinaryConverter.cs" />
+    <Compile Include="BinaryConverters\TypeBinaryConverter.cs" />
     <Compile Include="BinaryReaderCore.cs" />
     <Compile Include="BinaryWriterCore.cs" />
     <Compile Include="DeserializationContext.cs" />

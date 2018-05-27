@@ -8,7 +8,7 @@ using System.Web;
 
 namespace Core.Repository
 {
-    public class DTOQueryableConformer<T> : IDTOQueryableBuilder<T> where T : EntityBase<T>
+    public class DTOQueryableConformer<T> : IDTOQueryableBuilder<T> where T : ObjectBase 
     {
         public IQueryable<IDto> GetDtoQueryable(IQueryable<T> queryable)
         {

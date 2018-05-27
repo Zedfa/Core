@@ -165,6 +165,26 @@ namespace Core.Serialization.Tests
             Assert.AreEqual(dic.Count, listSelectedDetails.Count);
         }
 
+
+        [TestMethod]
+        public void IntegrateTestForBinarySerializeDeserializeObjectString()
+        {
+            List<object> lst = new List<object>() { "qwert", "qwert", "qwert", "qwert", "qwert", "qwert", "qwert", 2, "qwert", 2, "ssssss" };
+            var a = BinaryConverter.Serialize(lst);
+            var c = BinaryConverter.Deserialize<List<object>>(a);
+            Assert.AreEqual(c[0], lst[0]);
+            Assert.AreEqual(c[1], lst[1]);
+            Assert.AreEqual(c[2], lst[2]);
+            Assert.AreEqual(c[3], lst[3]);
+            Assert.AreEqual(c[4], lst[4]);
+            Assert.AreEqual(c[5], lst[5]);
+            Assert.AreEqual(c[6], lst[6]);
+            Assert.AreEqual(c[7], lst[7]);
+            Assert.AreEqual(c[8], lst[8]);
+            Assert.AreEqual(c[9], lst[9]);
+            Assert.AreEqual(c[10], lst[10]);       
+        }
+
         [TestMethod]
         public void NewtonSoftTestForComparision()
         {

@@ -25,6 +25,8 @@ namespace Core.Mvc.Attribute.Filter
 
         public Dictionary<string, string> DropDownKeyValue { get; set; }
 
+        public Dictionary<string, string> AutoCompleteKeyValue { get; set; }
+
         protected override void Serialize(IDictionary<string, object> json)
         {
             //json["vmPropName"] = viewInfoName;
@@ -81,6 +83,14 @@ namespace Core.Mvc.Attribute.Filter
                 if (DropDownKeyValue.Count > 0)
                 {
                     json["dropdownInfo"] = DropDownKeyValue;
+                }
+
+            }
+            if (AutoCompleteKeyValue != null)
+            {
+                if (AutoCompleteKeyValue.Count > 0)
+                {
+                    json["autoCompleteInfo"] = AutoCompleteKeyValue;
                 }
 
             }

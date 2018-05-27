@@ -49,7 +49,7 @@ namespace Core.Rep
         public string CacheKey { get; set; }
         [Cacheable(
             EnableSaveCacheOnHDD = true,
-            AutoRefreshInterval = 1,
+            AutoRefreshInterval = 3,
             EnableToFetchOnlyChangedDataFromDB = true,
             EnableUseCacheServer = false,
             DisableToSyncDeletedRecord_JustIfEnableToFetchOnlyChangedDataFromDB = true,

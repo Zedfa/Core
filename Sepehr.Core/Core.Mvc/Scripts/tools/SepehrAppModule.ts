@@ -97,7 +97,6 @@ module Ambients {
     export class Globals {
         static languageCode: string = null;
         static getLanguageCode() {
-            debugger;
             this.languageCode = window.location.pathname.split('/')[1];
             if (this.languageCode.length > 2) {
                 this.languageCode = "fa"

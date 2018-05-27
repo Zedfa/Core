@@ -11,11 +11,12 @@ using Core.Entity;
 using Core.Cmn;
 using Core.Cmn.EntityBase;
 using Core.Ef.Exceptions;
+using System.Collections.Generic;
 
 namespace Core.Mvc.Controller
 {
     public class CrudDTOApiControllerBase<EntityT, DTOT, ServiceT> : Core.Mvc.Controller.ApiControllerBase
-        where EntityT : EntityBase<EntityT>, new()
+        where EntityT : ObjectBase, new()
         where DTOT : DtoBase<EntityT>, new()
         where ServiceT : IServiceBase<EntityT>
     {
@@ -90,7 +91,28 @@ namespace Core.Mvc.Controller
 
             return Request.CreateResponse(HttpStatusCode.OK, new { Data = new[] { dto } });
         }
+        public virtual HttpResponseMessage DeleteEntities(List<DTOT> dtoList)
+        {
+            try
+            {
+                List<EntityT> models=new List<EntityT>();
+                foreach (var item in dtoList)
+                {
+                    SetDTOAccordingPrimaryKeys(item, true);
+                    models.Add(item.Model);
 
+                }
+
+
+                var deletedEntity = _service.Delete(models);
+            }
+            catch (DbUpdateConcurrencyExceptionBase)
+            {
+                return Request.CreateResponse(HttpStatusCode.NotFound);
+            }
+
+            return Request.CreateResponse(HttpStatusCode.OK, new { Data = new[] { dtoList } });
+        }
         private void SetDTOAccordingPrimaryKeys(DTOT dto, bool deleteMode = false)
         {
             var entityInfo = dto.Model.EntityInfo();

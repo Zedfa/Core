@@ -4,14 +4,11 @@
 
 class ngSearchObj {
     searchWindowAttributes;
-    windowContainer;
-    winContentcontainer;
     gridSelector;
     gridData;
     afterFirstContentUrlAssigned = false;
     andOrDropDownAlreadyAssigned = false;
     localContent;
-    win;
     searchableColumnsList = [];
     selectedColumnCriteria = {};
     fieldOptcont = null;
@@ -20,8 +17,7 @@ class ngSearchObj {
     booleanValContainer = {};
     multiValueFields = {};
     instance;
-    activeRowIndex;
-
+    activeRowIndex; 
     seWinWidth = "auto";
     seWinHeight = "250";
     scope;
@@ -33,6 +29,8 @@ class ngSearchObj {
     title;
     winSearchId;
     filterSeperator = "|";
+    static readonly searchTextContainer: JQuery = $("<div>", { "class": "search-text" }).text("جستجوی فعلی : ");
+
 
     constructor(dom, scope, $compile, immAncesstorGridId, ngOkCallback, ngCancelOrCloseCallback, title, seWinWidth, seWinHeight) {
         this.scope = scope;
@@ -86,8 +84,7 @@ class ngSearchObj {
                 pager.children("[class='search-text']").remove();
 
                 if (data.length > 0) {
-                    var container: JQuery = $("<div>", { "class": "search-text" }).text("جستجوی فعلی : ");
-
+                    var searchTextContainer: JQuery = ngSearchObj.searchTextContainer.clone();
                     $.each(data, (index, record) => {
 
                         var logic = index == 0 ? "" : record.andor.andorName,
@@ -96,11 +93,12 @@ class ngSearchObj {
                                 + record.fld.columnName + " "
                                 + record.opt.operatorName + " "
                                 + "'" + displayText + "'" + "</span>";
-                        container.append(conditionText);
+
+                        searchTextContainer.append(conditionText);
                     });
 
                     if (pager) {
-                        pager.append(container);
+                        pager.append(searchTextContainer);
                     }
 
 
@@ -128,8 +126,7 @@ class ngSearchObj {
         this.scope.searchToolbarTemplate = searchAddRuleBtn;
 
         this.scope.searchOpen = function (arg) {
-            //var that = this;
-            //ngSearchHelper.setActiveGridSearch("grdSearch" + that.cGId);
+
         }
 
         this.scope.searchClose = function (arg) {
@@ -178,7 +175,8 @@ class ngSearchObj {
         $.each(that.schemaTypes, (schemaField, info) => {
 
             if ((info.custType.toLowerCase() == "lookup" && info.lookupInfo.bindingName == field) ||
-                (info.custType.toLowerCase() == "dropdown" && info.dropdownInfo.propertyNameForBinding == field)) {
+                (info.custType.toLowerCase() == "dropdown" && info.dropdownInfo.propertyNameForBinding == field) ||
+                (info.custType.toLowerCase() == "autocomplete" && info.autoCompleteInfo.propertyNameForBinding == field)) {
 
                 schemaInfo = info,
                     loc = schemaField;
@@ -213,8 +211,8 @@ class ngSearchObj {
         switch (type.toLocaleLowerCase()) {
             case "date":
             case "persiandate":
-                valueInfo.value = val.split(',')[0],
-                    valueInfo.text = val.split(',')[0];
+                valueInfo.value = val.split('|')[0],
+                    valueInfo.text = val.split('|')[0];
                 break;
             case "currency":
                 var realValue = typeof (val) == "number" ? val : val.replace(/,/g, '');
@@ -223,6 +221,7 @@ class ngSearchObj {
                 break;
             case "dropdown":
             case "lookup":
+            case "autocomplete":
                 valueInfo.value = typeof (val) == "string" ? val.split(this.filterSeperator)[0] : val;
                 break;
             default:
@@ -243,12 +242,12 @@ class ngSearchObj {
                 if (filter.filters) {
                     self.convertFiltersToData(data, filter, rowLogic, initfilter);
                 }
-                else if (!isEqual(initfilter, filter) || (Object.hasOwnProperty(filter.show) && filter.show)) //(!isEqual(initfilter, filter))
+                else if (!isEqual(initfilter, filter) || (Object.hasOwnProperty(filter.show) && filter.show))
                     data.push(self.createModelAccordingFilter(filter, filterCollection.logic));
             });
         }
 
-        else if (!isEqual(initfilter, filterCollection) || (Object.hasOwnProperty(filterCollection.show) && filterCollection.show)) { //(!isEqual(initfilter, filterCollection)) {
+        else if (!isEqual(initfilter, filterCollection) || (Object.hasOwnProperty(filterCollection.show) && filterCollection.show)) {
             data.push(self.createModelAccordingFilter(filterCollection, rowLogic));
         }
 
@@ -278,9 +277,14 @@ class ngSearchObj {
 
                     break;
                 case "dropdown":
-                    fieldInfo = { columnId: { type: "dropdown", LId: colName, TId: colName }, columnName: navigationColumn.dropdownInfo.DisplayName };
+                    fieldInfo = { columnId: { type: "dropdown", LId: colName, TId: colName }, columnName: navigationColumn.dropdownInfo.displayName };
 
                     break;
+                case "autocomplete":
+                    fieldInfo = { columnId: { type: "autocomplete", LId: colName, TId: colName }, columnName: navigationColumn.autoCompleteInfo.displayName };
+
+                    break;
+
             };
 
             valueInfo = that.getValueModelByType(navigationColumn.custType, filter.value);
@@ -321,7 +325,7 @@ class ngSearchObj {
             columnObj = that.getColumnObj(that.searchableColumnsList[0]),
             dataArray = [],
             mainGridFilters = that.scope[that.scope.gridName].dataSource.filter(),
-            currentData = []; //that.scope["grdSearch" + that.cGId] ? that.scope["grdSearch" + that.cGId].dataSource.data() : [];
+            currentData = [];
 
 
         //original grid has filter
@@ -503,7 +507,7 @@ class ngSearchObj {
 
     removeCurrentRow(event) {
 
-        var that = ngSearchHelper.getActiveGridSearch(),//ngSearchHelper.getGridSearchInstanceById($(event.delegateTarget).attr("kendo-grid")),
+        var that = ngSearchHelper.getActiveGridSearch(),
             searchGrid = that.scope[$(event.delegateTarget).attr("kendo-grid")],
             currentRowUid = $(event.target).closest("tr").attr("data-uid");
         searchGrid.dataSource.remove(searchGrid.dataSource.getByUid(currentRowUid));
@@ -511,7 +515,7 @@ class ngSearchObj {
     }
     columnDropDownEditor(cont, options) {
 
-        var that = ngSearchHelper.getActiveGridSearch(); //ngSearchHelper.getGridSearchInstanceById(cont.closest("[kendo-grid]").attr("kendo-grid")); 
+        var that = ngSearchHelper.getActiveGridSearch();
         that.columnCont = cont;
         var input = $('<input id="column" data-text-field="columnName" data-value-field="columnId.LId" data-bind="value:' + options.field + '"/>');
         input.appendTo(cont);
@@ -529,13 +533,6 @@ class ngSearchObj {
             //    }
             //},
             dataBound: (e) => {
-
-                //var parentRowId = that.columnCont.parent("tr").attr("data-uid");
-                //if (!that.selectedColumnCriteria[parentRowId]) {
-                //    var val = e.sender.dataSource.options.data[0];
-                //    that.selectedColumnCriteria[parentRowId] = val;
-                //   that.columnCont.parent("tr").find("td:nth-child(2)").focus();
-                //}
 
             },
             select: (e) => {
@@ -586,6 +583,7 @@ class ngSearchObj {
                 break;
             case 'lookup':
             case 'dropdown':
+            case 'autocomplete':
                 specificFieldOperators = that.getLookupRelatedOperators()[0];
                 break;
             case 'persiandate':
@@ -624,12 +622,13 @@ class ngSearchObj {
                 break;
             case 'lookup':
             case 'dropdown':
+            case 'autocomplete':
                 specificFieldOperators = that.getLookupRelatedOperators();
                 break;
             case 'date':
             case 'persiandate':
             case 'datetime':
-                specificFieldOperators = that.getDateTimeRelatedOperators();
+                specificFieldOperators = that.getDateRelatedOperators();
                 break;
             case 'time':
                 specificFieldOperators = that.getTimeRelatedOperators();
@@ -704,16 +703,12 @@ class ngSearchObj {
         return [{ operatorName: "برابر با", operatorId: "eq" },
         { operatorId: "neq", operatorName: "غیر از تاریخ" },
         { operatorName: "از تاریخ", operatorId: "gt" },
-        { operatorName: "تا تاریخ", operatorId: "lt" }];
+        { operatorName: "برابر یا از تاریخ", operatorId: "gte" },
+        { operatorName: "تا تاریخ", operatorId: "lt" },
+        { operatorName: " برابر یا تا تاریخ", operatorId: "lte" }
+        ];
     }
-
-    getDateTimeRelatedOperators() {
-        return [{ operatorName: "برابر با", operatorId: "eq" },
-        { operatorName: "نا برابر با", operatorId: "neq" },
-        { operatorName: "از تاریخ", operatorId: "gt" },
-        { operatorName: "تا تاریخ", operatorId: "lt" }]
-
-    }
+        
 
     getTimeRelatedOperators() {
         return [{ operatorName: "برابر با", operatorId: "eq" },
@@ -784,6 +779,9 @@ class ngSearchObj {
             case "dropdown":
                 result = that.createDropDownTemplate(that.getDropDownPropertyValue(dataItem.fld.columnId.LId), dataItem);
                 break;
+            case "autocomplete":
+                result = that.createAutoCompleteTemplate(that.getAutoCompletePropertyValue(dataItem.fld.columnId.LId), dataItem);
+                break;
             case "currency":
                 result = that.createCurrencyTemplate(dataItem);
                 break;
@@ -807,13 +805,10 @@ class ngSearchObj {
 
         var currentGrid = ngSearchHelper.getActiveGridSearch();
 
-
-
         model.lookupDblClick = (args) => {
-
-            ngSearchHelper.setActiveGridSearch(currentGrid)
-
+            ngSearchHelper.setActiveGridSearch(currentGrid);
         };
+
         var lookup = "<cust-lookup lookup-id='" + info.lookupName + "_" + model.uid.split('-')[0] + "'"
             + " title=\"'" + info.title + "'\""
             + " value-name=dataItem.val.value"
@@ -830,26 +825,56 @@ class ngSearchObj {
             + " </cust-lookup>";
         kendo.bind(lookup, model);
 
-
         return lookup;
     }
 
     createDropDownTemplate(info, model) {
-  
-        var dropDown = "<drop-down-list id=search_" + info.DisplayName + "_" + model.uid
+        model.onDropDownDataBound = (args, dataItem) => {
+            
+            dataItem.val.text = args.sender.text(),
+                dataItem.val.value = args.sender.value();
+        };
+        model.onDropDownChange = (args, dataItem) => {
+            debugger;
+            args.sender.text(dataItem.val.text),
+                args.sender.value(dataItem.val.value);
+            //baraye inke meghdare view e dropdown update beshe
+            $("tr[data-uid=" + dataItem.uid + "]").children().last().click();
+          
+        };
+       
+        var dropDown = "<drop-down-list id=search_" + info.displayName + "_" + model.uid
             + " display-name=" + info.displayName
             + " value-name=" + info.valueName
             + " db-category-name=" + info.dbCategoryName
             + " url=" + info.url
             + " property-id=dataItem.val.value"
             + " property-name=dataItem.val.text"
-            // + " custom-change=onDropDownChange(args)"
-            // + " on-data-bound=onDropDownDataBound(args,scope)"
+            + " on-data-bound = dataItem.onDropDownDataBound(args,dataItem)"
+            + " custom-change = dataItem.onDropDownChange(args,dataItem)"
             + " ></drop-down-list>"
         kendo.bind(dropDown, model);
 
         return dropDown;
     }
+
+    createAutoCompleteTemplate(info, model) {
+
+        var auto = "<autocomplete id =search_" + + info.displayName + "_" + model.uid
+            + " url=" + info.url
+            + " search-property=" + info.searchProperty
+            + " filter-type='contains'"
+            + " water-mark=" + info.watermark
+            + " display-name=" + info.displayName
+            + " value-name=" + info.valueName
+            + " property-id=dataItem.val.value"
+            + " property-name=dataItem.val.text"
+            + " />";
+        kendo.bind(auto, model);
+
+        return auto;
+    }
+
 
     createCurrencyTemplate(model) {
         var numericTextBox = '<input type="text" data-value-update="keyup" data-bind="value: dataItem.val.value, text: dataItem.val.text" price-format price-value="dataItem.val.value"/>';
@@ -865,24 +890,30 @@ class ngSearchObj {
             //TODO:Check whether the value is multiple or singular.
             record.val = record.keys;
         }
-
+        
         if (typeName == "datetime" || typeName == "date") {
-            record.val.value += this.filterSeperator+"dt";
+            record.val.value += this.filterSeperator + "dt";
         }
         else if (typeName == "persiandate") {
-            record.val.value += this.filterSeperator +"pdt";
+            record.val.value += this.filterSeperator + "pdt";
         }
 
         else if (typeName === "lookup") {
             var lookupObj = this.getLookupPropertyValue(record.fld.columnId.LId);
 
-            record.val.value += this.filterSeperator +"lkp:" + lookupObj.bindingName;
+            record.val.value += this.filterSeperator + "lkp:" + lookupObj.bindingName;
         }
         else if (typeName === "dropdown") {
 
             var dropdownInfo = this.getDropDownPropertyValue(record.fld.columnId.LId);
 
-            record.val.value += this.filterSeperator +"ddl:" + dropdownInfo.propertyNameForBinding;
+            record.val.value += this.filterSeperator + "ddl:" + dropdownInfo.propertyNameForBinding;
+        }
+        else if (typeName === "autocomplete") {
+
+            var autocompleteInfo = this.getAutoCompletePropertyValue(record.fld.columnId.LId);
+
+            record.val.value += this.filterSeperator + "ac:" + autocompleteInfo.propertyNameForBinding;
         }
         else if (typeName === "currency") {
             record.val.value = record.val.value;
@@ -897,7 +928,7 @@ class ngSearchObj {
     createFiltersTree(dataItem, logic, allFilters) {
         //no items in filters
         if (allFilters.filters.length == 0 && !allFilters.logic) {
-            //allFilters.logic = logic,
+
             allFilters.filters.push(dataItem);
         }
         else {
@@ -980,30 +1011,16 @@ class ngSearchObj {
         var dropdownInfo = this.schemaTypes[fieldVal].dropdownInfo;
         return dropdownInfo;
     }
+    getAutoCompletePropertyValue(fieldVal) {
+        var autoCompleteInfo = this.schemaTypes[fieldVal].autoCompleteInfo;
+        return autoCompleteInfo;
+    }
     removeAnyPreviouslyInsertedItems(con) {
         con.find('span').remove();
         con.find('input').remove();
     }
 
-    //makeBooleanCheckBoxStr(cont, columnCriteria, options) {
-    //    var that = this;
-    //    if (this.schemaTypes[columnCriteria.columnId.TId]) {
-    //        var columnItem = that.schemaTypes[columnCriteria.columnId.TId];
-    //        if (columnItem) {
-    //            $('<input type="text" id="bool_val"  data-text-field="text" data-value-field="tag" data-bind="value:' + options.field + '"/>')
-    //                .appendTo(cont)
-    //                .kendoDropDownList({
-    //                    autoBind: false,
-    //                    dataSource: [{ tag: false, text: columnItem.falseEqui }, { tag: true, text: columnItem.trueEqui }],
-    //                    dataBound: (e) => {
-    //                    },
-    //                    select: (e) => {
-    //                        that.gridSelector.setDataSourceItemVal(e.item.text(), e.sender.dataSource.data[e.item.index()].tag);
-    //                    }
-    //                });
-    //        }
-    //    }
-    //}
+
 
     makeEnumDdl(cont, columnCriteria, options) {
         var that = this;//ngSearchHelper.getCurrentActiveSearch();
@@ -1038,13 +1055,10 @@ class ngSearchObj {
 
     makeInputElement(cont, options) {
 
-        var that = ngSearchHelper.getActiveGridSearch(); //ngSearchHelper.getGridSearchInstanceById(cont.closest("[kendo-grid]").attr("kendo-grid"));
-        //  var parentRowId = cont.parent("tr").attr("data-uid");
-        //    if (that.selectedColumnCriteria[parentRowId]) {
+        var that = ngSearchHelper.getActiveGridSearch();
 
-        var columnCriteria = options.model.fld, //that.scope["grdSearch" + that.cGId].dataSource.getByUid(parentRowId).fld,
+        var columnCriteria = options.model.fld,
             columnType = columnCriteria.columnId.type;
-        //that.removeAnyPreviouslyInsertedItems(cont);
 
         switch (columnType.toLowerCase()) {
             case 'number':
@@ -1056,10 +1070,7 @@ class ngSearchObj {
                 break;
             case 'bool':
             case 'boolean':
-
                 $('<input type="checkbox"  data-type="boolean" value= "true" data-bind="checked: val.value, text:val.value" ng-model="dataItem.val.value" />').appendTo(cont);
-
-
                 break;
             case 'enum':
                 that.makeEnumDdl(cont, columnCriteria, options);
@@ -1072,35 +1083,59 @@ class ngSearchObj {
                 var uid = $(cont).parent("tr").attr("data-uid"),
                     dropdowInfo = that.getDropDownPropertyValue(columnCriteria.columnId.TId);
 
-                this.scope.onDropDownChange = (args) => {
-
-                    setColumnValue(args);
-
+                this.scope.onDropDownChange = (args, dataItem) => {
+                    dataItem.val.text = args.sender.text(),
+                        dataItem.val.value = args.sender.value();
+                
                 };
-                this.scope.onDropDownDataBound = (args, scope) => {
-
-                    setColumnValue(args);
+                this.scope.onDropDownDataBound = (args, dataItem) => {
+                    if (dataItem.val.text && dataItem.val.value) {
+                        args.sender.text(dataItem.val.text),
+                        args.sender.value(dataItem.val.value);
+                    }
+                
                 }
+              
 
-                var setColumnValue = (widget) => {
-
-                    $(cont).parents('[kendo-grid]').data("kendoGrid").dataSource.getByUid(uid).val.value = widget.sender.value();
-                    $(cont).parents('[kendo-grid]').data("kendoGrid").dataSource.getByUid(uid).val.text = widget.sender.text();
-                }
-
-                var dropDownListElement = "<drop-down-list id=search_" + columnCriteria.columnId.TId
+                var dropDownListElement = "<drop-down-list id=search_" + columnCriteria.columnId.TId + "_" + uid
                     + " display-name=" + dropdowInfo.displayName
                     + " value-name=" + dropdowInfo.valueName
                     + " db-category-name=" + dropdowInfo.dbCategoryName
                     + " url=" + dropdowInfo.url
-                    + " property-id=val.value"
-                    + " property-name=val.text"
-                    + " custom-change=onDropDownChange(args)"
-                    + " on-data-bound=onDropDownDataBound(args,scope)"
+                    + " property-id = 'val.value'"
+                    + " property-name = 'val.text'"
+                    + " custom-change = 'onDropDownChange(args, dataItem)'"
+                    + " on-data-bound = 'onDropDownDataBound(args, dataItem)'"
                     + " ></drop-down-list>";
 
                 cont.append(dropDownListElement);
-                // this.compile(dropDownListElement)(this.scope);
+
+                break;
+            case 'autocomplete':
+
+
+                var uid = $(cont).parent("tr").attr("data-uid"),
+                    autocompleteInfo = that.getAutoCompletePropertyValue(columnCriteria.columnId.TId);
+
+
+                this.scope.onAutoCompleteChange = (args) => {
+                    args.dataItem.val = args.val;
+                };
+
+                var autoCompleteElement = "<autocomplete id =search_" + columnCriteria.columnId.TId
+                    + " url=" + autocompleteInfo.url
+                    + " search-property=" + autocompleteInfo.searchProperty
+                    + " filter-type='contains'"
+                    + " water-mark='" + autocompleteInfo.watermark + "'"
+                    + " display-name=" + autocompleteInfo.displayName
+                    + " value-name=" + autocompleteInfo.valueName
+                    + " property-id = val.value"
+                    + " property-name = val.text"
+                    + " change = onAutoCompleteChange(this)"
+
+                    + " />"
+                cont.append(autoCompleteElement);
+
 
                 break;
             case 'lookup':
@@ -1113,11 +1148,6 @@ class ngSearchObj {
                     currentInstance.scope["grdSearch" + that.cGId].dataSource.getByUid(parentRowId).val.value = args.scope.valueName,
                         currentInstance.scope["grdSearch" + that.cGId].dataSource.getByUid(parentRowId).val.text = args.scope.displayName;
                     ngSearchHelper.setActiveGridSearch(currentInstance)
-                    //var currentGrid = ngSearchHelper.getActiveGridSearch().scope["grdSearch" + that.cGId],
-                    //    parentRowId = $(cont).parent("tr").attr("data-uid");
-
-                    // $(cont).text(args.scope.displayName);
-
 
                 };
 
@@ -1127,11 +1157,9 @@ class ngSearchObj {
                     + " display-name = dataItem.val.text"
                     + " lkp-value-name='" + lookup.valueName + "'"
                     + " lkp-display-name='" + lookup.displayName + "'"
-                    //+ " selected-item=val"
                     + " view-model-name='" + lookup.viewModelName + "'"
                     + " lkp-prop-name='" + lookup.viewInfoName + "'"
                     + " lkp-dbl-click=lookupDblClick(args,'" + cont.parent('tr').data().uid + "')"
-                    //+ " lkp-init=onInitLookup(args)"
                     + " win-width=900"
                     + " win-height=500>"
                     + " < /cust-lookup>")(this.scope);
@@ -1158,7 +1186,7 @@ class ngSearchObj {
 
 
     setDateTimePicker(container, inputHtml): void {
-        var that = this; //ngSearchHelper.getCurrentActiveSearch();
+        var that = this;
 
         var customDatePicker: any = $("#dateTimeInput").datepicker({
             changeMonth: true,
@@ -1172,8 +1200,7 @@ class ngSearchObj {
                     currentGrid = ngSearchHelper.getActiveGridSearch().scope["grdSearch" + that.cGId];
                 currentGrid.dataSource.getByUid(parentRowId).val.value = dataText,
                     currentGrid.dataSource.getByUid(parentRowId).val.text = dataText;
-                //$(container).parents('[kendo-grid]').data("kendoGrid").dataSource.getByUid(parentRowId).val.value = dataText,
-                //   $(container).parents('[kendo-grid]').data("kendoGrid").dataSource.getByUid(parentRowId).val.text = dataText;
+
             },
             beforeShow: function (element: any, inst: any) {
                 inst.id = element.id;
@@ -1209,11 +1236,10 @@ class ngSearchObj {
 
     buildCurrentSearchList() {
 
-        var that = this, //ngSearchHelper.getCurrentActiveSearch();
+        var that = this,
             extractedFilters = that.extractFilterObjectFromDataSource(),
             filterCollection = extractedFilters.filters.length > 0 ? extractedFilters : [];
 
-        //var iFItems = ngSearchHelper.getInitialFilterItems();
         that.scope[that.scope.gridName]._requestInProgress = undefined;
         that.scope[that.scope.gridName].dataSource._requestInProgress = undefined;
 
@@ -1246,9 +1272,6 @@ module ngSearchHelper {
         var gridSearchService = angular.injector(["gridSearchServiceModule", "ng"]).get("gridSearchService");
         return gridSearchService.setActiveGridSearchInstance(instance);
     }
-    //export function initializeSearchObj(instanc :ngSearchObj): void {
-    //    instanc.initializeSearchObj();
-    //}
 
     export function initializeNewGridSearch(domElement, grdScope, $compile, gridId, ngOkCallback, ngCancelOrCloseCallback, title, seWinWidth, seWinHeight): ngSearchObj {
 

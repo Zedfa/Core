@@ -222,7 +222,7 @@ namespace Core.Cmn
     // Type parameters:
     //   TEntity:
     //     The type of the entity.
-    public interface IDbEntityEntryBase<TEntity> where TEntity : _EntityBase
+    public interface IDbEntityEntryBase<TEntity> where TEntity : ObjectBase
     {
         //
         // Summary:

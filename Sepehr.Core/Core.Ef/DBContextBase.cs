@@ -123,12 +123,6 @@ namespace Core.Ef
             }
         }
 
-        public bool DisableExceptionLogger
-        {
-            get;
-            set;
-        }
-
         private Cmn.IDatabase _database;
         Cmn.IDatabase IDbContextBase.Database
         {
@@ -166,11 +160,6 @@ namespace Core.Ef
             }
         }
 
-        bool IDbContextBase.DisableExceptionLogger
-        {
-            get;
-            set;
-        }
 
         private string _connectionString;
         public string ConnectionString
@@ -180,6 +169,8 @@ namespace Core.Ef
                 return _connectionString;
             }
         }
+
+        public bool DisableExceptionLogger { get; set; }
 
         private static void CheckConstraint(DbUpdateConcurrencyException dbUpdateEx)
         {
@@ -222,7 +213,7 @@ namespace Core.Ef
 
             var modifiedOrAddedEntities = GetAllModifiedOrAddEntities();
 
-            foreach (_EntityBase entry in modifiedOrAddedEntities)
+            foreach (ObjectBase entry in modifiedOrAddedEntities)
             {
                 foreach (var prop in entry.EntityInfo().WritableMappedProperties)
                 {
@@ -452,7 +443,7 @@ namespace Core.Ef
 
         }
 
-        void IDbContextBase.SetContextState<T>(EntityBase<T> entity, Cmn.EntityState entityState)
+        void IDbContextBase.SetContextState<T>(T entity, Cmn.EntityState entityState)
         {
             var entry = this.Entry(entity);
             switch (entityState)

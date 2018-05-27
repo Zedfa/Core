@@ -1,8 +1,5 @@
-﻿/// <reference path="../../../typings/jquery/jquery.d.ts" />
-/// <reference path="../../../typings/angularjs/angular.d.ts" />
-
-var lookupDirectiveModule = new SepehrModule.MainModule("lookupDirectiveModule", []);
-lookupDirectiveModule.addDirective("custLookup", ["$http", "$parse", "$compile", function ($http, $parse, $compile) {
+﻿
+new SepehrModule.MainModule("lookupDirectiveModule", []).addDirective("custLookup", ["$http", "$parse", "$compile", function ($http, $parse, $compile) {
     return {
         restrict: "E",
         replace: true,

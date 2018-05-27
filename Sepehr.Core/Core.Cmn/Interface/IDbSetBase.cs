@@ -16,7 +16,7 @@ namespace Core.Cmn
     //     The type that defines the set.
     public interface IDbSetBase<TEntity>
         : IQueryable<TEntity>
-        where TEntity : EntityBase<TEntity>
+        where TEntity : ObjectBase
     {
         // Summary:
         //     Gets an System.Collections.ObjectModel.ObservableCollection<T> that represents

@@ -47,16 +47,16 @@ var ngSearchObj = (function () {
                 that.buildCurrentSearchList();
                 pager.children("[class='search-text']").remove();
                 if (data.length > 0) {
-                    var container = $("<div>", { "class": "search-text" }).text("جستجوی فعلی : ");
+                    var searchTextContainer = ngSearchObj.searchTextContainer.clone();
                     $.each(data, function (index, record) {
                         var logic = index == 0 ? "" : record.andor.andorName, displayText = record.fld.columnId.type == "boolean" ? record.val.value : record.val.text, conditionText = "<span class='search-text-item'> <strong > " + logic + " </strong>"
                             + record.fld.columnName + " "
                             + record.opt.operatorName + " "
                             + "'" + displayText + "'" + "</span>";
-                        container.append(conditionText);
+                        searchTextContainer.append(conditionText);
                     });
                     if (pager) {
-                        pager.append(container);
+                        pager.append(searchTextContainer);
                     }
                 }
             }
@@ -104,7 +104,8 @@ var ngSearchObj = (function () {
         var that = this, schemaInfo = null, loc = "";
         $.each(that.schemaTypes, function (schemaField, info) {
             if ((info.custType.toLowerCase() == "lookup" && info.lookupInfo.bindingName == field) ||
-                (info.custType.toLowerCase() == "dropdown" && info.dropdownInfo.propertyNameForBinding == field)) {
+                (info.custType.toLowerCase() == "dropdown" && info.dropdownInfo.propertyNameForBinding == field) ||
+                (info.custType.toLowerCase() == "autocomplete" && info.autoCompleteInfo.propertyNameForBinding == field)) {
                 schemaInfo = info,
                     loc = schemaField;
                 return false;
@@ -133,8 +134,8 @@ var ngSearchObj = (function () {
         switch (type.toLocaleLowerCase()) {
             case "date":
             case "persiandate":
-                valueInfo.value = val.split(',')[0],
-                    valueInfo.text = val.split(',')[0];
+                valueInfo.value = val.split('|')[0],
+                    valueInfo.text = val.split('|')[0];
                 break;
             case "currency":
                 var realValue = typeof (val) == "number" ? val : val.replace(/,/g, '');
@@ -143,6 +144,7 @@ var ngSearchObj = (function () {
                 break;
             case "dropdown":
             case "lookup":
+            case "autocomplete":
                 valueInfo.value = typeof (val) == "string" ? val.split(this.filterSeperator)[0] : val;
                 break;
             default:
@@ -176,7 +178,10 @@ var ngSearchObj = (function () {
                     fieldInfo = { columnId: { type: "lookup", LId: colName, TId: colName }, columnName: navigationColumn.lookupInfo.title };
                     break;
                 case "dropdown":
-                    fieldInfo = { columnId: { type: "dropdown", LId: colName, TId: colName }, columnName: navigationColumn.dropdownInfo.DisplayName };
+                    fieldInfo = { columnId: { type: "dropdown", LId: colName, TId: colName }, columnName: navigationColumn.dropdownInfo.displayName };
+                    break;
+                case "autocomplete":
+                    fieldInfo = { columnId: { type: "autocomplete", LId: colName, TId: colName }, columnName: navigationColumn.autoCompleteInfo.displayName };
                     break;
             }
             ;
@@ -398,6 +403,7 @@ var ngSearchObj = (function () {
                 break;
             case 'lookup':
             case 'dropdown':
+            case 'autocomplete':
                 specificFieldOperators = that.getLookupRelatedOperators()[0];
                 break;
             case 'persiandate':
@@ -434,12 +440,13 @@ var ngSearchObj = (function () {
                 break;
             case 'lookup':
             case 'dropdown':
+            case 'autocomplete':
                 specificFieldOperators = that.getLookupRelatedOperators();
                 break;
             case 'date':
             case 'persiandate':
             case 'datetime':
-                specificFieldOperators = that.getDateTimeRelatedOperators();
+                specificFieldOperators = that.getDateRelatedOperators();
                 break;
             case 'time':
                 specificFieldOperators = that.getTimeRelatedOperators();
@@ -499,13 +506,10 @@ var ngSearchObj = (function () {
         return [{ operatorName: "برابر با", operatorId: "eq" },
             { operatorId: "neq", operatorName: "غیر از تاریخ" },
             { operatorName: "از تاریخ", operatorId: "gt" },
-            { operatorName: "تا تاریخ", operatorId: "lt" }];
-    };
-    ngSearchObj.prototype.getDateTimeRelatedOperators = function () {
-        return [{ operatorName: "برابر با", operatorId: "eq" },
-            { operatorName: "نا برابر با", operatorId: "neq" },
-            { operatorName: "از تاریخ", operatorId: "gt" },
-            { operatorName: "تا تاریخ", operatorId: "lt" }];
+            { operatorName: "برابر یا از تاریخ", operatorId: "gte" },
+            { operatorName: "تا تاریخ", operatorId: "lt" },
+            { operatorName: " برابر یا تا تاریخ", operatorId: "lte" }
+        ];
     };
     ngSearchObj.prototype.getTimeRelatedOperators = function () {
         return [{ operatorName: "برابر با", operatorId: "eq" },
@@ -560,6 +564,9 @@ var ngSearchObj = (function () {
             case "dropdown":
                 result = that.createDropDownTemplate(that.getDropDownPropertyValue(dataItem.fld.columnId.LId), dataItem);
                 break;
+            case "autocomplete":
+                result = that.createAutoCompleteTemplate(that.getAutoCompletePropertyValue(dataItem.fld.columnId.LId), dataItem);
+                break;
             case "currency":
                 result = that.createCurrencyTemplate(dataItem);
                 break;
@@ -597,16 +604,42 @@ var ngSearchObj = (function () {
         return lookup;
     };
     ngSearchObj.prototype.createDropDownTemplate = function (info, model) {
-        var dropDown = "<drop-down-list id=search_" + info.DisplayName + "_" + model.uid
+        model.onDropDownDataBound = function (args, dataItem) {
+            dataItem.val.text = args.sender.text(),
+                dataItem.val.value = args.sender.value();
+        };
+        model.onDropDownChange = function (args, dataItem) {
+            debugger;
+            args.sender.text(dataItem.val.text),
+                args.sender.value(dataItem.val.value);
+            $("tr[data-uid=" + dataItem.uid + "]").children().last().click();
+        };
+        var dropDown = "<drop-down-list id=search_" + info.displayName + "_" + model.uid
             + " display-name=" + info.displayName
             + " value-name=" + info.valueName
             + " db-category-name=" + info.dbCategoryName
             + " url=" + info.url
             + " property-id=dataItem.val.value"
             + " property-name=dataItem.val.text"
+            + " on-data-bound = dataItem.onDropDownDataBound(args,dataItem)"
+            + " custom-change = dataItem.onDropDownChange(args,dataItem)"
             + " ></drop-down-list>";
         kendo.bind(dropDown, model);
         return dropDown;
+    };
+    ngSearchObj.prototype.createAutoCompleteTemplate = function (info, model) {
+        var auto = "<autocomplete id =search_" + +info.displayName + "_" + model.uid
+            + " url=" + info.url
+            + " search-property=" + info.searchProperty
+            + " filter-type='contains'"
+            + " water-mark=" + info.watermark
+            + " display-name=" + info.displayName
+            + " value-name=" + info.valueName
+            + " property-id=dataItem.val.value"
+            + " property-name=dataItem.val.text"
+            + " />";
+        kendo.bind(auto, model);
+        return auto;
     };
     ngSearchObj.prototype.createCurrencyTemplate = function (model) {
         var numericTextBox = '<input type="text" data-value-update="keyup" data-bind="value: dataItem.val.value, text: dataItem.val.text" price-format price-value="dataItem.val.value"/>';
@@ -631,6 +664,10 @@ var ngSearchObj = (function () {
         else if (typeName === "dropdown") {
             var dropdownInfo = this.getDropDownPropertyValue(record.fld.columnId.LId);
             record.val.value += this.filterSeperator + "ddl:" + dropdownInfo.propertyNameForBinding;
+        }
+        else if (typeName === "autocomplete") {
+            var autocompleteInfo = this.getAutoCompletePropertyValue(record.fld.columnId.LId);
+            record.val.value += this.filterSeperator + "ac:" + autocompleteInfo.propertyNameForBinding;
         }
         else if (typeName === "currency") {
             record.val.value = record.val.value;
@@ -694,6 +731,10 @@ var ngSearchObj = (function () {
         var dropdownInfo = this.schemaTypes[fieldVal].dropdownInfo;
         return dropdownInfo;
     };
+    ngSearchObj.prototype.getAutoCompletePropertyValue = function (fieldVal) {
+        var autoCompleteInfo = this.schemaTypes[fieldVal].autoCompleteInfo;
+        return autoCompleteInfo;
+    };
     ngSearchObj.prototype.removeAnyPreviouslyInsertedItems = function (con) {
         con.find('span').remove();
         con.find('input').remove();
@@ -750,27 +791,45 @@ var ngSearchObj = (function () {
                 break;
             case 'dropdown':
                 var uid = $(cont).parent("tr").attr("data-uid"), dropdowInfo = that.getDropDownPropertyValue(columnCriteria.columnId.TId);
-                this.scope.onDropDownChange = function (args) {
-                    setColumnValue(args);
+                this.scope.onDropDownChange = function (args, dataItem) {
+                    dataItem.val.text = args.sender.text(),
+                        dataItem.val.value = args.sender.value();
                 };
-                this.scope.onDropDownDataBound = function (args, scope) {
-                    setColumnValue(args);
+                this.scope.onDropDownDataBound = function (args, dataItem) {
+                    if (dataItem.val.text && dataItem.val.value) {
+                        args.sender.text(dataItem.val.text),
+                            args.sender.value(dataItem.val.value);
+                    }
                 };
-                var setColumnValue = function (widget) {
-                    $(cont).parents('[kendo-grid]').data("kendoGrid").dataSource.getByUid(uid).val.value = widget.sender.value();
-                    $(cont).parents('[kendo-grid]').data("kendoGrid").dataSource.getByUid(uid).val.text = widget.sender.text();
-                };
-                var dropDownListElement = "<drop-down-list id=search_" + columnCriteria.columnId.TId
+                var dropDownListElement = "<drop-down-list id=search_" + columnCriteria.columnId.TId + "_" + uid
                     + " display-name=" + dropdowInfo.displayName
                     + " value-name=" + dropdowInfo.valueName
                     + " db-category-name=" + dropdowInfo.dbCategoryName
                     + " url=" + dropdowInfo.url
-                    + " property-id=val.value"
-                    + " property-name=val.text"
-                    + " custom-change=onDropDownChange(args)"
-                    + " on-data-bound=onDropDownDataBound(args,scope)"
+                    + " property-id = 'val.value'"
+                    + " property-name = 'val.text'"
+                    + " custom-change = 'onDropDownChange(args, dataItem)'"
+                    + " on-data-bound = 'onDropDownDataBound(args, dataItem)'"
                     + " ></drop-down-list>";
                 cont.append(dropDownListElement);
+                break;
+            case 'autocomplete':
+                var uid = $(cont).parent("tr").attr("data-uid"), autocompleteInfo = that.getAutoCompletePropertyValue(columnCriteria.columnId.TId);
+                this.scope.onAutoCompleteChange = function (args) {
+                    args.dataItem.val = args.val;
+                };
+                var autoCompleteElement = "<autocomplete id =search_" + columnCriteria.columnId.TId
+                    + " url=" + autocompleteInfo.url
+                    + " search-property=" + autocompleteInfo.searchProperty
+                    + " filter-type='contains'"
+                    + " water-mark='" + autocompleteInfo.watermark + "'"
+                    + " display-name=" + autocompleteInfo.displayName
+                    + " value-name=" + autocompleteInfo.valueName
+                    + " property-id = val.value"
+                    + " property-name = val.text"
+                    + " change = onAutoCompleteChange(this)"
+                    + " />";
+                cont.append(autoCompleteElement);
                 break;
             case 'lookup':
                 var lookup = that.getLookupPropertyValue(columnCriteria.columnId.TId), lkpIndx = cont.parent('tr').index(), currentInstance = ngSearchHelper.getActiveGridSearch();
@@ -861,6 +920,7 @@ var ngSearchObj = (function () {
     };
     return ngSearchObj;
 }());
+ngSearchObj.searchTextContainer = $("<div>", { "class": "search-text" }).text("جستجوی فعلی : ");
 var ngSearchHelper;
 (function (ngSearchHelper) {
     function getGridSearchInstanceById(gridId) {

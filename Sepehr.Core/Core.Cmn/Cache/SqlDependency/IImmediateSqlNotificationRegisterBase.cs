@@ -8,6 +8,6 @@ namespace Core.Cmn.Cache.SqlDependency
     {
         event EventHandler<SqlNotificationEventArgs> OnChanged;
 
-        void Init(IDbContextBase context, IQueryable query);
+        void Init(IDbContextBase context, IQueryable query, CacheInfo cacheInfo);
     }
 }

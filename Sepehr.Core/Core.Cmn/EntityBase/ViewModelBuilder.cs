@@ -24,7 +24,7 @@ namespace Core.Cmn
         }
 
         public ViewModel GetViewModel<ViewModel, T>(T model)
-            where T : EntityBase<T>, new()
+            where T : ObjectBase , new()
             where ViewModel : ModelBase<T>, new()
         {
             var vm = new ViewModel();
@@ -33,7 +33,7 @@ namespace Core.Cmn
         }
 
         public IEnumerable<ViewModel> GetViewModels<ViewModel, T>(IEnumerable<T> models)
-            where T : EntityBase<T>, new()
+            where T : ObjectBase , new()
             where ViewModel : ModelBase<T>, new()
         {
             if (models != null)

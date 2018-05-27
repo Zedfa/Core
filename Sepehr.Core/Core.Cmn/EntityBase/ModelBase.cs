@@ -13,7 +13,7 @@ namespace Core.Cmn
 {
     [Serializable]
     [DataContract]
-    public abstract class ModelBase<T> : EntityBase<T>, IModelBase<T>, IValidatableObject where T : IEntity
+    public abstract class ModelBase<T> : EntityBase<T> , IModelBase<T>, IValidatableObject where T : IEntity
     {
         #region Private Members
         List<ValidationResult> _validationResults = new List<ValidationResult>();

@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
@@ -9,8 +10,6 @@ namespace Core.Cmn.Extensions
 {
     public static class DateExt
     {
-        private static ILogService _logService = AppBase.LogService;
-
         public static IEnumerable<DateTime> EachDay(DateTime from, DateTime thru)
         {
             for (var day = from.Date; day.Date <= thru.Date; day = day.AddDays(1))
@@ -39,10 +38,18 @@ namespace Core.Cmn.Extensions
             return new DateTime(dateTime.Year, dateTime.Month, dateTime.Day, new System.Globalization.PersianCalendar());
         }
 
+        private static ConcurrentDictionary<DateTime, string> _persianDates = new ConcurrentDictionary<DateTime, string>();
         public static string MiladiToShamsi(this DateTime miladiDate)
         {
-            PersianCalendar persianCalendar = new PersianCalendar();
-            return persianCalendar.GetYear(miladiDate) + "/" + FixNumber(persianCalendar.GetMonth(miladiDate).ToString(), 2) + "/" + FixNumber(persianCalendar.GetDayOfMonth(miladiDate).ToString(), 2);
+            string result;
+            if (_persianDates.TryGetValue(miladiDate.Date, out result) == false)
+            {
+                PersianCalendar persianCalendar = new PersianCalendar();
+                result = $"{persianCalendar.GetYear(miladiDate)}/{persianCalendar.GetMonth(miladiDate).FixNumber(2)}/{persianCalendar.GetDayOfMonth(miladiDate).FixNumber(2)}";
+                _persianDates[miladiDate.Date] = result;
+            }
+
+            return result;
         }
 
         public static DateTime LastDayOfShamsiMonth(this string persianDate)
@@ -62,57 +69,9 @@ namespace Core.Cmn.Extensions
             return miladiDate;
         }
 
-        private static string FixNumber(string number, int desiredLength)
-        {
-            if (number.Length < desiredLength)
-            {
-                while (number.Length < desiredLength)
-                {
-                    number = "0" + number;
-                }
-            }
-
-            return number;
-        }
-
         public static string ToYearMonth(this DateTime dateTime)
         {
             return dateTime.ToString("MMMMMMMMMM, yyyy");
-        }
-
-        public static string ToArabYearMonth(this DateTime dateTime)
-        {
-            var currentCulture = System.Threading.Thread.CurrentThread.CurrentCulture;
-
-            try
-            {
-                System.Threading.Thread.CurrentThread.CurrentCulture = System.Globalization.CultureInfo.CreateSpecificCulture("ar-SA");
-                string result = dateTime.ToString("MMMMMMMMMM, yyyy");
-                System.Threading.Thread.CurrentThread.CurrentCulture = currentCulture;
-                return result;
-            }
-            catch (Exception ex)
-            {
-                //System.Threading.Thread.CurrentThread.CurrentCulture = currentCulture;
-
-                //System.Diagnostics.StackTrace st = new System.Diagnostics.StackTrace(ex, true);
-                //System.Diagnostics.StackFrame[] frames = st.GetFrames();
-                //string x = "";
-                //// Iterate over the frames extracting the information you need
-                //foreach (System.Diagnostics.StackFrame frame in frames)
-                //{
-                //    //   x = ""+ frame.GetFileName()+"";
-                //    x += "    ** FileName:" + frame.GetFileName() + "** MethodName:" + frame.GetMethod().Name + "** LineNumber:" + frame.GetFileLineNumber() + "** ColumnNumber:" + frame.GetFileColumnNumber();
-                //}
-                //var eLog = _logService.GetEventLogObj();
-                //eLog.OccuredException = ex;
-                //eLog.UserId = "---";
-                //eLog.CustomMessage = String.Format("Incomming parameter: {0} in ToArabYearMonth,{1}", dateTime, x);
-                //_logService.Handle(eLog);
-                _logService.Handle(ex, String.Format("Incomming parameter: {0} in ToArabYearMonth", dateTime));
-
-                return String.Empty;
-            }
         }
 
         public static DateTime ToLocalKind(this DateTime dateTime)

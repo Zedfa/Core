@@ -167,7 +167,7 @@ namespace Core.Mvc.ViewModel
             {
                 if (_lookupInfo == null)
                 {
-                    _lookupInfo = ViewInfo.DeepCopy<GridInfo>();
+                    _lookupInfo = ViewInfo.DeepCopy();
                     _lookupInfo.Features.ReadOnly = true;
                 }
                 return _lookupInfo;

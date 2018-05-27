@@ -1,34 +1,30 @@
-﻿
-
-namespace Core.Cmn
+﻿namespace Core.Cmn
 {
-    using System;
-    using System.Collections.Generic;
-    using System.ComponentModel.DataAnnotations;
-    using System.Linq;
-    using System.Reflection;
-    using System.Runtime.CompilerServices;
-
-    using System.Web.Script.Serialization;
-    using System.Runtime.Serialization;
-    using System.ComponentModel.DataAnnotations.Schema;
-    using Newtonsoft.Json;
-    using Core.Cmn.Attributes;
     using Core.Cmn.Cache;
-    using System.Linq.Dynamic;
-    using System.Diagnostics;
-    using System.ComponentModel;
+    using Newtonsoft.Json;
+    using Serialization;
+    using System;
     using System.Collections;
     using System.Collections.Concurrent;
-    using Serialization;
+    using System.Collections.Generic;
+    using System.ComponentModel;
+    using System.ComponentModel.DataAnnotations;
+    using System.ComponentModel.DataAnnotations.Schema;
+    using System.Linq;
+    using System.Linq.Dynamic;
+    using System.Runtime.CompilerServices;
+    using System.Runtime.Serialization;
+    using System.Web.Script.Serialization;
 
     [Serializable]
     [DataContract(IsReference = true)]
-    public class _EntityBase
+    public class ObjectBase : IEntity
     {
         private ConcurrentDictionary<string, object> _navigationPropertyDataDic;
+
         internal ConcurrentDictionary<string, object> NavigationPropertyDataDic => _navigationPropertyDataDic ??
                                                                                 (_navigationPropertyDataDic = new ConcurrentDictionary<string, object>());
+
         /// <summary>
         /// It just works right for Single Pirimarykey, e.g: Id, not Id, name as PrimaryKey.
         /// </summary>
@@ -42,16 +38,17 @@ namespace Core.Cmn
         //        func = md.ReflectionEmitPropertyAccessor.EmittedPropertyGetters[md.WritablePropertyNames["ID"]];
         //    }
 
-
         //    // return rnd.Next(0, int.MaxValue);
         //    return func(this).GetHashCode();
         //}
 
-        static Random rnd = new Random();
-        protected _EntityBase()
+        private static Random rnd = new Random();
+
+        protected ObjectBase()
         {
         }
-        public virtual void UpdateAllProps(_EntityBase entity)
+
+        public virtual void UpdateAllProps(ObjectBase entity)
         {
             var props = this.EntityInfo().WritableMappedProperties;
             foreach (var prop in props)
@@ -59,12 +56,16 @@ namespace Core.Cmn
                 this[prop.Key] = prop.Value.GetValue(entity);
             }
         }
-        public virtual void CallPropertyChangedByCache(IList<_EntityBase> senders, string propertyName)
+        public ObjectBase ShallowCopy()
         {
-
+            return MemberwiseClone() as ObjectBase;
+        }
+        public virtual void CallPropertyChangedByCache(IList<ObjectBase> senders, string propertyName)
+        {
         }
 
         private UInt64 _timeStampStr;
+
         [NotMapped]
         //[NonSerialized]
         [IgnoreDataMember]
@@ -88,19 +89,23 @@ namespace Core.Cmn
                 return _timeStampStr;
             }
         }
+
         [NotMapped]
         //[NonSerialized]
         [IgnoreDataMember]
         [ScriptIgnore]
         [JsonIgnore]
         public ConcurrentDictionary<int, int[]> IndexOfIndexableProperties { get; set; }
+
         [NotMapped]
         //[NonSerialized]
         [IgnoreDataMember]
         [ScriptIgnore]
         [JsonIgnore]
         public ConcurrentDictionary<int, int[]> IndexOfGroupedIndexableProperties { get; set; }
+
         private int _cacheId;
+
         [NotMapped]
         [IgnoreDataMember]
         [ScriptIgnore]
@@ -129,6 +134,7 @@ namespace Core.Cmn
         }
 
         private bool _enableFillNavigationProperyByCache;
+
         [NotMapped]
         public bool IsEnableFillNavigationProperyByCache => _enableFillNavigationProperyByCache;
 
@@ -138,6 +144,7 @@ namespace Core.Cmn
         }
 
         private EntityInfo _entityInfo;
+
         public EntityInfo EntityInfo()
         {
             if (_entityInfo == null)
@@ -184,6 +191,7 @@ namespace Core.Cmn
         }
 
         private ObjectMetaData _objectMetaData;
+
         [IgnoreDataMember]
         internal ObjectMetaData ObjectMetaData
         {
@@ -203,7 +211,7 @@ namespace Core.Cmn
         //    return Equals((_EntityBase)obj);
         //}
 
-        protected ICollection<T> GetNavigationPropertyDataListFromCache<T>([CallerMemberName]string navigationPropertyName = null) where T : IEntity
+        protected ICollection<T> GetNavigationPropertyDataListFromCache<T>([CallerMemberName]string navigationPropertyName = null) where T : ObjectBase
         {
             ICollection<T> result = null;
             if (IsEnableFillNavigationProperyByCache)
@@ -222,20 +230,20 @@ namespace Core.Cmn
             }
             else
             {
-                if (NavigationPropertyDataDic.ContainsKey(navigationPropertyName + 1))
-                    result = NavigationPropertyDataDic[navigationPropertyName + 1] as ICollection<T>;
+                object value;
+                if (NavigationPropertyDataDic.TryGetValue(string.Concat(navigationPropertyName, "1"), out value))
+                    result = (ICollection<T>)value;
             }
 
             return result;
         }
 
-        private IEnumerable<T> GetNavigationPropertyDataAtFirstTime<T>(string navigationPropertyName, out object resultForSecondLevelDataSource) where T : IEntity
+        private IEnumerable<T> GetNavigationPropertyDataAtFirstTime<T>(string navigationPropertyName, out object resultForSecondLevelDataSource) where T : ObjectBase
         {
             resultForSecondLevelDataSource = null;
             var infoForFillingNavigationProperty = EntityInfo().InfoForFillingNavigationPropertyDic[navigationPropertyName];
 
             InitForFillingNavigationProperty_JustOneTime(infoForFillingNavigationProperty);
-
 
             IEnumerable<T> result = null;
             if (!NavigationPropertyDataDic.ContainsKey(navigationPropertyName))
@@ -249,19 +257,16 @@ namespace Core.Cmn
                     {
                         if (!NavigationPropertyDataDic.ContainsKey(navigationPropertyName))
                         {
-
                             if (thisPropertyValue != Activator.CreateInstance(propertyType))
                             {
-
                                 if (cacheInfo.DisableCache)
                                 {
-                                    _EntityBase resultItem;
+                                    ObjectBase resultItem;
                                     result = (cacheInfo.MethodInfo.Invoke(null, new object[] { cacheInfo.Repository.GetQueryableForCahce(AppBase.DependencyInjectionFactory.CreateContextInstance()) }) as IQueryable<T>)
                                             .Where(string.Format("{0} == {1}", infoForFillingNavigationProperty.OtherEntityRefrencePropertyName, thisPropertyValue));
-                                    resultItem = result.FirstOrDefault() as _EntityBase;
+                                    resultItem = result.FirstOrDefault() as ObjectBase;
                                     if (resultItem != null)
                                         resultItem.EnableFillNavigationProperyByCache();
-
                                 }
                                 else
                                 {
@@ -280,24 +285,22 @@ namespace Core.Cmn
 
                                 if (!infoForFillingNavigationProperty.IsEnumerable)
                                 {
-
-
                                     if (result.Count() == 0 && !string.IsNullOrEmpty(infoForFillingNavigationProperty.SecondLevelDataSourceName))
                                     {
                                         var dataSourceInfo = CacheConfig.CacheInfoDic.First(ci => ci.Value.Name == infoForFillingNavigationProperty.SecondLevelDataSourceName).Value;
                                         resultForSecondLevelDataSource = ((dataSourceInfo.MethodInfo.Invoke(null, new object[] { dataSourceInfo.Repository.GetQueryableForCahce(AppBase.DependencyInjectionFactory.CreateContextInstance()) }) as IQueryable)
                                            .Where(string.Format("{0} == {1}", infoForFillingNavigationProperty.OtherEntityRefrencePropertyName, thisPropertyValue)) as IEnumerable).Cast<IEntity>().FirstOrDefault();
                                         if (resultForSecondLevelDataSource != null)
-                                            ((_EntityBase)resultForSecondLevelDataSource).EnableFillNavigationProperyByCache();
+                                            ((ObjectBase)resultForSecondLevelDataSource).EnableFillNavigationProperyByCache();
                                     }
 
-                                    _EntityBase resultItem;
+                                    ObjectBase resultItem;
                                     if (!cacheInfo.DisableCache && result.Count() == 0)
                                     {
                                         //ToDo: Change invoke method by excact delegate for better performance.
                                         result = (cacheInfo.MethodInfo.Invoke(null, new object[] { cacheInfo.Repository.GetQueryableForCahce(AppBase.DependencyInjectionFactory.CreateContextInstance()) }) as IQueryable<T>)
                                             .Where(string.Format("{0} == {1}", infoForFillingNavigationProperty.OtherEntityRefrencePropertyName, thisPropertyValue));
-                                        resultItem = result.FirstOrDefault() as _EntityBase;
+                                        resultItem = result.FirstOrDefault() as ObjectBase;
                                         if (resultItem != null)
                                             resultItem.EnableFillNavigationProperyByCache();
                                         //item => item[infoForFillingNavigationProperty.OtherEntityRefrencePropertyName].Equals(thisPropertyValue));
@@ -311,7 +314,6 @@ namespace Core.Cmn
 
                             if (infoForFillingNavigationProperty.IsEnumerable)
                             {
-
                                 NavigationPropertyDataDic[navigationPropertyName] = result.ToList<T>();
                             }
                             else
@@ -325,7 +327,6 @@ namespace Core.Cmn
                                 }
                                 else
                                     NavigationPropertyDataDic[navigationPropertyName] = resultForSecondLevelDataSource;
-
                             }
                         }
                         else
@@ -345,11 +346,9 @@ namespace Core.Cmn
                     result = new List<T>();
                 }
             }
-
             else
             {
                 result = NavigationPropertyDataDic[navigationPropertyName] as List<T>;
-
             }
 
             return result;
@@ -364,7 +363,7 @@ namespace Core.Cmn
                 {
                     if (!infoForFillingNavigationProperty.IsInitForFillingNavigationProperty)
                     {
-                        cacheInfo.InfoAndEntityListForFillingNavigationPropertyDic[infoForFillingNavigationProperty] = new ConcurrentBag<_EntityBase>();
+                        cacheInfo.InfoAndEntityListForFillingNavigationPropertyDic[infoForFillingNavigationProperty] = new ConcurrentBag<ObjectBase>();
                         EntityInfo().AllNavigationPropertyDataList.Add(cacheInfo.InfoAndEntityListForFillingNavigationPropertyDic[infoForFillingNavigationProperty]);
                         infoForFillingNavigationProperty.IsInitForFillingNavigationProperty = true;
                     }
@@ -374,11 +373,10 @@ namespace Core.Cmn
 
         protected void SetNavigationPropertyDataList(object value, [CallerMemberName]string navigationPropertyName = null)
         {
-            NavigationPropertyDataDic[navigationPropertyName + 1] = value;
+            NavigationPropertyDataDic[string.Concat(navigationPropertyName, "1")] = value;
         }
 
-
-        protected T GetNavigationPropertyDataItemFromCache<T>([System.Runtime.CompilerServices.CallerMemberName]string navigationPropertyName = null) where T : IEntity
+        protected T GetNavigationPropertyDataItemFromCache<T>([System.Runtime.CompilerServices.CallerMemberName]string navigationPropertyName = null) where T : ObjectBase
         {
             T result = default(T);
             if (IsEnableFillNavigationProperyByCache)
@@ -392,25 +390,24 @@ namespace Core.Cmn
                 }
                 else
                 {
-
                     //System.Diagnostics.Debug.WriteLine(NavigationPropertyDataDic[navigationPropertyName]);
                     result = (T)NavigationPropertyDataDic[navigationPropertyName];
                 }
             }
             else
             {
-                if (NavigationPropertyDataDic.ContainsKey(navigationPropertyName + 1))
+                object value;
+                if (NavigationPropertyDataDic.TryGetValue(string.Concat(navigationPropertyName, "1"), out value))
                 {
-                    result = (T)NavigationPropertyDataDic[navigationPropertyName + 1];
+                    result = (T)value;
                 }
             }
 
             return result;
         }
 
-        protected IT GetNavigationPropertyDataItemFromCache<T, IT>([CallerMemberName]string navigationPropertyName = null) where T : IEntity
+        protected IT GetNavigationPropertyDataItemFromCache<T, IT>([CallerMemberName]string navigationPropertyName = null) where T : ObjectBase
         {
-
             IT result = default(IT);
             if (IsEnableFillNavigationProperyByCache)
             {
@@ -429,16 +426,17 @@ namespace Core.Cmn
             }
             else
             {
-                if (NavigationPropertyDataDic.ContainsKey(navigationPropertyName + 1))
+                object value;
+                if (NavigationPropertyDataDic.TryGetValue(string.Concat(navigationPropertyName, "1"), out value))
                 {
-                    result = (IT)NavigationPropertyDataDic[navigationPropertyName + 1];
+                    result = (IT)value;
                 }
             }
 
             return result;
         }
 
-        public bool Equals(_EntityBase other)
+        public bool Equals(ObjectBase other)
         {
             if (ReferenceEquals(null, other)) return false;
             if (ReferenceEquals(this, other)) return true;
@@ -446,7 +444,6 @@ namespace Core.Cmn
             bool result = true;
             foreach (var key in this.EntityInfo().KeyColumns.Values)
             {
-
                 if (!key.GetValue(other).Equals(key.GetValue(this)))
                 {
                     result = false;
@@ -470,7 +467,7 @@ namespace Core.Cmn
             }
         }
 
-        public void CallNavigationPropertyChangedByCache(_EntityBase sender, string propertyName)
+        public void CallNavigationPropertyChangedByCache(ObjectBase sender, string propertyName)
         {
             NavigationPropertyChangedByCache?.Invoke(sender, new PropertyChangedEventArgs(propertyName));
         }
@@ -504,6 +501,7 @@ namespace Core.Cmn
         // protected abstract void SetEntityInfo();
 
         private Byte[] _timeStamp;
+
         [Timestamp]
         [DataMember]
         public virtual Byte[] TimeStamp
@@ -511,7 +509,6 @@ namespace Core.Cmn
             get { return _timeStamp; }
             set
             {
-
                 _timeStamp = value;
                 //when TimeStamp reset must reset TimeStampUnit too, so set _timeStampStr = 0;
                 _timeStampStr = 0;
@@ -544,40 +541,30 @@ namespace Core.Cmn
 
     [Serializable]
     [DataContract(IsReference = true)]
-    public class EntityBase<T> : _EntityBase, IEntity, System.IEquatable<_EntityBase> where T : IEntity
+    public class EntityBase<T> : ObjectBase, System.IEquatable<ObjectBase> where T : IEntity
     {
-
         public EntityBase()
         {
             //  dicValue = new Dictionary<string, object>();
             // SetEntityInfo();
         }
 
-
         private static object _lockObject = new object();
 
-        public override void CallPropertyChangedByCache(IList<_EntityBase> senders, string propertyName)
+        public override void CallPropertyChangedByCache(IList<ObjectBase> senders, string propertyName)
         {
             CallPropertyChangedByCache(senders, propertyName);
         }
-
 
         public static void CallPropertyChangedByCache(List<T> senders, string propertyName)
         {
             PropertyChangedByCache?.Invoke(senders, new PropertyChangedEventArgs(propertyName));
         }
 
-        public EntityBase<T> ShallowCopy()
-        {
-            return MemberwiseClone() as EntityBase<T>;
-        }
-
-
         public static event PropertyChangedEventHandler<T> PropertyChangedByCache;
     }
 
     public delegate bool PropertyChangedEventHandler<Entity>(List<Entity> sender, PropertyChangedEventArgs e);
-    public delegate bool PropertyChangedEventHandler(_EntityBase senders, PropertyChangedEventArgs e);
 
+    public delegate bool PropertyChangedEventHandler(ObjectBase senders, PropertyChangedEventArgs e);
 }
-

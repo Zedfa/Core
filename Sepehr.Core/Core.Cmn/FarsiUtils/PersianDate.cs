@@ -314,6 +314,8 @@ namespace Core.Cmn.FarsiUtils
         [NonSerialized]
         public static PersianDate MaxValue;
 
+        private System.Globalization.PersianCalendar persianCalendar = new System.Globalization.PersianCalendar();
+
         #endregion
 
         #region Static Ctor
@@ -540,7 +542,7 @@ namespace Core.Cmn.FarsiUtils
         {
             get
             {
-                return PersianDateConverter.MonthDays(month);
+                return PersianDateConverter.MonthDays(year, month);
             }
         }
 
@@ -817,6 +819,68 @@ namespace Core.Cmn.FarsiUtils
                 list.Add(i);
             return list;
         }
+
+        public PersianDate AddDays(int days)
+        {
+            return new PersianDate(persianCalendar.AddDays(this, days));
+        }
+
+        /// <summary>
+        /// <para>Returnes a PersianDate object that is offset the specified number of months away from the specified PersianDate</para>
+        /// </summary> 
+        public PersianDate AddMonths(int months)
+        {
+            return new PersianDate(persianCalendar.AddMonths(this, months));
+        }
+
+        /// <summary>
+        /// <para>Returnes a PersianDate object that is offset the specified number of years away from the specified PersianDate</para>
+        /// </summary> 
+        public PersianDate AddYears(int years)
+        {
+            return new PersianDate(persianCalendar.AddYears(this, years));
+        }
+
+        /// <summary>
+        /// <para>Returnes a PersianDate that is specified number of hours away from the specified PersianDate</para>
+        /// </summary> 
+        public PersianDate AddHours(int hours)
+        {
+            return new PersianDate(persianCalendar.AddHours(this, hours));
+        }
+
+        /// <summary>
+        /// <para>Returnes a PersianDate that is specified number of minutes away from the specified PersianDate</para>
+        /// </summary> 
+        public PersianDate AddMinutes(int minutes)
+        {
+            return new PersianDate(persianCalendar.AddMinutes(this, minutes));
+        }
+
+        /// <summary>
+        /// <para>Returnes a PersianDate that is specified number of seconds away from the specified PersianDate</para>
+        /// </summary> 
+        public PersianDate AddSeconds(int seconds)
+        {
+            return new PersianDate(persianCalendar.AddSeconds(this, seconds));
+        }
+
+        /// <summary>
+        /// <para>Returnes a PersianDate that is specified number of milliseconds away from the specified PersianDate</para>
+        /// </summary> 
+        public PersianDate AddMilliseconds(int milliseconds)
+        {
+            return new PersianDate(persianCalendar.AddMilliseconds(this, milliseconds));
+        }
+
+        /// <summary>
+        /// <para>Returnes a PersianDate that is specified number of weeks away from the specified PersianDate</para>
+        /// </summary> 
+        public PersianDate AddWeeks(int weeks)
+        {
+            return new PersianDate(persianCalendar.AddWeeks(this, weeks));
+        }
+
         #endregion
 
         #region Parse Methods

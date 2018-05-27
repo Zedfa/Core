@@ -83,6 +83,9 @@ var Ambients;
         }
         Globals.getLanguageCode = function () {
             this.languageCode = window.location.pathname.split('/')[1];
+            if (this.languageCode.length > 2) {
+                this.languageCode = "fa";
+            }
             if (this.languageCode == "" || this.languageCode == null)
                 this.languageCode = "fa";
         };
